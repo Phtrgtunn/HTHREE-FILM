@@ -1,0 +1,190 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: oklch(0.98 0.02 240); /* Màu nền sáng, xanh nhạt */
+  --foreground: oklch(0.20 0.02 240); /* Màu chữ đậm, xanh đậm */
+  --card: oklch(0.99 0.01 240); /* Nền card sáng */
+  --card-foreground: oklch(0.20 0.02 240); /* Chữ trên card */
+  --popover: oklch(0.99 0.01 240); /* Nền popover */
+  --popover-foreground: oklch(0.20 0.02 240); /* Chữ trên popover */
+  --primary: oklch(0.65 0.15 270); /* Màu chính: tím nhạt */
+  --primary-foreground: oklch(0.98 0.01 240); /* Chữ trên nền chính */
+  --secondary: oklch(0.90 0.03 220); /* Màu phụ: xám xanh nhạt */
+  --secondary-foreground: oklch(0.20 0.02 240); /* Chữ trên nền phụ */
+  --muted: oklch(0.95 0.02 240); /* Màu mờ: xám nhạt */
+  --muted-foreground: oklch(0.50 0.03 240); /* Chữ mờ */
+  --accent: oklch(0.75 0.10 200); /* Màu điểm nhấn: xanh lam */
+  --accent-foreground: oklch(0.98 0.01 240); /* Chữ trên điểm nhấn */
+  --destructive: oklch(0.60 0.20 10); /* Màu cảnh báo: đỏ nhạt */
+  --border: oklch(0.90 0.02 240); /* Viền nhẹ */
+  --input: oklch(0.95 0.02 240); /* Nền input */
+  --ring: oklch(0.65 0.15 270); /* Viền focus, đồng bộ với màu chính */
+  --chart-1: oklch(0.70 0.15 270); /* Tím nhạt cho biểu đồ */
+  --chart-2: oklch(0.65 0.12 200); /* Xanh lam cho biểu đồ */
+  --chart-3: oklch(0.60 0.10 150); /* Xanh lá nhạt cho biểu đồ */
+  --chart-4: oklch(0.75 0.13 300); /* Hồng nhạt cho biểu đồ */
+  --chart-5: oklch(0.68 0.14 240); /* Xanh dương nhạt cho biểu đồ */
+  --sidebar: oklch(0.99 0.01 240); /* Nền sidebar sáng */
+  --sidebar-foreground: oklch(0.20 0.02 240); /* Chữ sidebar */
+  --sidebar-primary: oklch(0.65 0.15 270); /* Màu chính sidebar */
+  --sidebar-primary-foreground: oklch(0.98 0.01 240); /* Chữ trên màu chính sidebar */
+  --sidebar-accent: oklch(0.75 0.10 200); /* Điểm nhấn sidebar */
+  --sidebar-accent-foreground: oklch(0.98 0.01 240); /* Chữ trên điểm nhấn sidebar */
+  --sidebar-border: oklch(0.90 0.02 240); /* Viền sidebar */
+  --sidebar-ring: oklch(0.65 0.15 270); /* Viền focus sidebar */
+}
+
+.dark {
+  --background: oklch(0.20 0.02 240); /* Nền tối, xanh đậm */
+  --foreground: oklch(0.95 0.02 240); /* Chữ sáng */
+  --card: oklch(0.25 0.02 240); /* Nền card tối */
+  --card-foreground: oklch(0.95 0.02 240); /* Chữ trên card */
+  --popover: oklch(0.25 0.02 240); /* Nền popover tối */
+  --popover-foreground: oklch(0.95 0.02 240); /* Chữ trên popover */
+  --primary: oklch(0.70 0.15 270); /* Màu chính: tím sáng hơn */
+  --primary-foreground: oklch(0.20 0.02 240); /* Chữ trên màu chính */
+  --secondary: oklch(0.30 0.03 240); /* Màu phụ: xám đậm */
+  --secondary-foreground: oklch(0.95 0.02 240); /* Chữ trên màu phụ */
+  --muted: oklch(0.35 0.02 240); /* Màu mờ: xám tối */
+  --muted-foreground: oklch(0.65 0.03 240); /* Chữ mờ */
+  --accent: oklch(0.60 0.12 200); /* Màu điểm nhấn: xanh lam tối */
+  --accent-foreground: oklch(0.95 0.02 240); /* Chữ trên điểm nhấn */
+  --destructive: oklch(0.65 0.20 10); /* Màu cảnh báo: đỏ sáng hơn */
+  --border: oklch(0.30 0.02 240 / 0.2); /* Viền tối với độ trong suốt */
+  --input: oklch(0.35 0.02 240 / 0.3); /* Nền input tối */
+  --ring: oklch(0.70 0.15 270); /* Viền focus, đồng bộ với màu chính */
+  --chart-1: oklch(0.60 0.20 270); /* Tím tối cho biểu đồ */
+  --chart-2: oklch(0.55 0.15 200); /* Xanh lam tối cho biểu đồ */
+  --chart-3: oklch(0.50 0.12 150); /* Xanh lá tối cho biểu đồ */
+  --chart-4: oklch(0.65 0.18 300); /* Hồng tối cho biểu đồ */
+  --chart-5: oklch(0.58 0.16 240); /* Xanh dương tối cho biểu đồ */
+  --sidebar: oklch(0.25 0.02 240); /* Nền sidebar tối */
+  --sidebar-foreground: oklch(0.95 0.02 240); /* Chữ sidebar */
+  --sidebar-primary: oklch(0.70 0.15 270); /* Màu chính sidebar */
+  --sidebar-primary-foreground: oklch(0.20 0.02 240); /* Chữ trên màu chính sidebar */
+  --sidebar-accent: oklch(0.60 0.12 200); /* Điểm nhấn sidebar */
+  --sidebar-accent-foreground: oklch(0.95 0.02 240); /* Chữ trên điểm nhấn sidebar */
+  --sidebar-border: oklch(0.30 0.02 240 / 0.2); /* Viền sidebar */
+  --sidebar-ring: oklch(0.70 0.15 270); /* Viền focus sidebar */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+
+/* Custom Animations for Pricing Page */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-down {
+  animation: fade-in-down 0.6s ease-out forwards;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #dc2626;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ef4444;
+}
