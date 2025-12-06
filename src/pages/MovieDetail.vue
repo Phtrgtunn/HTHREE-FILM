@@ -1,28 +1,28 @@
 <template>
   <div class="min-h-screen bg-gray-900 text-white">
     <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center items-center h-screen">
-      <div class="text-center">
-        <svg
-          class="animate-spin h-12 w-12 text-yellow-400 mx-auto mb-4"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25" />
-          <path
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            class="opacity-75"
-          />
-        </svg>
-        <p class="text-xl font-semibold text-gray-300">Đang tải thông tin phim...</p>
+    <div v-if="loading" class="space-y-8">
+      <LoadingSkeleton type="hero" />
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 space-y-6">
+            <LoadingSkeleton type="list" :count="2" />
+          </div>
+          <div class="lg:col-span-1">
+            <LoadingSkeleton type="card" />
+          </div>
+        </div>
+        <LoadingSkeleton type="list" :count="5" />
       </div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="flex justify-center items-center h-screen text-red-400">
-      <p class="text-xl font-semibold">{{ error }}</p>
-    </div>
+    <ErrorBoundary
+      v-else-if="error"
+      error-title="Không thể tải phim"
+      :error-message="error"
+      @retry="fetchMovieDetail"
+    />
 
     <!-- No Data State -->
     <div v-else-if="!movieData" class="flex justify-center items-center h-screen text-gray-400">
@@ -35,11 +35,11 @@
       <div class="relative w-full h-[70vh] min-h-[500px]">
         <!-- Backdrop Image -->
         <div class="absolute inset-0">
-          <img
+          <LazyImage
             :src="movieData.backdrop_path || movieData.poster_path || 'https://placehold.co/1920x1080/1f2937/fbbf24?text=No+Image'"
             :alt="movieData.title"
-            class="w-full h-full object-cover"
-            onerror="this.onerror=null;this.src='https://placehold.co/1920x1080/1f2937/fbbf24?text=No+Image';"
+            image-class="w-full h-full object-cover"
+            error-text="Không tải được ảnh nền"
           />
           <!-- Gradient Overlays -->
           <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent"></div>
@@ -127,6 +127,9 @@
 
       <!-- Details Section -->
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <!-- Breadcrumb -->
+        <Breadcrumb :items="breadcrumbItems" />
+
         <!-- Movie Info Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <!-- Left Column - Main Info -->
@@ -266,12 +269,11 @@
 
                 <!-- Episode Thumbnail -->
                 <div class="flex-shrink-0 w-36 h-20 bg-gray-700 rounded-lg overflow-hidden relative">
-                  <img
+                  <LazyImage
                     :src="movieData.backdrop_path || movieData.poster_path || 'https://placehold.co/160x90/374151/fbbf24?text=' + (index + 1)"
                     :alt="`${ep.name} thumbnail`"
-                    class="w-full h-full object-cover"
-                    loading="lazy"
-                    onerror="this.onerror=null;this.src='https://placehold.co/160x90/374151/fbbf24?text=' + (index + 1);"
+                    image-class="w-full h-full object-cover"
+                    container-class="w-full h-full"
                   />
                   <!-- Play Icon Overlay -->
                   <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -347,12 +349,8 @@
           />
 
           <!-- Comments List -->
-          <div v-if="loadingComments" class="text-center py-8">
-            <div class="relative w-12 h-12 mx-auto mb-4">
-              <div class="absolute inset-0 border-4 border-yellow-400/30 rounded-full"></div>
-              <div class="absolute inset-0 border-4 border-yellow-400 rounded-full border-t-transparent animate-spin"></div>
-            </div>
-            <p class="text-gray-400">Đang tải bình luận...</p>
+          <div v-if="loadingComments" class="space-y-4">
+            <LoadingSkeleton type="list" :count="3" />
           </div>
 
           <div v-else-if="comments.length > 0" class="space-y-4">
@@ -429,13 +427,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { supabase } from '../supabaseClient'; 
 import MovieCardRecommended from '@/shared/MovieCardRecommended.vue';
 import CommentForm from '@/components/CommentForm.vue';
+import LazyImage from '@/components/LazyImage.vue';
+import LoadingSkeleton from '@/components/LoadingSkeleton.vue';
+import ErrorBoundary from '@/components/ErrorBoundary.vue';
+import Breadcrumb from '@/components/Breadcrumb.vue';
 import axios from 'axios';
 import { API_CONFIG } from '@/config/api';
+import { useSEO, generateMovieMeta } from '@/composables/useSEO';
 
 // Khởi tạo router và route
 const route = useRoute();
@@ -459,7 +462,28 @@ const isPlaying = ref(false);
 const currentEpisodeLink = ref(null);
 const currentEpisodeName = ref('');
 const currentEpisodeSlug = ref('');
-const episodes = ref([]); 
+const episodes = ref([]);
+
+// Breadcrumb items (computed based on movie data)
+const breadcrumbItems = computed(() => {
+  const items = [
+    { label: 'Trang chủ', to: '/home' }
+  ];
+  
+  if (movieData.value) {
+    // Add movie type (Phim Lẻ or Phim Bộ)
+    if (movieData.value.type === 'single') {
+      items.push({ label: 'Phim Lẻ', to: '/list/phim-le/page/1' });
+    } else if (movieData.value.type === 'series') {
+      items.push({ label: 'Phim Bộ', to: '/list/phim-bo/page/1' });
+    }
+    
+    // Add current movie
+    items.push({ label: movieData.value.title, to: `/film/${filmSlug.value}` });
+  }
+  
+  return items;
+}); 
 
 // Chuyển YouTube URL sang embed
 const convertYoutubeUrlToEmbed = (url) => {
@@ -532,6 +556,32 @@ const fetchMovieDetail = async () => {
       embedUrl.value = convertYoutubeUrlToEmbed(movieData.value.trailer_url);
       console.log('moviedetail.vue: Đã tải thành công dữ liệu phim:', movieData.value);
       console.log('moviedetail.vue: Episodes:', episodes.value);
+      
+      // Update SEO meta tags
+      const movieMeta = generateMovieMeta({
+        name: movieData.value.title,
+        origin_name: movieData.value.original_title,
+        content: movieData.value.overview,
+        quality: movieData.value.quality,
+        category: movieData.value.genres.map(g => ({ name: g })),
+        poster_url: movieData.value.poster_path,
+        thumb_url: movieData.value.backdrop_path,
+        slug: movieData.value.slug
+      });
+      const { updateMeta, setMovieStructuredData } = useSEO(movieMeta);
+      updateMeta();
+      setMovieStructuredData({
+        name: movieData.value.title,
+        origin_name: movieData.value.original_title,
+        content: movieData.value.overview,
+        poster_url: movieData.value.poster_path,
+        thumb_url: movieData.value.backdrop_path,
+        year: movieData.value.year,
+        category: movieData.value.genres.map(g => ({ name: g })),
+        quality: movieData.value.quality,
+        lang: movieData.value.lang,
+        rating: movieData.value.vote_average
+      });
       
       // Fetch phim liên quan và comments
       if (movieData.value.genres && movieData.value.genres.length > 0) {

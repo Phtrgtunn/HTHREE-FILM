@@ -54,7 +54,43 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true;
 
       try {
-        // Check Firebase auth
+        console.log('🔄 Initializing auth...');
+        
+        // FIRST: Check localStorage SYNCHRONOUSLY (fastest)
+        const syncUser = authService.getCurrentUserSync();
+        const syncToken = authService.getTokenSync();
+        
+        if (syncUser && syncToken) {
+          // Set user IMMEDIATELY from localStorage (no await needed)
+          this.user = syncUser;
+          this.loading = false;
+          console.log('⚡ AuthStore - User restored INSTANTLY from localStorage:', syncUser.email);
+          
+          // Background: Verify with persistent storage (IndexedDB)
+          this.verifyPersistentStorage();
+          
+          return syncUser;
+        }
+        
+        // SECOND: Check persistent storage (IndexedDB/SessionStorage/Cookie)
+        const localUser = await authService.getCurrentUser();
+        const localToken = await authService.getToken();
+        
+        console.log('🔍 Checking persistent storage on init:', {
+          hasUser: !!localUser,
+          hasToken: !!localToken,
+          user: localUser
+        });
+        
+        if (localUser && localToken) {
+          // Set user from persistent storage
+          this.user = localUser;
+          console.log('✅ AuthStore - User restored from persistent storage:', localUser.email);
+          this.loading = false;
+          return localUser;
+        }
+        
+        // THIRD: Check Firebase auth (async)
         const auth = getAuth();
         
         return new Promise((resolve) => {
@@ -69,17 +105,11 @@ export const useAuthStore = defineStore('auth', {
                 photoURL: firebaseUser.photoURL,
                 emailVerified: firebaseUser.emailVerified
               };
-              console.log('🔐 AuthStore - Firebase user loaded:', firebaseUser.email);
+              console.log('✅ AuthStore - Firebase user loaded:', firebaseUser.email);
             } else {
-              // Check PHP auth (localStorage)
-              const phpUser = authService.getCurrentUser();
-              if (phpUser) {
-                this.user = phpUser;
-                console.log('🔐 AuthStore - PHP user loaded:', phpUser.email);
-              } else {
-                this.user = null;
-                console.log('🔐 AuthStore - No user logged in');
-              }
+              // No Firebase user and no persistent storage user
+              this.user = null;
+              console.log('❌ AuthStore - No user logged in');
             }
             
             this.loading = false;
@@ -87,10 +117,32 @@ export const useAuthStore = defineStore('auth', {
           });
         });
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('❌ Error initializing auth:', error);
         this.error = error.message;
         this.loading = false;
         return null;
+      }
+    },
+
+    /**
+     * Verify persistent storage in background (không block UI)
+     */
+    async verifyPersistentStorage() {
+      try {
+        const persistentUser = await authService.getCurrentUser();
+        const persistentToken = await authService.getToken();
+        
+        if (persistentUser && persistentToken) {
+          console.log('✅ Persistent storage verified');
+        } else {
+          console.warn('⚠️ Persistent storage missing, syncing from localStorage...');
+          // Sync back to persistent storage
+          if (this.user) {
+            await authService.login(null, null); // This will trigger save to persistent storage
+          }
+        }
+      } catch (error) {
+        console.warn('⚠️ Persistent storage verification failed:', error);
       }
     },
 

@@ -1,28 +1,34 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router';
 
-// Import các component View (trang)
+// ⚡ Eager load: Critical pages (loaded immediately)
 import WelcomePage from '../pages/WelcomePage.vue';
 import Homepage from '../pages/Homepage.vue'; // Trang chủ chính
-import NetflixHomepage from '../pages/NetflixHomepage.vue'; // Netflix style (backup)
-import MovieDetail from '../pages/MovieDetail.vue';
-import WatchMovie from '../pages/WatchMovie.vue';
-import ListBaseType from '../pages/ListBaseType.vue';
-import ListBaseCategory from '../pages/ListBaseCategory.vue';
-import ListBaseNational from '../pages/ListBaseNational.vue';
-import Contact from '../pages/Contact.vue';
-import Account from '../pages/Account.vue';
-import DemoUI from '../pages/DemoUI.vue';
-import TestImages from '../pages/TestImages.vue';
-import SearchResults from '../pages/SearchResults.vue';
-import Pricing from '../pages/Pricing.vue';
-import Cart from '../pages/Cart.vue';
-import Checkout from '../pages/Checkout.vue';
-import Admin from '../pages/Admin.vue';
+
+// 📦 Lazy load: Other pages (loaded on demand for better performance)
+const NetflixHomepage = () => import(/* webpackChunkName: "netflix" */ '../pages/NetflixHomepage.vue');
+const MovieDetail = () => import(/* webpackChunkName: "movie" */ '../pages/MovieDetail.vue');
+const WatchMovie = () => import(/* webpackChunkName: "watch" */ '../pages/WatchMovie.vue');
+const ListBaseType = () => import(/* webpackChunkName: "list" */ '../pages/ListBaseType.vue');
+const ListBaseCategory = () => import(/* webpackChunkName: "list" */ '../pages/ListBaseCategory.vue');
+const ListBaseNational = () => import(/* webpackChunkName: "list" */ '../pages/ListBaseNational.vue');
+const Contact = () => import(/* webpackChunkName: "contact" */ '../pages/Contact.vue');
+const Account = () => import(/* webpackChunkName: "account" */ '../pages/Account.vue');
+const DemoUI = () => import(/* webpackChunkName: "demo" */ '../pages/DemoUI.vue');
+const TestImages = () => import(/* webpackChunkName: "test" */ '../pages/TestImages.vue');
+const SearchResults = () => import(/* webpackChunkName: "search" */ '../pages/SearchResults.vue');
+const Pricing = () => import(/* webpackChunkName: "pricing" */ '../pages/Pricing.vue');
+const Cart = () => import(/* webpackChunkName: "cart" */ '../pages/Cart.vue');
+const Checkout = () => import(/* webpackChunkName: "checkout" */ '../pages/Checkout.vue');
+const Admin = () => import(/* webpackChunkName: "admin" */ '../pages/Admin.vue');
+const Categories = () => import(/* webpackChunkName: "categories" */ '../pages/Categories.vue');
+const Library = () => import(/* webpackChunkName: "library" */ '../pages/Library.vue');
 
 const routes = [
   { path: '/', name: 'Welcome', component: WelcomePage },
   { path: '/home', name: 'Homepage', component: Homepage }, // Trang chủ chính
+  { path: '/categories', name: 'Categories', component: Categories }, // Tất cả thể loại
+  { path: '/library', name: 'Library', component: Library }, // Thư viện của tôi
   { path: '/pricing', name: 'Pricing', component: Pricing }, // Trang giá gói
   { path: '/cart', name: 'Cart', component: Cart }, // Giỏ hàng
   { path: '/checkout', name: 'Checkout', component: Checkout }, // Thanh toán
@@ -62,6 +68,29 @@ const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     return { top: 0, behavior: 'smooth' };
   },
+});
+
+// Route guard: Chặn admin truy cập vào trang mua gói
+router.beforeEach((to, from, next) => {
+  // Các route không cho phép admin truy cập
+  const restrictedForAdmin = ['Pricing', 'Cart', 'Checkout'];
+  
+  if (restrictedForAdmin.includes(to.name)) {
+    // Kiểm tra xem user có phải admin không
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const adminEmails = ['hient7182@gmail.com', 'admin@hthree.com'];
+    
+    const isAdmin = user && (user.role === 'admin' || adminEmails.includes(user.email));
+    
+    if (isAdmin) {
+      // Nếu là admin, chuyển về trang chủ
+      console.log('⛔ Admin không thể truy cập trang:', to.name);
+      next({ name: 'Homepage' });
+      return;
+    }
+  }
+  
+  next();
 });
 
 export default router;

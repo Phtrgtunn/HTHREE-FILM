@@ -10,35 +10,67 @@ A modern movie streaming website built with Vue.js 3, featuring a Netflix-inspir
 ## ✨ Features
 
 ### 🎥 Movie Features
+
 - **Browse Movies**: Phim bộ, phim lẻ, hoạt hình, TV shows
 - **Search**: Tìm kiếm phim theo tên, thể loại, quốc gia
 - **Filter**: Lọc theo năm, chất lượng, ngôn ngữ
 - **Watch Online**: Xem phim trực tuyến với nhiều server
 - **Episode Navigation**: Chuyển tập dễ dàng cho phim bộ
 - **Movie Details**: Thông tin chi tiết, trailer, diễn viên
+- **Library Management**: Yêu thích, xem sau, lịch sử
+- **Bulk Actions**: Chọn nhiều phim cùng lúc
 
 ### 🎨 UI/UX
+
 - **Netflix-style Design**: Giao diện hiện đại, mượt mà
 - **Responsive**: Tối ưu cho mobile, tablet, desktop
 - **Smooth Animations**: Fade-in, slide-up, hover effects
 - **Dark Theme**: Giao diện tối dễ nhìn
 - **Hero Banner**: Backdrop image với gradient overlay
+- **Keyboard Shortcuts**: Ctrl+K, /, ?, G+H/L/P/C
+- **Command Palette**: Quick navigation và actions
+- **Accessibility**: WCAG 2.1 AA compliant
 
 ### 💬 Social Features
+
 - **Comments System**: Bình luận theo phim
 - **User Authentication**: Đăng nhập với Firebase
 - **User Profiles**: Quản lý tài khoản, avatar
 - **Community**: Top commenters, trending movies
 
-### 🚀 Performance
+### 🚀 Performance & SEO
+
 - **Fast Loading**: Lazy loading, code splitting
-- **Caching**: API response caching
-- **Optimized Images**: CDN, lazy load
-- **SEO Friendly**: Meta tags, sitemap
+- **API Caching**: Stale-while-revalidate strategy
+- **Optimized Images**: CDN, lazy load, WebP
+- **SEO Optimized**: Dynamic meta tags, Open Graph, Twitter Card
+- **Structured Data**: JSON-LD schema.org markup
+- **Sitemap & Robots.txt**: Search engine friendly
+
+### 🌐 Internationalization
+
+- **Multi-language**: Tiếng Việt, English
+- **Language Switcher**: Easy language switching
+- **RTL Support**: Ready for RTL languages
+
+### 📊 Analytics & Monitoring
+
+- **Google Analytics 4**: Page views, events, conversions
+- **Error Tracking**: Comprehensive error logging
+- **User Behavior**: Track movie plays, searches, purchases
+- **Performance Monitoring**: Real-time performance metrics
+
+### 🧪 Testing
+
+- **Unit Tests**: Vitest + Vue Test Utils
+- **Component Tests**: Isolated component testing
+- **Coverage Reports**: 80%+ test coverage
+- **CI/CD Ready**: Automated testing pipeline
 
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Vue.js 3** - Progressive JavaScript framework
 - **Vue Router** - Official router
 - **Pinia** - State management
@@ -47,11 +79,13 @@ A modern movie streaming website built with Vue.js 3, featuring a Netflix-inspir
 - **Vite** - Build tool
 
 ### Backend
+
 - **PHP 8+** - Server-side scripting
 - **MySQL** - Database
 - **PHPMailer** - Email service
 
 ### Services
+
 - **Firebase** - Authentication, hosting
 - **Supabase** - Database (optional)
 - **PhimAPI** - Movie data API
@@ -60,24 +94,29 @@ A modern movie streaming website built with Vue.js 3, featuring a Netflix-inspir
 ## 📦 Installation
 
 ### Prerequisites
+
 - Node.js 18+
 - npm or yarn
 - PHP 8+ (for backend)
 - MySQL
 
 ### Clone Repository
+
 ```bash
 git clone https://github.com/YOUR_USERNAME/HTHREE_film.git
 cd HTHREE_film
 ```
 
 ### Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### Environment Variables
+
 Create `.env` file:
+
 ```env
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_KEY=your_supabase_key
@@ -91,6 +130,7 @@ VITE_FIREBASE_MEASUREMENT_ID=your_firebase_measurement_id
 ```
 
 ### Run Development Server
+
 ```bash
 npm run dev
 ```
@@ -98,8 +138,22 @@ npm run dev
 Open http://localhost:5173
 
 ### Build for Production
+
 ```bash
 npm run build
+```
+
+### Run Tests
+
+```bash
+# Run all tests
+npm run test
+
+# Run tests with UI
+npm run test:ui
+
+# Run tests with coverage
+npm run test:coverage
 ```
 
 ## 🗂️ Project Structure
@@ -135,6 +189,7 @@ HTHREE_film/
 ## 🎯 Key Features Implementation
 
 ### Movie Detail Page
+
 - Hero section with backdrop image
 - Video player integration
 - Episode list with thumbnails
@@ -142,12 +197,14 @@ HTHREE_film/
 - Related movies
 
 ### Watch Movie Page
+
 - Full-screen video player
 - Episode navigation grid
 - Auto-load next episode
 - Smooth animations
 
 ### Comments System
+
 - Real-time comments
 - User avatars
 - Like functionality
@@ -156,6 +213,7 @@ HTHREE_film/
 ## 🚀 Deployment
 
 ### Deploy to Vercel
+
 ```bash
 # Install Vercel CLI
 npm install -g vercel
@@ -174,6 +232,7 @@ See [HUONG_DAN_UPLOAD_GIT.md](HUONG_DAN_UPLOAD_GIT.md) for detailed instructions
 ## 📝 API Documentation
 
 ### Movie API (PhimAPI)
+
 - Base URL: `https://phimapi.com/v1/api`
 - Endpoints:
   - `/danh-sach/phim-moi-cap-nhat` - Latest movies
@@ -181,6 +240,7 @@ See [HUONG_DAN_UPLOAD_GIT.md](HUONG_DAN_UPLOAD_GIT.md) for detailed instructions
   - `/tim-kiem` - Search movies
 
 ### Backend API
+
 - Base URL: `/backend/api`
 - Endpoints:
   - `/comments.php` - Comments CRUD
@@ -204,6 +264,7 @@ This project is licensed under the MIT License.
 ## 👨‍💻 Author
 
 **Your Name**
+
 - GitHub: [@yourusername](https://github.com/yourusername)
 - Email: your.email@example.com
 
@@ -218,12 +279,15 @@ This project is licensed under the MIT License.
 ## 📸 Screenshots
 
 ### Homepage
+
 ![Homepage](screenshots/homepage.png)
 
 ### Movie Detail
+
 ![Movie Detail](screenshots/movie-detail.png)
 
 ### Watch Movie
+
 ![Watch Movie](screenshots/watch-movie.png)
 
 ---

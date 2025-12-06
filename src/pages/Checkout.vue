@@ -1,5 +1,8 @@
 <template>
   <div class="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black">
+    <!-- Offline Banner -->
+    <OfflineBanner :show="showOfflineBanner" :show-retry="true" @retry="handleRetry" />
+    
     <!-- Progress Steps -->
     <div class="bg-gray-900/50 border-b border-gray-800 sticky top-0 z-40 backdrop-blur-sm">
       <div class="container mx-auto px-4 py-4">
@@ -38,8 +41,20 @@
     </div>
 
     <div class="container mx-auto px-4 py-8 max-w-7xl">
+      <!-- Loading -->
+      <div v-if="cartStore.loading" class="space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div class="lg:col-span-2 space-y-6">
+            <LoadingSkeleton type="list" :count="2" />
+          </div>
+          <div class="lg:col-span-1">
+            <LoadingSkeleton type="cart" />
+          </div>
+        </div>
+      </div>
+
       <!-- Empty Cart -->
-      <div v-if="cartStore.isEmpty" class="max-w-md mx-auto text-center py-20">
+      <div v-else-if="cartStore.isEmpty" class="max-w-md mx-auto text-center py-20">
         <div class="w-24 h-24 mx-auto mb-6 bg-gray-800 rounded-full flex items-center justify-center">
           <svg class="w-12 h-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -89,9 +104,9 @@
                     required
                     class="w-full bg-gray-800/80 backdrop-blur-sm text-white px-4 py-3 rounded-xl border border-gray-700 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600/20 transition-all placeholder:text-gray-500"
                     placeholder="Nguyễn Văn A"
-                    @blur="validateField('customer_name')"
+                    @blur="onFieldBlur('customer_name')"
                   />
-                  <p v-if="errors.customer_name" class="text-red-400 text-sm mt-1">{{ errors.customer_name }}</p>
+                  <p v-if="validationErrors.customer_name" class="text-red-400 text-sm mt-1">{{ validationErrors.customer_name }}</p>
                 </div>
 
                 <div>
@@ -108,9 +123,9 @@
                     required
                     class="w-full bg-gray-800/80 backdrop-blur-sm text-white px-4 py-3 rounded-xl border border-gray-700 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600/20 transition-all placeholder:text-gray-500"
                     placeholder="email@example.com"
-                    @blur="validateField('customer_email')"
+                    @blur="onFieldBlur('customer_email')"
                   />
-                  <p v-if="errors.customer_email" class="text-red-400 text-sm mt-1">{{ errors.customer_email }}</p>
+                  <p v-if="validationErrors.customer_email" class="text-red-400 text-sm mt-1">{{ validationErrors.customer_email }}</p>
                 </div>
 
                 <div>
@@ -125,7 +140,9 @@
                     type="tel"
                     class="w-full bg-gray-800/80 backdrop-blur-sm text-white px-4 py-3 rounded-xl border border-gray-700 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600/20 transition-all placeholder:text-gray-500"
                     placeholder="0901234567"
+                    @blur="onFieldBlur('customer_phone')"
                   />
+                  <p v-if="validationErrors.customer_phone" class="text-red-400 text-sm mt-1">{{ validationErrors.customer_phone }}</p>
                 </div>
 
                 <div class="md:col-span-2">
@@ -229,20 +246,31 @@
               </div>
             </div>
 
+            <!-- Auto-save indicator -->
+            <div v-if="lastSaved" class="flex items-center justify-center gap-2 text-xs text-gray-500">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Đã lưu tự động lúc {{ lastSaved.toLocaleTimeString('vi-VN') }}</span>
+            </div>
+
             <!-- Submit Button -->
             <button
               type="submit"
-              :disabled="submitting || !isFormValid"
+              :disabled="submitting || !isFormValid || !isOnline"
               class="w-full bg-gradient-to-r from-red-600 to-yellow-500 text-white py-4 rounded-xl font-bold text-lg hover:from-red-700 hover:to-yellow-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shadow-lg shadow-red-600/30 flex items-center justify-center gap-2"
             >
               <svg v-if="submitting" class="animate-spin h-5 w-5" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
               </svg>
+              <svg v-else-if="!isOnline" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"/>
+              </svg>
               <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              <span>{{ submitting ? 'Đang xử lý...' : 'Xác nhận đặt hàng' }}</span>
+              <span>{{ submitting ? 'Đang xử lý...' : !isOnline ? 'Không có kết nối' : 'Xác nhận đặt hàng' }}</span>
             </button>
 
             <!-- Security Note -->
@@ -320,13 +348,14 @@
                   <input
                     v-model="couponCode"
                     type="text"
-                    placeholder="Nhập mã"
-                    class="flex-1 bg-gray-800/80 backdrop-blur-sm text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600/20 transition-all placeholder:text-gray-500 text-sm"
+                    placeholder="Nhập mã (VD: SUMMER2024)"
+                    class="flex-1 bg-gray-800/80 backdrop-blur-sm text-white px-3 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600/20 transition-all placeholder:text-gray-500 text-sm uppercase"
                     @keyup.enter="applyCoupon"
+                    maxlength="20"
                   />
                   <button
                     @click="applyCoupon"
-                    :disabled="applyingCoupon || !couponCode"
+                    :disabled="applyingCoupon || !couponCode.trim()"
                     class="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold text-sm hover:scale-105 active:scale-95"
                   >
                     {{ applyingCoupon ? '...' : 'Áp dụng' }}
@@ -427,19 +456,26 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { createOrder, validateCoupon } from '@/services/ecommerceApi';
 import { useToast } from '@/composables/useToast';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { useFormAutoSave } from '@/composables/useFormAutoSave';
+import { useNetworkStatus } from '@/composables/useNetworkStatus';
 import paymentService from '@/services/paymentService';
 import axios from 'axios';
+import LoadingSkeleton from '@/components/LoadingSkeleton.vue';
+import ErrorBoundary from '@/components/ErrorBoundary.vue';
+import OfflineBanner from '@/components/OfflineBanner.vue';
 
 const router = useRouter();
 const cartStore = useCartStore();
 const authStore = useAuthStore();
 const toast = useToast();
+const { isOnline, showOfflineBanner } = useNetworkStatus();
 
 const submitting = ref(false);
 const couponCode = ref('');
@@ -455,9 +491,13 @@ const form = reactive({
   note: ''
 });
 
-const errors = reactive({
-  customer_name: '',
-  customer_email: ''
+// Use form validation composable
+const { errors: validationErrors, rules, validateField, validateForm, isFormValid: formIsValid } = useFormValidation();
+
+// Auto-save form data
+const { lastSaved, loadFromStorage, clearStorage } = useFormAutoSave('checkout', form, {
+  debounceMs: 3000,
+  enabled: true
 });
 
 const saveInfo = ref(false);
@@ -497,11 +537,20 @@ const finalTotal = computed(() => {
 const isFormValid = computed(() => {
   return form.customer_name.trim() !== '' && 
          form.customer_email.trim() !== '' &&
-         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.customer_email);
+         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.customer_email) &&
+         formIsValid.value;
 });
 
 onMounted(async () => {
   await cartStore.fetchCart();
+
+  // Try to restore form draft first
+  const savedDraft = loadFromStorage();
+  if (savedDraft) {
+    Object.assign(form, savedDraft);
+    toast.info('📝 Đã khôi phục thông tin đã nhập trước đó');
+    return;
+  }
 
   // Pre-fill user info from localStorage (updated from profile page)
   if (authStore.user) {
@@ -517,12 +566,63 @@ onMounted(async () => {
   }
 });
 
-const validateField = (field) => {
+const onFieldBlur = (fieldName) => {
+  const validationSchema = {
+    customer_name: {
+      value: form.customer_name,
+      rules: [rules.required, rules.minLength(2)],
+      label: 'Họ tên'
+    },
+    customer_email: {
+      value: form.customer_email,
+      rules: [rules.required, rules.email],
+      label: 'Email'
+    },
+    customer_phone: {
+      value: form.customer_phone,
+      rules: [rules.phone],
+      label: 'Số điện thoại'
+    }
+  };
+  
+  if (validationSchema[fieldName]) {
+    validateField(
+      fieldName, 
+      validationSchema[fieldName].value, 
+      validationSchema[fieldName].rules, 
+      validationSchema[fieldName].label
+    );
+  }
+};
+
+const validateAllFields = () => {
+  const validationSchema = {
+    customer_name: {
+      value: form.customer_name,
+      rules: [rules.required, rules.minLength(2)],
+      label: 'Họ tên'
+    },
+    customer_email: {
+      value: form.customer_email,
+      rules: [rules.required, rules.email],
+      label: 'Email'
+    },
+    customer_phone: {
+      value: form.customer_phone,
+      rules: [rules.phone],
+      label: 'Số điện thoại'
+    }
+  };
+  
+  return validateForm(form, validationSchema);
+};
+
+const oldValidateField = (field) => {
   if (field === 'customer_name') {
-    errors.customer_name = form.customer_name.trim() === '' ? 'Vui lòng nhập họ tên' : '';
+    validationErrors.customer_name = form.customer_name.trim() === '' ? 'Vui lòng nhập họ tên' : '';
   } else if (field === 'customer_email') {
     if (form.customer_email.trim() === '') {
-      errors.customer_email = 'Vui lòng nhập email';
+      validationErrors.customer_email = 'Vui lòng nhập email';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.customer_email)) {
       errors.customer_email = 'Email không hợp lệ';
     } else {
@@ -532,14 +632,16 @@ const validateField = (field) => {
 };
 
 const applyCoupon = async () => {
-  if (!couponCode.value) return;
+  // Sanitize input
+  const sanitizedCode = couponCode.value.trim().toUpperCase();
+  if (!sanitizedCode) return;
 
   applyingCoupon.value = true;
   couponError.value = null;
 
   try {
     const response = await validateCoupon(
-      couponCode.value,
+      sanitizedCode,
       cartStore.total,
       authStore.user?.id
     );
@@ -549,8 +651,10 @@ const applyCoupon = async () => {
       toast.success(response.message);
     }
   } catch (error) {
-    couponError.value = error.response?.data?.message || 'Mã không hợp lệ';
+    const errorMsg = error.response?.data?.message || 'Mã giảm giá không hợp lệ hoặc đã hết hạn';
+    couponError.value = errorMsg + '. Vui lòng kiểm tra lại mã hoặc liên hệ hỗ trợ.';
     appliedCoupon.value = null;
+    toast.error(errorMsg);
   } finally {
     applyingCoupon.value = false;
   }
@@ -575,6 +679,24 @@ const handleSubmit = async () => {
     toast.error('Vui lòng đăng nhập');
     router.push('/account');
     return;
+  }
+
+  // Import useConfirm dynamically
+  const { useConfirm } = await import('@/composables/useConfirm');
+  const { confirm } = useConfirm();
+  
+  // Show final payment confirmation
+  const paymentMethodName = paymentMethods.find(m => m.value === form.payment_method)?.label || 'Không xác định';
+  const confirmed = await confirm({
+    title: 'Xác nhận thanh toán',
+    message: `Bạn có chắc chắn muốn thanh toán ${finalTotal.value} qua ${paymentMethodName}?`,
+    type: 'info',
+    confirmText: 'Xác nhận thanh toán',
+    cancelText: 'Kiểm tra lại'
+  });
+  
+  if (!confirmed) {
+    return; // User cancelled
   }
 
   submitting.value = true;
@@ -615,6 +737,9 @@ const handleSubmit = async () => {
     ]);
 
     if (response.success) {
+      // Clear form draft after successful order
+      clearStorage();
+      
       const orderCode = response.data.order_code;
       const orderTotal = response.data.total;
       
@@ -671,9 +796,21 @@ const handleSubmit = async () => {
       }
     }
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Không thể tạo đơn hàng');
+    const errorMsg = error.response?.data?.message || 'Không thể tạo đơn hàng';
+    const helpText = !isOnline.value 
+      ? ' Vui lòng kiểm tra kết nối Internet và thử lại.'
+      : ' Vui lòng thử lại hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp diễn.';
+    
+    toast.error(errorMsg + helpText);
   } finally {
     submitting.value = false;
+  }
+};
+
+const handleRetry = async () => {
+  if (isOnline.value) {
+    await cartStore.fetchCart();
+    toast.success('Đã kết nối lại');
   }
 };
 

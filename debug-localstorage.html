@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug LocalStorage</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .section {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        pre {
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug LocalStorage - HTHREE Film</h1>
+    
+    <div class="section">
+        <h2>Kiểm tra LocalStorage hiện tại:</h2>
+        <button onclick="checkStorage()">Kiểm tra ngay</button>
+        <pre id="result"></pre>
+    </div>
+
+    <div class="section">
+        <h2>Hướng dẫn:</h2>
+        <ol>
+            <li>Mở file này trong trình duyệt (double click file)</li>
+            <li>Click nút "Kiểm tra ngay"</li>
+            <li>Copy kết quả và gửi cho developer</li>
+        </ol>
+    </div>
+
+    <script>
+        function checkStorage() {
+            const result = document.getElementById('result');
+            
+            const data = {
+                timestamp: new Date().toISOString(),
+                user: localStorage.getItem('user'),
+                token: localStorage.getItem('token'),
+                allKeys: Object.keys(localStorage),
+                allData: {}
+            };
+            
+            // Get all localStorage data
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                data.allData[key] = localStorage.getItem(key);
+            }
+            
+            result.textContent = JSON.stringify(data, null, 2);
+            
+            console.log('📊 LocalStorage Debug:', data);
+        }
+        
+        // Auto check on load
+        window.onload = checkStorage;
+    </script>
+</body>
+</html>

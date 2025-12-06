@@ -1,5 +1,26 @@
 <template>
   <div class="bg-black min-h-screen text-white">
+    <!-- Loading State -->
+    <div v-if="loading" class="space-y-8">
+      <LoadingSkeleton type="hero" />
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <LoadingSkeleton type="row" />
+        <LoadingSkeleton type="row" />
+        <LoadingSkeleton type="row" />
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <ErrorBoundary
+      v-else-if="error"
+      error-title="Không thể tải phim"
+      :error-message="error"
+      :show-details="true"
+      @retry="fetchMovies"
+    />
+
+    <!-- Content -->
+    <div v-else>
     <!-- Hero Banner Carousel -->
     <div 
       ref="heroBannerRef"
@@ -47,12 +68,12 @@
         <div class="relative z-10 h-full flex items-center container mx-auto px-4 sm:px-6 lg:px-8 pt-20">
           <div class="max-w-2xl">
             <!-- Title -->
-            <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 uppercase tracking-tight leading-tight text-white" style="text-shadow: 3px 3px 10px rgba(0,0,0,1), 0 0 30px rgba(0,0,0,0.9), 0 0 50px rgba(0,0,0,0.7);">
+            <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 uppercase tracking-tight leading-tight text-white" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.7);">
               {{ movie?.name || 'KHÁM PHÁ PHIM HAY' }}
             </h1>
             
             <!-- Origin Name -->
-            <p class="text-base md:text-lg text-white mb-4 font-semibold" style="text-shadow: 2px 2px 8px rgba(0,0,0,1), 0 0 15px rgba(0,0,0,0.8);">
+            <p class="text-base md:text-lg text-white mb-4 font-semibold" style="text-shadow: 1px 1px 6px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.7);">
               {{ movie?.origin_name || '' }}
             </p>
 
@@ -78,14 +99,14 @@
                 v-for="(genre, i) in movie.category.slice(0, 4)" 
                 :key="i"
                 class="text-white font-bold"
-                style="text-shadow: 2px 2px 6px rgba(0,0,0,1), 0 0 10px rgba(0,0,0,0.9);"
+                style="text-shadow: 1px 1px 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.7);"
               >
                 {{ genre.name }}
               </span>
             </div>
 
             <!-- Description -->
-            <p class="text-sm md:text-base mb-6 line-clamp-3 text-white leading-relaxed max-w-xl font-semibold" style="text-shadow: 2px 2px 8px rgba(0,0,0,1), 0 0 15px rgba(0,0,0,0.9);">
+            <p class="text-sm md:text-base mb-6 line-clamp-3 text-white leading-relaxed max-w-xl font-semibold" style="text-shadow: 1px 1px 6px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.7);">
               {{ movie?.content || 'Khám phá những bộ phim tuyệt vời cùng HTHREE' }}
             </p>
 
@@ -98,7 +119,7 @@
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
                 </svg>
-                Xem Ngay
+                {{ $t('movie.play') }}
               </button>
               <button 
                 class="flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-6 py-3.5 rounded-full font-bold text-base hover:bg-white/30 transition-all border border-white/30"
@@ -121,16 +142,17 @@
         </div>
       </div>
 
-      <!-- Dots Indicator -->
+      <!-- Dots Indicator - Improved size and visibility -->
       <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
         <button
           v-for="(movie, index) in featuredMovies"
           :key="`dot-${movie.slug}`"
           @click="goToBanner(index)"
-          class="transition-all duration-500 ease-out rounded-full transform hover:scale-125"
+          class="transition-all duration-300 ease-out rounded-full transform hover:scale-110"
           :class="currentBannerIndex === index 
-            ? 'w-10 h-2.5 bg-yellow-400 shadow-lg shadow-yellow-400/50' 
-            : 'w-2.5 h-2.5 bg-white/50 hover:bg-white/80'"
+            ? 'w-8 h-2 bg-yellow-400 shadow-lg shadow-yellow-400/50' 
+            : 'w-2 h-2 bg-white/50 hover:bg-white/80'"
+          :aria-label="`Chuyển đến phim ${index + 1}`"
         ></button>
       </div>
     </div>
@@ -140,25 +162,33 @@
     <FeaturedCarousel />
 
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-10 relative z-20">
+      <!-- Breadcrumb -->
+      <Breadcrumb :items="breadcrumbItems" />
+
+      <!-- Page Title -->
+      <div class="mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">{{ $t('home.title') }}</h1>
+        <p class="text-gray-400">{{ $t('home.subtitle') }}</p>
+      </div>
 
       <!-- Phim Mới Cập Nhật -->
       <MovieRow 
         v-if="newMovies?.length"
-        title="🆕 Phim Mới Cập Nhật" 
+        :title="$t('home.newMovies')" 
         :movies="newMovies"
       />
 
       <!-- Phim Bộ -->
       <MovieRow 
         v-if="seriesMovies?.length"
-        title="📺 Phim Bộ Hot" 
+        :title="$t('home.series')" 
         :movies="seriesMovies"
       />
 
       <!-- Phim Lẻ -->
       <MovieRow 
         v-if="singleMovies?.length"
-        title="🎬 Phim Lẻ Mới" 
+        :title="$t('home.single')" 
         :movies="singleMovies"
       />
 
@@ -179,7 +209,7 @@
       <!-- Phim Anime -->
       <MovieRow 
         v-if="animeMovies?.length"
-        title="🎌 Phim Anime" 
+        :title="$t('home.anime')" 
         :movies="animeMovies"
       />
     </div>
@@ -194,18 +224,24 @@
       @close="isModalOpen = false"
       @open-movie="handleOpenMovie"
     />
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
 import axios from 'axios';
 import { toast } from 'vue3-toastify';
 import MovieRow from '@/components/MovieRow.vue';
 import CommunitySection from '@/components/CommunitySection.vue';
 import FeaturedCarousel from '@/components/FeaturedCarousel.vue';
 import MovieDetailModal from '@/components/MovieDetailModal.vue';
+import LoadingSkeleton from '@/components/LoadingSkeleton.vue';
+import ErrorBoundary from '@/components/ErrorBoundary.vue';
+import Breadcrumb from '@/components/Breadcrumb.vue';
+import { useSEO, generatePageMeta } from '@/composables/useSEO';
 
 const router = useRouter();
 
@@ -227,8 +263,15 @@ let touchEndX = 0;
 let isScrolling = false;
 const isModalOpen = ref(false);
 const selectedMovieSlug = ref('');
+const loading = ref(true);
+const error = ref(null);
 
 const featuredMovie = computed(() => featuredMovies.value[currentBannerIndex.value] || null);
+
+// Breadcrumb items
+const breadcrumbItems = [
+  { label: 'Trang chủ', to: '/home' }
+];
 
 const openMovieDetail = (movie) => {
   if (movie?.slug) {
@@ -402,7 +445,10 @@ const handleTouchEnd = () => {
   }
 };
 
-onMounted(async () => {
+const fetchMovies = async () => {
+  loading.value = true;
+  error.value = null;
+  
   try {
     console.log('🚀 Loading movies from API...');
     
@@ -519,8 +565,20 @@ onMounted(async () => {
     // Không start auto slide nữa - chỉ chuyển khi user tương tác
   } catch (err) {
     console.error('❌ Error loading movies:', err);
+    error.value = err.response?.data?.message || err.message || 'Không thể tải dữ liệu phim. Vui lòng thử lại sau.';
     toast.error('Không thể tải dữ liệu phim');
+  } finally {
+    loading.value = false;
   }
+};
+
+// SEO Setup
+const seoMeta = generatePageMeta('home', { path: '/home' });
+const { updateMeta, setWebsiteStructuredData } = useSEO(seoMeta);
+
+onMounted(() => {
+  fetchMovies();
+  setWebsiteStructuredData();
 });
 
 onUnmounted(() => {
@@ -552,5 +610,35 @@ onUnmounted(() => {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus visible for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 </style>

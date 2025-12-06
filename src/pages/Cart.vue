@@ -1,5 +1,20 @@
 <template>
   <div class="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black">
+    <!-- Edit Cart Item Modal -->
+    <EditCartItemModal
+      v-model="showEditModal"
+      :item="editingItem"
+      @save="handleSaveEdit"
+    />
+    
+    <!-- Undo Snackbar -->
+    <UndoSnackbar
+      :show="showUndo"
+      :message="undoMessage"
+      @undo="handleUndo"
+      @close="closeUndo"
+    />
+    
     <!-- Confirm Modal -->
     <ConfirmModal
       v-model="showConfirmModal"
@@ -66,10 +81,19 @@
     <!-- Content -->
     <div class="container mx-auto px-4 py-12">
       <!-- Loading -->
-      <div v-if="cartStore.loading" class="text-center py-20">
-        <div class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-t-red-600 border-r-transparent border-b-red-600 border-l-transparent"></div>
-        <p class="text-gray-400 mt-4">Đang tải giỏ hàng...</p>
+      <div v-if="cartStore.loading" class="space-y-6">
+        <LoadingSkeleton type="cart" />
+        <LoadingSkeleton type="cart" />
+        <LoadingSkeleton type="cart" />
       </div>
+
+      <!-- Error State -->
+      <ErrorBoundary
+        v-else-if="error"
+        error-title="Không thể tải giỏ hàng"
+        :error-message="error"
+        @retry="fetchCart"
+      />
 
       <!-- Empty Cart -->
       <div v-else-if="cartStore.isEmpty" class="max-w-2xl mx-auto text-center py-20">
@@ -156,15 +180,28 @@
                       </div>
                       <p class="text-gray-400 text-sm">{{ item.description }}</p>
                     </div>
-                    <button
-                      @click="removeItem(item.id)"
-                      class="group/btn text-gray-500 hover:text-red-500 transition-all p-2 hover:bg-red-500/10 rounded-lg hover:scale-110"
-                      title="Xóa khỏi giỏ hàng"
-                    >
-                      <svg class="w-5 h-5 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                      </svg>
-                    </button>
+                    <div class="flex items-center gap-2">
+                      <!-- Edit Button -->
+                      <button
+                        @click="editItem(item)"
+                        class="group/btn text-gray-500 hover:text-yellow-500 transition-all p-2 hover:bg-yellow-500/10 rounded-lg hover:scale-110"
+                        title="Chỉnh sửa gói"
+                      >
+                        <svg class="w-5 h-5 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                      </button>
+                      <!-- Delete Button -->
+                      <button
+                        @click="removeItem(item.id)"
+                        class="group/btn text-gray-500 hover:text-red-500 transition-all p-2 hover:bg-red-500/10 rounded-lg hover:scale-110"
+                        title="Xóa khỏi giỏ hàng"
+                      >
+                        <svg class="w-5 h-5 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
 
                   <!-- Features with Icons -->
@@ -411,11 +448,19 @@ import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { validateCoupon } from '@/services/ecommerceApi';
 import { useToast } from '@/composables/useToast';
+import { useConfirm } from '@/composables/useConfirm';
+import { useUndo } from '@/composables/useUndo';
 import ConfirmModal from '@/components/ConfirmModal.vue';
+import EditCartItemModal from '@/components/EditCartItemModal.vue';
+import UndoSnackbar from '@/components/UndoSnackbar.vue';
+import LoadingSkeleton from '@/components/LoadingSkeleton.vue';
+import ErrorBoundary from '@/components/ErrorBoundary.vue';
 
 const cartStore = useCartStore();
 const authStore = useAuthStore();
 const toast = useToast();
+const { confirm } = useConfirm();
+const { showUndo, undoMessage, triggerUndo, handleUndo, closeUndo } = useUndo();
 
 const couponCode = ref('');
 const appliedCoupon = ref(null);
@@ -423,6 +468,9 @@ const applyingCoupon = ref(false);
 const couponError = ref(null);
 const updating = ref(null);
 const quantityChange = ref({ id: null, delta: 0 });
+const error = ref(null);
+const showEditModal = ref(false);
+const editingItem = ref(null);
 
 // Confirm Modal State
 const showConfirmModal = ref(false);
@@ -434,8 +482,18 @@ const confirmModal = ref({
   onConfirm: () => {}
 });
 
-onMounted(async () => {
-  await cartStore.fetchCart();
+const fetchCart = async () => {
+  try {
+    error.value = null;
+    await cartStore.fetchCart();
+  } catch (err) {
+    error.value = err.message || 'Không thể tải giỏ hàng';
+    toast.error('Không thể tải giỏ hàng');
+  }
+};
+
+onMounted(() => {
+  fetchCart();
 });
 
 const finalTotal = computed(() => {
@@ -476,50 +534,74 @@ const updateQuantity = async (cartId, quantity) => {
   }
 };
 
+// Edit cart item
+const editItem = (item) => {
+  editingItem.value = { ...item };
+  showEditModal.value = true;
+};
+
+// Save edited item
+const handleSaveEdit = async (editData) => {
+  try {
+    // Update cart item with new quantity and duration
+    await cartStore.updateItem(editingItem.value.id, {
+      quantity: editData.quantity,
+      duration_months: editData.duration
+    });
+    
+    toast.success('✅ Đã cập nhật gói');
+  } catch (err) {
+    toast.error('❌ Không thể cập nhật');
+  }
+};
+
 const removeItem = async (cartId) => {
-  confirmModal.value = {
+  const confirmed = await confirm({
     title: 'Xóa gói khỏi giỏ hàng?',
-    message: 'Bạn có chắc chắn muốn xóa gói này khỏi giỏ hàng? Hành động này không thể hoàn tác.',
+    message: 'Bạn có chắc chắn muốn xóa gói này khỏi giỏ hàng?',
     type: 'danger',
     confirmText: 'Xóa ngay',
-    onConfirm: async () => {
-      try {
-        // Add minimum delay for better UX
-        await Promise.all([
-          cartStore.removeItem(cartId),
-          new Promise(resolve => setTimeout(resolve, 400))
-        ]);
-        toast.success('Đã xóa khỏi giỏ hàng');
-        appliedCoupon.value = null;
-      } catch (error) {
-        toast.error(error.message || 'Không thể xóa');
-      }
+    cancelText: 'Hủy'
+  });
+
+  if (confirmed) {
+    try {
+      // Store item data for undo
+      const item = cartStore.items.find(i => i.id === cartId);
+      const itemData = { ...item };
+      
+      await cartStore.removeItem(cartId);
+      appliedCoupon.value = null;
+      
+      // Show undo snackbar
+      triggerUndo(`Đã xóa "${itemData.plan_name}" khỏi giỏ hàng`, async () => {
+        await cartStore.addItem(itemData.plan_id, itemData.quantity, itemData.duration_months);
+        toast.success('✅ Đã hoàn tác');
+      });
+    } catch (error) {
+      toast.error(error.message || '❌ Không thể xóa');
     }
-  };
-  showConfirmModal.value = true;
+  }
 };
 
 const clearCart = async () => {
-  confirmModal.value = {
+  const confirmed = await confirm({
     title: 'Xóa toàn bộ giỏ hàng?',
-    message: 'Bạn có chắc chắn muốn xóa tất cả các gói trong giỏ hàng? Hành động này không thể hoàn tác.',
+    message: 'Bạn có chắc chắn muốn xóa tất cả các gói trong giỏ hàng?',
     type: 'danger',
     confirmText: 'Xóa tất cả',
-    onConfirm: async () => {
-      try {
-        // Add minimum delay for better UX
-        await Promise.all([
-          cartStore.clear(),
-          new Promise(resolve => setTimeout(resolve, 500))
-        ]);
-        toast.success('Đã xóa toàn bộ giỏ hàng');
-        appliedCoupon.value = null;
-      } catch (error) {
-        toast.error(error.message || 'Không thể xóa');
-      }
+    cancelText: 'Hủy'
+  });
+
+  if (confirmed) {
+    try {
+      await cartStore.clear();
+      toast.success('✅ Đã xóa toàn bộ giỏ hàng');
+      appliedCoupon.value = null;
+    } catch (error) {
+      toast.error(error.message || '❌ Không thể xóa');
     }
-  };
-  showConfirmModal.value = true;
+  }
 };
 
 const applyCoupon = async () => {

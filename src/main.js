@@ -7,6 +7,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'firebase/auth'; // Thêm auth
 import './index.css'; // Import CSS toàn cục
 import './assets/netflix.css'; // Import Netflix styles
+import './styles/accessibility.css'; // Import Accessibility styles
 
 // --- Cấu hình Firebase (lấy từ Firebase Console) ---
 const firebaseConfig = {
@@ -34,6 +35,10 @@ const app = createApp(App);
 const pinia = createPinia();
 app.use(router);
 app.use(pinia);
+
+// Setup i18n (Internationalization)
+import i18n from './i18n';
+app.use(i18n);
 
 // Khởi tạo authStore
 import { useAuthStore } from './stores/authStore';

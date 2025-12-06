@@ -70,7 +70,7 @@
         </div>
 
         <!-- Form -->
-        <form @submit.prevent="handleSubmit" class="space-y-4">
+        <form @submit.prevent="handleSubmit" class="space-y-4" novalidate>
           <!-- Username (chỉ hiện khi đăng ký) -->
           <div v-if="!isLogin" class="relative">
             <div class="absolute top-3 left-3 text-gray-400">
@@ -104,7 +104,7 @@
 
           <!-- Email (hoặc Username khi đăng nhập) -->
           <div class="relative">
-            <div class="absolute top-3 left-3 text-gray-400">
+            <div class="absolute top-3 left-3 text-gray-400 pointer-events-none">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
               </svg>
@@ -113,14 +113,15 @@
               :type="isLogin ? 'text' : 'email'"
               :placeholder="isLogin ? 'Tên đăng nhập hoặc Email' : 'Email'"
               v-model="email"
-              class="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-800/50 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all"
+              class="w-full pl-10 pr-12 py-3 rounded-lg bg-gray-800/50 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all"
               required
+              autocomplete="email"
             />
           </div>
 
           <!-- Password -->
           <div class="relative">
-            <div class="absolute top-3 left-3 text-gray-400">
+            <div class="absolute top-3 left-3 text-gray-400 pointer-events-none">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
@@ -129,13 +130,17 @@
               :type="showPassword ? 'text' : 'password'"
               placeholder="Mật khẩu"
               v-model="password"
-              class="w-full pl-10 pr-12 py-3 rounded-lg bg-gray-800/50 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all"
+              class="w-full pl-10 pr-20 py-3 rounded-lg bg-gray-800/50 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all"
+              :class="{ 'border-red-500': passwordError }"
               required
+              @blur="validatePassword"
+              autocomplete="current-password"
             />
             <button
               type="button"
               @click="showPassword = !showPassword"
-              class="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors"
+              class="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors z-10"
+              tabindex="-1"
             >
               <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -146,6 +151,12 @@
               </svg>
             </button>
           </div>
+          
+          <!-- Password Error -->
+          <p v-if="passwordError" class="text-red-400 text-xs mt-1">{{ passwordError }}</p>
+          
+          <!-- Password Strength Meter (only for register) -->
+          <PasswordStrengthMeter v-if="!isLogin" :password="password" />
 
           <!-- Submit button -->
           <button
@@ -193,6 +204,8 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import authService from '@/services/authService';
 import { useToast } from '@/composables/useToast';
+import { useFormValidation } from '@/composables/useFormValidation';
+import PasswordStrengthMeter from '@/components/PasswordStrengthMeter.vue';
 import { 
   getAuth, 
   signInWithPopup, 
@@ -203,6 +216,7 @@ const router = useRouter();
 const auth = getAuth();
 const googleProvider = new GoogleAuthProvider();
 const toast = useToast();
+const { rules } = useFormValidation();
 
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
@@ -215,6 +229,7 @@ const showPassword = ref(false);
 const error = ref('');
 const success = ref('');
 const loading = ref(false);
+const passwordError = ref('');
 
 // Lock body scroll and hide scrollbar when component mounts
 onMounted(() => {
@@ -230,13 +245,29 @@ const toggleMode = () => {
   isLogin.value = !isLogin.value;
   error.value = '';
   success.value = '';
+  passwordError.value = '';
   username.value = '';
   email.value = '';
   password.value = '';
   fullName.value = '';
 };
 
+const validatePassword = () => {
+  if (!isLogin.value && password.value) {
+    const error = rules.password(password.value);
+    passwordError.value = error || '';
+    return !error;
+  }
+  passwordError.value = '';
+  return true;
+};
+
 const handleSubmit = async () => {
+  // Validate password for registration
+  if (!isLogin.value && !validatePassword()) {
+    return;
+  }
+
   loading.value = true;
   error.value = '';
   success.value = '';

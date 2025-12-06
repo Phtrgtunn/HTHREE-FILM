@@ -1,13 +1,13 @@
 <?php
 /**
- * API Admin: Duyệt đơn hàng
- * POST: Duyệt đơn và kích hoạt subscription
+ * Approve Order (Manual Payment Confirmation)
+ * Dùng để admin hoặc test approve đơn hàng thủ công
  */
 
-header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Headers: Content-Type');
+header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -16,124 +16,109 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/../../config/database.php';
 
-$conn = getDBConnection();
+$db = new Database();
+$conn = $db->getConnection();
 
 try {
-    $data = json_decode(file_get_contents('php://input'), true);
+    $input = json_decode(file_get_contents('php://input'), true);
     
-    if (!isset($data['order_id'])) {
+    $orderId = $input['order_id'] ?? null;
+    $transactionId = $input['transaction_id'] ?? 'MANUAL_' . time();
+    
+    if (!$orderId) {
         throw new Exception('Order ID is required');
     }
     
-    $order_id = intval($data['order_id']);
+    // Bắt đầu transaction
+    $conn->beginTransaction();
     
-    // Kiểm tra order tồn tại
-    $stmt = $conn->prepare("SELECT * FROM orders WHERE id = ?");
-    $stmt->bind_param("i", $order_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // 1. Update order status
+    $stmt = $conn->prepare("
+        UPDATE orders 
+        SET payment_status = 'paid',
+            status = 'completed',
+            paid_at = NOW(),
+            completed_at = NOW(),
+            transaction_id = ?
+        WHERE id = ?
+    ");
     
-    if ($result->num_rows === 0) {
-        throw new Exception('Order not found');
+    $stmt->execute([$transactionId, $orderId]);
+    
+    if ($stmt->rowCount() === 0) {
+        throw new Exception('Order not found or already processed');
     }
     
-    $order = $result->fetch_assoc();
+    // 2. Lấy thông tin order để kích hoạt subscription
+    $stmt = $conn->prepare("
+        SELECT o.*, oi.plan_id, oi.duration_months, sp.duration_days
+        FROM orders o
+        JOIN order_items oi ON o.id = oi.order_id
+        JOIN subscription_plans sp ON oi.plan_id = sp.id
+        WHERE o.id = ?
+        LIMIT 1
+    ");
+    $stmt->execute([$orderId]);
+    $order = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Kiểm tra order đã được duyệt chưa
-    if ($order['payment_status'] === 'paid') {
-        throw new Exception('Order already approved');
+    if (!$order) {
+        throw new Exception('Order details not found');
     }
     
-    $conn->begin_transaction();
+    // 3. Kích hoạt subscription
+    $totalDays = $order['duration_days'] * $order['duration_months'];
+    $endDate = date('Y-m-d H:i:s', strtotime("+{$totalDays} days"));
     
-    try {
-        // 1. Update order status
-        $stmt = $conn->prepare("
-            UPDATE orders 
-            SET payment_status = 'paid',
-                paid_at = NOW(),
-                status = 'completed',
-                completed_at = NOW()
-            WHERE id = ?
-        ");
-        $stmt->bind_param("i", $order_id);
-        $stmt->execute();
-        
-        // 2. Tạo hoặc gia hạn subscription
-        // Lấy thông tin order items
-        $stmt = $conn->prepare("
-            SELECT oi.plan_id, oi.duration_months, sp.duration_days, o.user_id
-            FROM order_items oi
-            JOIN subscription_plans sp ON oi.plan_id = sp.id
-            JOIN orders o ON oi.order_id = o.id
-            WHERE oi.order_id = ?
-        ");
-        $stmt->bind_param("i", $order_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        while ($item = $result->fetch_assoc()) {
-            $user_id = $item['user_id'];
-            $plan_id = $item['plan_id'];
-            $duration_days = $item['duration_days'] * $item['duration_months'];
-            
-            // Kiểm tra đã có subscription cùng plan chưa
-            $check_stmt = $conn->prepare("
-                SELECT id, end_date, status 
-                FROM user_subscriptions 
-                WHERE user_id = ? AND plan_id = ? AND status = 'active'
-                ORDER BY end_date DESC 
-                LIMIT 1
-            ");
-            $check_stmt->bind_param("ii", $user_id, $plan_id);
-            $check_stmt->execute();
-            $check_result = $check_stmt->get_result();
-            
-            if ($check_result->num_rows > 0) {
-                // Đã có subscription → Gia hạn thêm
-                $existing = $check_result->fetch_assoc();
-                $current_end = new DateTime($existing['end_date']);
-                $now = new DateTime();
-                
-                // Nếu còn hạn, gia hạn từ end_date hiện tại
-                // Nếu hết hạn, gia hạn từ hôm nay
-                $start_from = $current_end > $now ? $current_end : $now;
-                $new_end = clone $start_from;
-                $new_end->modify("+{$duration_days} days");
-                
-                $update_stmt = $conn->prepare("
-                    UPDATE user_subscriptions 
-                    SET end_date = ?, updated_at = NOW()
-                    WHERE id = ?
-                ");
-                $new_end_str = $new_end->format('Y-m-d H:i:s');
-                $update_stmt->bind_param("si", $new_end_str, $existing['id']);
-                $update_stmt->execute();
-                
-            } else {
-                // Chưa có subscription → Tạo mới
-                $insert_stmt = $conn->prepare("
-                    INSERT INTO user_subscriptions (user_id, plan_id, start_date, end_date, status, order_id)
-                    VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? DAY), 'active', ?)
-                ");
-                $insert_stmt->bind_param("iiii", $user_id, $plan_id, $duration_days, $order_id);
-                $insert_stmt->execute();
-            }
-        }
-        
-        $conn->commit();
-        
-        echo json_encode([
-            'success' => true,
-            'message' => 'Order approved and subscription activated successfully'
-        ]);
-        
-    } catch (Exception $e) {
-        $conn->rollback();
-        throw $e;
-    }
+    $stmt = $conn->prepare("
+        INSERT INTO user_subscriptions 
+        (user_id, plan_id, start_date, end_date, status, order_id)
+        VALUES (?, ?, NOW(), ?, 'active', ?)
+    ");
+    
+    $stmt->execute([
+        $order['user_id'],
+        $order['plan_id'],
+        $endDate,
+        $orderId
+    ]);
+    
+    // 4. Log payment
+    $stmt = $conn->prepare("
+        INSERT INTO payment_logs 
+        (order_id, order_code, event_type, message, data)
+        VALUES (?, ?, 'manual_approval', 'Order manually approved', ?)
+    ");
+    
+    $logData = json_encode([
+        'transaction_id' => $transactionId,
+        'approved_at' => date('Y-m-d H:i:s'),
+        'method' => 'manual'
+    ]);
+    
+    $stmt->execute([
+        $orderId,
+        $order['order_code'],
+        $logData
+    ]);
+    
+    // Commit transaction
+    $conn->commit();
+    
+    echo json_encode([
+        'success' => true,
+        'message' => 'Order approved successfully',
+        'data' => [
+            'order_id' => $orderId,
+            'order_code' => $order['order_code'],
+            'subscription_end_date' => $endDate
+        ]
+    ]);
     
 } catch (Exception $e) {
+    if ($conn->inTransaction()) {
+        $conn->rollBack();
+    }
+    
     http_response_code(400);
     echo json_encode([
         'success' => false,

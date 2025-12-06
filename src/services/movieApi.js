@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { apiCache } from '@/utils/apiCache';
 
 // Chuyển đổi giữa API trực tiếp và PHP backend
 const USE_PHP_BACKEND = false; // Dùng API trực tiếp từ phimapi.com
@@ -53,8 +54,11 @@ export const getMovieList = async (params = {}) => {
       const url = `${BASE_URL}/movies.php?${queryParams.toString()}`;
       console.log('📡 Fetching movies (PHP):', url);
 
-      const response = await axios.get(url);
-      return response.data;
+      // Use cache with 5 minutes TTL
+      return await apiCache.get(url, async () => {
+        const response = await axios.get(url);
+        return response.data;
+      }, 5 * 60 * 1000);
     } else {
       // Gọi API trực tiếp
       const queryParams = new URLSearchParams({
@@ -72,8 +76,11 @@ export const getMovieList = async (params = {}) => {
       const url = `${BASE_URL}/danh-sach/${type_list}?${queryParams.toString()}`;
       console.log('📡 Fetching movies:', url);
 
-      const response = await axios.get(url);
-      return response.data;
+      // Use cache with 5 minutes TTL
+      return await apiCache.get(url, async () => {
+        const response = await axios.get(url);
+        return response.data;
+      }, 5 * 60 * 1000);
     }
   } catch (error) {
     console.error('❌ Error fetching movies:', error);
@@ -422,8 +429,11 @@ export const searchMovies = async (keyword, params = {}) => {
     
     console.log('🔍 Searching movies:', url);
 
-    const response = await axios.get(url);
-    return response.data;
+    // Use cache with 2 minutes TTL for search results
+    return await apiCache.get(url, async () => {
+      const response = await axios.get(url);
+      return response.data;
+    }, 2 * 60 * 1000);
   } catch (error) {
     console.error('❌ Error searching movies:', error);
     throw error;

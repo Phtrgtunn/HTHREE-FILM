@@ -373,8 +373,24 @@ function createDirectOrder($data) {
     
     // Tính giá
     $subtotal = $plan['price'] * $duration_months;
-    $discount = 0;
-    $total = $subtotal - $discount;
+    
+    // Nếu frontend gửi total_price (đã tính discount), sử dụng nó
+    if (isset($data['total_price']) && $data['total_price'] > 0) {
+        $total = floatval($data['total_price']);
+        $discount = $subtotal - $total; // Tính ngược discount
+    } else {
+        // Fallback: Tính discount dựa trên duration
+        $discount_percent = 0;
+        if ($duration_months == 3) {
+            $discount_percent = 5;
+        } elseif ($duration_months == 6) {
+            $discount_percent = 10;
+        } elseif ($duration_months == 12) {
+            $discount_percent = 15;
+        }
+        $discount = $subtotal * ($discount_percent / 100);
+        $total = $subtotal - $discount;
+    }
     
     // Tạo mã đơn hàng
     $order_code = 'ORD' . date('Ymd') . str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);

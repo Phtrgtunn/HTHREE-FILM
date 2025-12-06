@@ -1,0 +1,14 @@
+# robots.txt for HTHREE Film
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /backend/
+Disallow: /cart
+Disallow: /account
+
+# Sitemap
+Sitemap: https://hthree.com/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1

@@ -91,47 +91,50 @@
 
             <!-- Form -->
             <form @submit.prevent="handleSubmit" class="space-y-3">
-              <div v-if="!isLogin">
-                <input
-                  type="text"
-                  placeholder="Tên đăng nhập"
-                  v-model="username"
-                  class="w-full px-3 py-2.5 text-sm rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
-                  required
-                />
-              </div>
+              <FormInput
+                v-if="!isLogin"
+                id="username"
+                v-model="username"
+                placeholder="Tên đăng nhập"
+                :required="true"
+                :validate-on-input="true"
+                :validation="validateUsername"
+                helper-text="Tối thiểu 3 ký tự, chỉ chữ và số"
+              />
 
-              <div v-if="!isLogin">
-                <input
-                  type="text"
-                  placeholder="Họ và tên"
-                  v-model="fullName"
-                  class="w-full px-3 py-2.5 text-sm rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
-                />
-              </div>
+              <FormInput
+                v-if="!isLogin"
+                id="fullName"
+                v-model="fullName"
+                placeholder="Họ và tên"
+                helper-text="Tùy chọn"
+              />
 
-              <div>
-                <input
-                  :type="isLogin ? 'text' : 'email'"
-                  :placeholder="isLogin ? 'Tên đăng nhập hoặc Email' : 'Email'"
-                  v-model="email"
-                  class="w-full px-3 py-2.5 text-sm rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
-                  required
-                />
-              </div>
+              <FormInput
+                id="email"
+                v-model="email"
+                :type="isLogin ? 'text' : 'email'"
+                :placeholder="isLogin ? 'Tên đăng nhập hoặc Email' : 'Email'"
+                :required="true"
+                :validate-on-input="!isLogin"
+                :validation="isLogin ? null : validateEmail"
+              />
 
               <div class="relative">
-                <input
+                <FormInput
+                  id="password"
+                  v-model="password"
                   :type="showPassword ? 'text' : 'password'"
                   placeholder="Mật khẩu"
-                  v-model="password"
-                  class="w-full px-3 py-2.5 text-sm rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
-                  required
+                  :required="true"
+                  :validate-on-input="!isLogin"
+                  :validation="validatePassword"
+                  helper-text="Tối thiểu 6 ký tự"
                 />
                 <button
                   type="button"
                   @click="showPassword = !showPassword"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  class="absolute right-3 top-[14px] text-gray-400 hover:text-white z-10"
                 >
                   <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -144,17 +147,23 @@
               </div>
 
               <div v-if="!isLogin" class="relative">
-                <input
+                <FormInput
+                  id="confirmPassword"
+                  v-model="confirmPassword"
                   :type="showConfirmPassword ? 'text' : 'password'"
                   placeholder="Nhập lại mật khẩu"
-                  v-model="confirmPassword"
-                  class="w-full px-3 py-2.5 text-sm rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
-                  required
+                  :required="true"
+                  :validate-on-input="true"
+                  :validation="(value) => {
+                    if (!value) return 'Vui lòng nhập lại mật khẩu';
+                    if (value !== password) return 'Mật khẩu không khớp';
+                    return true;
+                  }"
                 />
                 <button
                   type="button"
                   @click="showConfirmPassword = !showConfirmPassword"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  class="absolute right-3 top-[14px] text-gray-400 hover:text-white z-10"
                 >
                   <svg v-if="!showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -166,14 +175,15 @@
                 </button>
               </div>
 
-              <button
+              <LoadingButton
                 type="submit"
-                :disabled="loading"
-                class="w-full py-2.5 text-sm bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold rounded-lg transition-all disabled:opacity-50"
+                :loading="loading"
+                variant="primary"
+                size="md"
+                class="w-full"
               >
-                <span v-if="!loading">{{ isLogin ? 'Đăng Nhập' : 'Đăng Ký' }}</span>
-                <span v-else>Đang xử lý...</span>
-              </button>
+                {{ isLogin ? 'Đăng Nhập' : 'Đăng Ký' }}
+              </LoadingButton>
             </form>
 
             <!-- Toggle -->
@@ -203,6 +213,8 @@
 import { ref } from 'vue';
 import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { toast } from 'vue3-toastify';
+import FormInput from './FormInput.vue';
+import LoadingButton from './LoadingButton.vue';
 
 const props = defineProps({
   modelValue: Boolean
@@ -225,6 +237,27 @@ const showConfirmPassword = ref(false);
 const error = ref('');
 const success = ref('');
 const loading = ref(false);
+
+// Validation functions
+const validateUsername = (value) => {
+  if (!value) return 'Tên đăng nhập là bắt buộc';
+  if (value.length < 3) return 'Tên đăng nhập phải có ít nhất 3 ký tự';
+  if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Chỉ được dùng chữ, số và dấu gạch dưới';
+  return true;
+};
+
+const validateEmail = (value) => {
+  if (!value) return 'Email là bắt buộc';
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(value)) return 'Email không hợp lệ';
+  return true;
+};
+
+const validatePassword = (value) => {
+  if (!value) return 'Mật khẩu là bắt buộc';
+  if (value.length < 6) return 'Mật khẩu phải có ít nhất 6 ký tự';
+  return true;
+};
 
 const closeModal = () => {
   emit('update:modelValue', false);
@@ -264,10 +297,21 @@ const handleSubmit = async () => {
       await syncUserToMySQL(user, token);
       
       // Verify localStorage was saved
-      console.log('✅ Saved to localStorage:', {
-        user: localStorage.getItem('user'),
-        token: localStorage.getItem('token')
-      });
+      const savedUser = localStorage.getItem('user');
+      const savedToken = localStorage.getItem('token');
+      
+      console.log('✅ Login successful! Checking localStorage:');
+      console.log('  - User data:', savedUser);
+      console.log('  - Token:', savedToken ? 'EXISTS' : 'MISSING');
+      console.log('  - Parsed user:', savedUser ? JSON.parse(savedUser) : null);
+      
+      if (!savedUser || !savedToken) {
+        console.error('❌ CRITICAL: localStorage not saved properly!');
+        error.value = 'Lỗi lưu thông tin đăng nhập. Vui lòng thử lại.';
+        toast.error(error.value);
+        loading.value = false;
+        return;
+      }
       
       success.value = 'Đăng nhập thành công!';
       toast.success('Đăng nhập thành công!');
@@ -277,6 +321,8 @@ const handleSubmit = async () => {
       
       emit('success');
       closeModal();
+      
+      console.log('🔄 Reloading page...');
       window.location.reload();
       
     } else {

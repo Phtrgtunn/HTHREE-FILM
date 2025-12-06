@@ -1,5 +1,12 @@
 <template>
   <div class="min-h-screen bg-black font-sans flex flex-col">
+    <!-- Edit Profile Modal -->
+    <EditProfileModal
+      v-model="showEditProfile"
+      :user="user"
+      @save="handleSaveProfile"
+    />
+    
     <!-- Top Header with Logo -->
     <div class="bg-black border-b border-gray-800 px-8 py-4">
       <div class="flex items-center justify-between">
@@ -18,11 +25,19 @@
         <aside class="w-80 flex-shrink-0 flex flex-col pl-8 pr-8 py-8">
         <!-- Back Button -->
         <div class="mb-8">
-          <router-link to="/home" class="inline-flex items-center text-gray-400 hover:text-white transition-colors font-medium text-sm">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <router-link 
+            :to="{ name: 'Homepage' }" 
+            class="group relative inline-flex items-center text-gray-300 hover:text-yellow-400 transition-all duration-300 font-medium text-sm no-underline"
+            style="text-decoration: none !important;"
+          >
+            <svg class="w-4 h-4 mr-2 transition-transform duration-300 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Quay lại HTHREE Film
+            <span class="relative" style="text-decoration: none !important;">
+              Quay lại HTHREE Film
+              <!-- Underline animation -->
+              <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-400 transition-all duration-300 group-hover:w-full"></span>
+            </span>
           </router-link>
         </div>
 
@@ -33,7 +48,7 @@
             :key="item.id"
             @click="activeSection = item.id"
             :class="[
-              'w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-500 ease-out relative group',
+              'w-full flex items-center py-3 pl-4 pr-4 text-left rounded-lg transition-all duration-500 ease-out relative group',
               activeSection === item.id
                 ? 'text-white font-semibold'
                 : 'text-gray-400 hover:text-white'
@@ -62,8 +77,10 @@
             ></div>
             
             <!-- Content -->
-            <component :is="item.icon" class="w-5 h-5 mr-3 transition-transform duration-500 ease-out group-hover:scale-105 relative z-10" />
-            <span class="text-base relative z-10">{{ item.label }}</span>
+            <div class="w-10 flex items-center justify-start flex-shrink-0 relative z-10">
+              <component :is="item.icon" class="w-5 h-5 transition-transform duration-500 ease-out group-hover:scale-105" />
+            </div>
+            <span class="text-base relative z-10 text-left flex-1">{{ item.label }}</span>
           </button>
         </nav>
       </aside>
@@ -71,30 +88,42 @@
         <!-- Main Content Area -->
         <div class="flex-1 overflow-y-auto">
           <div class="max-w-4xl px-8 py-8">
+            <main class="w-full">
+              <!-- Loading State -->
+              <div v-if="loading" class="flex justify-center items-center min-h-[400px]">
+                <svg class="animate-spin h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
 
-        <main class="w-full">
-          <!-- Loading State -->
-          <div v-if="loading" class="flex justify-center items-center min-h-[400px]">
-            <svg class="animate-spin h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          </div>
+              <!-- Not Logged In -->
+              <div v-else-if="!user" class="text-center py-12">
+                <p class="text-xl text-gray-400 mb-4">Vui lòng đăng nhập để xem thông tin tài khoản.</p>
+                <router-link to="/auth" class="inline-block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg transition-colors">
+                  Đăng Nhập Ngay
+                </router-link>
+              </div>
 
-          <!-- Not Logged In -->
-          <div v-else-if="!user" class="text-center py-12">
-            <p class="text-xl text-gray-400 mb-4">Vui lòng đăng nhập để xem thông tin tài khoản.</p>
-            <router-link to="/auth" class="inline-block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg transition-colors">
-              Đăng Nhập Ngay
-            </router-link>
-          </div>
-
-          <!-- Account Content -->
-          <div v-else>
-            <!-- Tổng quan -->
-            <div v-if="activeSection === 'overview'">
-              <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">Tài khoản</h1>
-              <p class="text-gray-300 mb-8">Thông tin tư cách thành viên</p>
+              <!-- Account Content -->
+              <div v-else>
+                <!-- Tổng quan -->
+                <div v-if="activeSection === 'overview'">
+                  <div class="flex items-center justify-between mb-4">
+                    <div>
+                      <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">Tài khoản</h1>
+                      <p class="text-gray-300">Thông tin tư cách thành viên</p>
+                    </div>
+                    <button
+                      @click="showEditProfile = true"
+                      class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-lg font-medium transition-all hover:scale-105"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                      </svg>
+                      Chỉnh sửa hồ sơ
+                    </button>
+                  </div>
 
               <!-- Header -->
               <div class="flex items-center justify-between mb-4">
@@ -111,75 +140,150 @@
                 </button>
               </div>
               
-              <!-- Membership Cards (Multiple) -->
-              <div v-if="subscriptions.length > 0" class="space-y-4 mb-6">
+              <!-- Active Subscription -->
+              <div v-if="activeSubscription" class="mb-6">
+                <h3 class="text-white font-bold text-lg mb-4 flex items-center gap-2">
+                  <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  Gói đang sử dụng
+                </h3>
+                
                 <div 
-                  v-for="sub in subscriptions" 
-                  :key="sub.id"
-                  class="bg-gradient-to-br border rounded-lg p-5 shadow-lg transition-all hover:scale-[1.02]"
-                  :class="getPlanColor(sub.plan_slug)"
+                  class="bg-gradient-to-br border-2 rounded-2xl p-6 shadow-xl"
+                  :class="getPlanColor(activeSubscription.plan_slug)"
                 >
-                  <div class="flex items-start justify-between mb-3">
-                    <div class="flex-1">
-                      <div class="flex items-center gap-2 mb-2">
-                        <h3 class="text-lg font-bold text-white">{{ sub.plan_name }}</h3>
-                        <span class="text-xs text-gray-300">{{ sub.quality }}</span>
+                  <!-- Header -->
+                  <div class="flex items-start justify-between mb-6">
+                    <div>
+                      <div class="flex items-center gap-3 mb-2">
+                        <h2 class="text-2xl font-black text-white">{{ activeSubscription.plan_name }}</h2>
+                        <span class="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-bold text-white">
+                          {{ activeSubscription.quality }}
+                        </span>
                       </div>
-                      <p class="text-gray-200 text-sm">Hết hạn: {{ sub.end_date_formatted }}</p>
-                      <p class="text-gray-300 text-xs mt-1">
-                        {{ getRealtimeProgress(sub).daysRemaining > 0 ? `Còn lại ${getRealtimeProgress(sub).daysRemaining} ngày` : 'Đã hết hạn' }}
-                      </p>
+                      <p class="text-white/80 text-sm">{{ getPlanDescription(activeSubscription.plan_slug) }}</p>
                     </div>
-                    <div class="text-right">
-                      <span 
-                        class="inline-block px-2 py-1 rounded-full text-xs font-bold"
-                        :class="{
-                          'bg-green-500 text-white': getRealtimeProgress(sub).status === 'active',
-                          'bg-yellow-500 text-black': getRealtimeProgress(sub).status === 'expiring_soon',
-                          'bg-red-500 text-white': getRealtimeProgress(sub).status === 'expired'
-                        }"
-                      >
-                        {{ getRealtimeProgress(sub).status === 'active' ? 'Hoạt động' : 
-                           getRealtimeProgress(sub).status === 'expiring_soon' ? 'Sắp hết' : 'Hết hạn' }}
-                      </span>
+                    <span 
+                      class="px-4 py-2 rounded-full text-sm font-bold shadow-lg"
+                      :class="{
+                        'bg-green-500 text-white': getRealtimeProgress(activeSubscription).status === 'active',
+                        'bg-yellow-500 text-black': getRealtimeProgress(activeSubscription).status === 'expiring_soon',
+                        'bg-red-500 text-white': getRealtimeProgress(activeSubscription).status === 'expired'
+                      }"
+                    >
+                      {{ getRealtimeProgress(activeSubscription).status === 'active' ? '✓ Đang hoạt động' : 
+                         getRealtimeProgress(activeSubscription).status === 'expiring_soon' ? '⚠ Sắp hết hạn' : '✕ Đã hết hạn' }}
+                    </span>
+                  </div>
+
+                  <!-- Timeline -->
+                  <div class="bg-black/20 backdrop-blur-sm rounded-xl p-5 mb-5">
+                    <div class="grid grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <p class="text-white/60 text-xs mb-1">Ngày bắt đầu</p>
+                        <p class="text-white font-bold">{{ activeSubscription.start_date_formatted }}</p>
+                      </div>
+                      <div class="text-center">
+                        <p class="text-white/60 text-xs mb-1">Thời gian sử dụng</p>
+                        <p class="text-white font-bold">{{ activeSubscription.used_days }}/{{ activeSubscription.total_days }} ngày</p>
+                      </div>
+                      <div class="text-right">
+                        <p class="text-white/60 text-xs mb-1">Ngày hết hạn</p>
+                        <p class="text-white font-bold">{{ activeSubscription.end_date_formatted }}</p>
+                      </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="relative">
+                      <div class="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+                        <div 
+                          class="h-full rounded-full transition-all duration-1000 relative"
+                          :class="{
+                            'bg-gradient-to-r from-green-400 to-green-500': getRealtimeProgress(activeSubscription).progress < 70,
+                            'bg-gradient-to-r from-yellow-400 to-yellow-500': getRealtimeProgress(activeSubscription).progress >= 70 && getRealtimeProgress(activeSubscription).progress < 90,
+                            'bg-gradient-to-r from-red-400 to-red-500': getRealtimeProgress(activeSubscription).progress >= 90
+                          }"
+                          :style="{ width: getRealtimeProgress(activeSubscription).progress + '%' }"
+                        >
+                          <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+                        </div>
+                      </div>
+                      <p class="text-center text-white font-bold text-sm mt-2">
+                        {{ getRealtimeProgress(activeSubscription).daysRemaining > 0 ? 
+                           `Còn lại ${getRealtimeProgress(activeSubscription).daysRemaining} ngày` : 
+                           'Đã hết hạn' }}
+                      </p>
                     </div>
                   </div>
-                  
-                  <!-- Progress Bar -->
-                  <div>
-                    <div class="flex justify-between text-xs text-gray-300 mb-1">
-                      <span>{{ sub.start_date_formatted }}</span>
-                      <span>{{ sub.end_date_formatted }}</span>
-                    </div>
-                    <div class="w-full bg-gray-700/50 rounded-full h-1.5 overflow-hidden">
-                      <div 
-                        class="h-full rounded-full transition-all duration-1000"
-                        :class="{
-                          'bg-gradient-to-r from-green-400 to-green-500': getRealtimeProgress(sub).progress < 70,
-                          'bg-gradient-to-r from-yellow-400 to-yellow-500': getRealtimeProgress(sub).progress >= 70 && getRealtimeProgress(sub).progress < 90,
-                          'bg-gradient-to-r from-red-400 to-red-500': getRealtimeProgress(sub).progress >= 90
-                        }"
-                        :style="{ width: getRealtimeProgress(sub).progress + '%' }"
-                      ></div>
-                    </div>
-                    <div class="flex items-center justify-between mt-2">
-                      <p class="text-xs text-gray-400">
-                        {{ sub.used_days }}/{{ sub.total_days }} ngày
-                      </p>
-                      <button
-                        @click="cancelSubscription(sub)"
-                        :disabled="cancellingSubscription === sub.id"
-                        class="text-xs text-red-400 hover:text-red-300 underline disabled:opacity-50"
-                      >
-                        {{ cancellingSubscription === sub.id ? 'Đang hủy...' : 'Hủy gói' }}
-                      </button>
+
+                  <!-- Actions -->
+                  <div class="flex gap-3">
+                    <button
+                      @click="router.push('/pricing')"
+                      class="flex-1 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                      </svg>
+                      <span>Nâng cấp gói</span>
+                    </button>
+                    <button
+                      @click="cancelSubscription(activeSubscription)"
+                      :disabled="cancellingSubscription === activeSubscription.id"
+                      class="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold py-3 rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      <svg v-if="cancellingSubscription !== activeSubscription.id" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                      <svg v-else class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>{{ cancellingSubscription === activeSubscription.id ? 'Đang hủy...' : 'Hủy gói' }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pending Subscriptions -->
+              <div v-if="pendingSubscriptions.length > 0" class="mb-6">
+                <h3 class="text-white font-bold text-lg mb-4 flex items-center gap-2">
+                  <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                  </svg>
+                  Gói chờ kích hoạt ({{ pendingSubscriptions.length }})
+                </h3>
+                
+                <div class="space-y-3">
+                  <div 
+                    v-for="sub in pendingSubscriptions"
+                    :key="sub.id"
+                    class="bg-gray-800/50 border border-gray-700 rounded-xl p-4 hover:bg-gray-800/70 transition-all"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                          <svg class="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 class="text-white font-bold">{{ sub.plan_name }} - {{ sub.quality }}</h4>
+                          <p class="text-gray-400 text-sm">Sẽ bắt đầu: {{ sub.start_date_formatted }}</p>
+                          <p class="text-gray-500 text-xs">Thời hạn: {{ sub.total_days }} ngày</p>
+                        </div>
+                      </div>
+                      <span class="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs font-bold">
+                        Chờ kích hoạt
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
               
               <!-- No Subscription -->
-              <div v-else-if="!loadingSubscription" class="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-lg p-6 mb-6 text-center">
+              <div v-else-if="!loadingSubscription && !activeSubscription && pendingSubscriptions.length === 0" class="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-lg p-6 mb-6 text-center">
                 <svg class="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -384,12 +488,12 @@
                   Hủy tư cách thành viên
                 </button>
               </div>
-            </div>
+                </div>
 
-            <!-- Bảo mật -->
-            <div v-if="activeSection === 'password'">
-              <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">Bảo mật</h1>
-              <p class="text-gray-400 mb-8">Thông tin tài khoản</p>
+                <!-- Bảo mật -->
+                <div v-if="activeSection === 'password'">
+                  <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">Bảo mật</h1>
+                  <p class="text-gray-400 mb-8">Thông tin tài khoản</p>
 
               <!-- Thông tin tài khoản -->
               <div class="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6 mb-6">
@@ -556,12 +660,12 @@
                   Xóa tài khoản
                 </button>
               </div>
-            </div>
+                </div>
 
-            <!-- Thiết bị -->
-            <div v-if="activeSection === 'devices'">
-              <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">Thiết bị</h1>
-              <p class="text-gray-400 mb-8">Truy cập tài khoản</p>
+                <!-- Thiết bị -->
+                <div v-if="activeSection === 'devices'">
+                  <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">Thiết bị</h1>
+                  <p class="text-gray-400 mb-8">Truy cập tài khoản</p>
 
               <!-- Truy cập và thiết bị -->
               <div class="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6 mb-6">
@@ -600,11 +704,11 @@
                   </svg>
                 </button>
               </div>
-            </div>
+                </div>
 
-            <!-- Cài đặt -->
-            <div v-if="activeSection === 'settings'">
-              <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">Quản lý hồ sơ và tùy chọn</h1>
+                <!-- Cài đặt -->
+                <div v-if="activeSection === 'settings'">
+                  <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">Quản lý hồ sơ và tùy chọn</h1>
 
               <!-- Quản lý hồ sơ -->
               <div class="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6 mb-6">
@@ -881,10 +985,10 @@
                   </div>
                   <svg class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
             </main>
           </div>
@@ -1075,11 +1179,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, reactive, h } from 'vue';
+import { ref, onMounted, onUnmounted, reactive, h, computed } from 'vue';
 import { getAuth, onAuthStateChanged, updateProfile, signOut } from 'firebase/auth';
 import { useToast } from '@/composables/useToast';
 import { useRouter } from 'vue-router';
 import ConfirmModal from '@/components/ConfirmModal.vue';
+import EditProfileModal from '@/components/EditProfileModal.vue';
 
 const auth = getAuth();
 const toast = useToast();
@@ -1088,6 +1193,7 @@ const router = useRouter();
 const user = ref(null);
 const loading = ref(true);
 const activeSection = ref('overview');
+const showEditProfile = ref(false);
 const showPhoneModal = ref(false);
 const phoneNumber = ref('');
 const savedPhoneNumber = ref(localStorage.getItem('userPhoneNumber') || '');
@@ -1138,6 +1244,23 @@ const   menuItems = [
 
 const subscriptions = ref([]);
 const loadingSubscription = ref(false);
+
+// Computed: Active subscription (highest priority)
+const activeSubscription = computed(() => {
+  const active = subscriptions.value.filter(sub => sub.status === 'active');
+  if (active.length === 0) return null;
+  
+  // Sort by priority: vip > premium > basic > free
+  const priority = { vip: 4, premium: 3, basic: 2, free: 1 };
+  return active.sort((a, b) => {
+    return (priority[b.plan_slug] || 0) - (priority[a.plan_slug] || 0);
+  })[0];
+});
+
+// Computed: Pending subscriptions
+const pendingSubscriptions = computed(() => {
+  return subscriptions.value.filter(sub => sub.status === 'pending');
+});
 const currentTime = ref(new Date());
 
 // Fetch user subscriptions (multiple)
@@ -1174,6 +1297,17 @@ const getPlanColor = (slug) => {
     'free': 'from-gray-800 via-gray-700 to-gray-900 border-gray-700'
   };
   return colors[slug] || colors.free;
+};
+
+// Get plan description
+const getPlanDescription = (slug) => {
+  const descriptions = {
+    free: 'Xem phim miễn phí với quảng cáo',
+    basic: 'Xem phim HD không quảng cáo trên 1 thiết bị',
+    premium: 'Xem phim Full HD trên 2 thiết bị, tải về được',
+    vip: 'Xem phim 4K trên 4 thiết bị, xem trước phim mới'
+  };
+  return descriptions[slug] || '';
 };
 
 // Calculate real-time progress and days remaining
@@ -1274,6 +1408,29 @@ onUnmounted(() => {
   if (timeInterval) clearInterval(timeInterval);
   if (refreshInterval) clearInterval(refreshInterval);
 });
+
+// Handle save profile
+const handleSaveProfile = async (profileData) => {
+  try {
+    // Update Firebase profile
+    if (auth.currentUser) {
+      await updateProfile(auth.currentUser, {
+        displayName: profileData.full_name
+      });
+    }
+    
+    // Update local user ref
+    user.value = {
+      ...user.value,
+      ...profileData
+    };
+    
+    toast.success('✅ Đã cập nhật hồ sơ thành công');
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    toast.error('❌ Không thể cập nhật hồ sơ');
+  }
+};
 
 const getJoinMonth = () => {
   if (!user.value?.metadata?.creationTime) return '1/2025';

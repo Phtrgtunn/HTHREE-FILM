@@ -26,9 +26,6 @@ try {
         case 'GET':
             getOrders($conn);
             break;
-        case 'POST':
-            confirmPayment($conn);
-            break;
         default:
             throw new Exception('Method not allowed');
     }
@@ -95,41 +92,6 @@ function getOrders($conn) {
 }
 
 /**
- * Xác nhận thanh toán
+ * Đã bỏ function confirmPayment
+ * Thanh toán tự động kích hoạt subscription qua activate_subscription.php
  */
-function confirmPayment($conn) {
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-    if (!isset($data['order_id'])) {
-        throw new Exception('Missing order_id');
-    }
-    
-    $order_id = intval($data['order_id']);
-    
-    // Update order status
-    $stmt = $conn->prepare("
-        UPDATE orders 
-        SET payment_status = 'paid',
-            paid_at = NOW(),
-            status = 'processing',
-            updated_at = NOW()
-        WHERE id = ?
-    ");
-    
-    $stmt->execute([$order_id]);
-    
-    if ($stmt->rowCount() === 0) {
-        throw new Exception('Order not found or already confirmed');
-    }
-    
-    // Get order info
-    $stmt = $conn->prepare("SELECT * FROM orders WHERE id = ?");
-    $stmt->execute([$order_id]);
-    $order = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    echo json_encode([
-        'success' => true,
-        'message' => 'Đã xác nhận thanh toán cho đơn hàng ' . $order['order_code'],
-        'data' => $order
-    ]);
-}

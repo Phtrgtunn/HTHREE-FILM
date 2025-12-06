@@ -1,11 +1,13 @@
 import axios from 'axios';
 import { API_CONFIG } from '@/config/api';
+import persistentStorage from '@/utils/persistentStorage';
 
 const API_URL = API_CONFIG.BACKEND_URL;
 
 /**
  * Auth Service
  * Quản lý đăng nhập, đăng ký với PHP backend
+ * Sử dụng PersistentStorage để tránh mất data khi reload
  */
 
 class AuthService {
@@ -39,9 +41,11 @@ class AuthService {
       });
       
       if (response.data.status) {
-        // Lưu user vào localStorage
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        localStorage.setItem('token', response.data.token);
+        // Lưu user vào PERSISTENT storage (IndexedDB + LocalStorage + SessionStorage + Cookie)
+        await persistentStorage.setItem('user', JSON.stringify(response.data.user));
+        await persistentStorage.setItem('token', response.data.token);
+        
+        console.log('✅ Auth data saved to persistent storage');
       }
       
       return response.data;
@@ -54,18 +58,39 @@ class AuthService {
   /**
    * Đăng xuất
    */
-  logout() {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+  async logout() {
+    await persistentStorage.removeItem('user');
+    await persistentStorage.removeItem('token');
+    console.log('✅ Auth data removed from all storages');
   }
 
   /**
    * Lấy user hiện tại
    */
-  getCurrentUser() {
-    const userStr = localStorage.getItem('user');
+  async getCurrentUser() {
+    const userStr = await persistentStorage.getItem('user');
     if (userStr) {
-      return JSON.parse(userStr);
+      try {
+        return JSON.parse(userStr);
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Lấy user hiện tại (synchronous - fallback to localStorage only)
+   */
+  getCurrentUserSync() {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        return JSON.parse(userStr);
+      }
+    } catch (e) {
+      console.error('Error getting user sync:', e);
     }
     return null;
   }
@@ -73,14 +98,22 @@ class AuthService {
   /**
    * Kiểm tra đã đăng nhập chưa
    */
-  isLoggedIn() {
-    return !!localStorage.getItem('token');
+  async isLoggedIn() {
+    const token = await persistentStorage.getItem('token');
+    return !!token;
   }
 
   /**
    * Lấy token
    */
-  getToken() {
+  async getToken() {
+    return await persistentStorage.getItem('token');
+  }
+
+  /**
+   * Lấy token (synchronous - fallback to localStorage only)
+   */
+  getTokenSync() {
     return localStorage.getItem('token');
   }
 }

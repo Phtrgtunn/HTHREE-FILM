@@ -1,5 +1,12 @@
 <template>
   <div class="min-h-screen bg-black relative overflow-hidden">
+    <!-- Success Animation -->
+    <SuccessAnimation 
+      :show="showSuccess" 
+      :message="successMessage"
+      @close="showSuccess = false"
+    />
+    
     <!-- Animated Background -->
     <div class="absolute inset-0">
       <div class="absolute top-0 left-1/4 w-96 h-96 bg-red-600/10 rounded-full blur-3xl animate-pulse"></div>
@@ -8,44 +15,17 @@
 
     <!-- Content -->
     <div class="relative z-10 container mx-auto px-4 py-20">
+      <!-- Breadcrumb -->
+      <Breadcrumb :items="breadcrumbItems" class="mb-8" />
+
       <!-- Header -->
       <div class="text-center mb-16 animate-fade-in">
         <h1 class="text-6xl font-black text-white mb-4">
-          Chọn gói <span class="text-red-600">phù hợp</span> với bạn
+          {{ $t('pricing.chooseTitle') }} <span class="text-red-600">{{ $t('pricing.chooseTitleHighlight') }}</span> {{ $t('pricing.chooseTitleEnd') }}
         </h1>
-        <p class="text-xl text-gray-400 mb-8">
-          Xem phim không giới hạn • Hủy bất cứ lúc nào
+        <p class="text-xl text-gray-400">
+          {{ $t('pricing.subtitle') }}
         </p>
-
-        <!-- Billing Toggle with Animation -->
-        <div class="relative inline-flex items-center gap-1 bg-gray-800/50 backdrop-blur-sm rounded-full p-1.5 border border-gray-700">
-          <!-- Animated Background Slider -->
-          <div 
-            class="absolute top-1.5 h-[calc(100%-12px)] bg-gradient-to-r from-red-600 to-red-700 rounded-full shadow-lg transition-all duration-500 ease-out"
-            :style="{
-              left: billingPeriod === 'monthly' ? '6px' : 'calc(50% + 2px)',
-              width: billingPeriod === 'monthly' ? 'calc(50% - 8px)' : 'calc(50% - 8px)'
-            }"
-          ></div>
-          
-          <button
-            @click="billingPeriod = 'monthly'"
-            class="relative z-10 px-8 py-3 rounded-full font-bold transition-all duration-300 transform hover:scale-105"
-            :class="billingPeriod === 'monthly' ? 'text-white' : 'text-gray-400 hover:text-white'"
-          >
-            Theo tháng
-          </button>
-          <button
-            @click="billingPeriod = 'yearly'"
-            class="relative z-10 px-8 py-3 rounded-full font-bold transition-all duration-300 transform hover:scale-105"
-            :class="billingPeriod === 'yearly' ? 'text-white' : 'text-gray-400 hover:text-white'"
-          >
-            Theo năm
-            <span class="absolute -top-1 -right-1 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full animate-bounce">
-              -15%
-            </span>
-          </button>
-        </div>
       </div>
 
       <!-- Loading -->
@@ -66,28 +46,28 @@
             plan.slug === 'premium' 
               ? 'border-red-600/50 lg:scale-105 shadow-lg shadow-red-600/10' 
               : 'border-gray-700/50 hover:border-gray-600',
-            hoveredPlan === plan.slug ? 'scale-105 -translate-y-2 shadow-2xl' : ''
+            hoveredPlan === plan.slug ? 'scale-102 shadow-2xl' : ''
           ]"
         >
-          <!-- Subtle Glow Effect -->
+          <!-- Subtle Glow Effect - Reduced opacity -->
           <div 
             class="absolute -inset-0.5 rounded-2xl opacity-0 transition-opacity duration-300 blur-lg -z-10"
             :class="[
               getGlowClass(plan.slug),
-              hoveredPlan === plan.slug ? 'opacity-30' : ''
+              hoveredPlan === plan.slug ? 'opacity-20' : ''
             ]"
           ></div>
 
-          <!-- Shine Effect on Hover -->
-          <div 
+          <!-- Shine Effect on Hover - Removed for cleaner look -->
+          <!-- <div 
             class="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
             style="background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)"
-          ></div>
+          ></div> -->
 
-          <!-- Popular Badge -->
+          <!-- Popular Badge - Removed animate-pulse -->
           <div v-if="plan.slug === 'premium'" class="absolute -top-3 left-1/2 -translate-x-1/2">
-            <span class="bg-gradient-to-r from-red-600 to-yellow-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase shadow-lg animate-pulse">
-              ⭐ Phổ biến nhất
+            <span class="bg-gradient-to-r from-red-600 to-yellow-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase shadow-lg">
+              ⭐ {{ $t('pricing.mostPopular') }}
             </span>
           </div>
 
@@ -103,12 +83,12 @@
               {{ getIcon(plan.slug) }}
             </div>
             
-            <!-- Tooltip on hover -->
+            <!-- Tooltip on hover - Removed animate-bounce -->
             <div 
               v-if="hoveredPlan === plan.slug"
-              class="absolute -top-2 -right-2 bg-white text-black text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-bounce"
+              class="absolute -top-2 -right-2 bg-white text-black text-xs font-bold px-2 py-1 rounded-full shadow-lg"
             >
-              Click để chọn
+              {{ $t('pricing.clickToSelect') }}
             </div>
           </div>
 
@@ -128,30 +108,20 @@
             {{ plan.quality }}
           </div>
 
-          <!-- Price with Animation -->
+          <!-- Price Display -->
           <div class="mb-6">
             <div class="flex items-baseline gap-2">
               <span 
                 class="text-5xl font-black text-white transition-all duration-300"
                 :class="hoveredPlan === plan.slug ? 'scale-110' : ''"
               >
-                {{ formatPrice(getDisplayPrice(plan.price)) }}
+                {{ plan.slug === 'free' ? $t('pricing.free') : formatPrice(plan.price) }}
               </span>
-              <span class="text-gray-400">{{ billingPeriod === 'monthly' ? '/tháng' : '/năm' }}</span>
+              <span v-if="plan.slug !== 'free'" class="text-gray-400">/tháng</span>
             </div>
             
-            <!-- Original Price (crossed out for yearly) -->
-            <div v-if="billingPeriod === 'yearly' && plan.price > 0" class="mt-1">
-              <span class="text-gray-500 text-sm line-through">
-                {{ formatPrice(plan.price * 12) }}đ/năm
-              </span>
-              <span class="text-green-400 text-sm font-bold ml-2">
-                Tiết kiệm {{ formatPrice(plan.price * 12 * 0.15) }}đ
-              </span>
-            </div>
-            
-            <p v-if="plan.price > 0 && billingPeriod === 'monthly'" class="text-gray-500 text-sm mt-1">
-              ≈ {{ Math.round(plan.price / 30).toLocaleString() }}đ/ngày
+            <p v-if="plan.price > 0" class="text-gray-400 text-sm mt-2">
+              Hoặc {{ formatPrice(calculatePrice(plan.price, 12, 15)) }}/năm (tiết kiệm 15%)
             </p>
           </div>
 
@@ -179,30 +149,31 @@
               v-if="plan.slug !== 'free'"
               @click.stop="handleAddToCart(plan)"
               :disabled="addingToCart === plan.id"
-              class="relative w-full py-3 rounded-xl font-bold text-center transition-all duration-300 overflow-hidden border-2"
+              class="w-full py-3.5 rounded-xl font-bold text-center transition-all duration-300 border-2 flex items-center justify-center gap-2"
               :class="[
-                hoveredPlan === plan.slug ? 'scale-105' : '',
-                plan.slug === 'basic' ? 'border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white' : '',
-                plan.slug === 'premium' ? 'border-red-500 text-red-400 hover:bg-red-500 hover:text-white' : '',
-                plan.slug === 'vip' ? 'border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white' : '',
+                plan.slug === 'basic' ? 'border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white hover:scale-105' : '',
+                plan.slug === 'premium' ? 'border-red-500 text-red-400 hover:bg-red-500 hover:text-white hover:scale-105' : '',
+                plan.slug === 'vip' ? 'border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white hover:scale-105' : '',
                 addingToCart === plan.id ? 'opacity-50 cursor-not-allowed' : ''
               ]"
             >
-              <span class="relative flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
-                {{ addingToCart === plan.id ? 'Đang thêm...' : 'Thêm vào giỏ' }}
-              </span>
+              <svg v-if="addingToCart === plan.id" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+              {{ $t('pricing.addToCart') }}
             </button>
 
             <!-- Buy Now Button -->
             <button
               @click.stop="handleBuyNow(plan)"
-              class="relative w-full py-4 rounded-xl font-bold text-center transition-all duration-300 overflow-hidden"
+              class="relative w-full py-4 rounded-xl font-bold text-center transition-all duration-300 overflow-hidden flex items-center justify-center gap-2"
               :class="[
                 getButtonClass(plan.slug),
-                hoveredPlan === plan.slug ? 'scale-105 shadow-lg' : ''
+                hoveredPlan === plan.slug ? 'scale-105 shadow-2xl' : ''
               ]"
             >
               <!-- Button Shine -->
@@ -211,11 +182,11 @@
                 class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine"
               ></div>
               
-              <span class="relative flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                </svg>
-                {{ plan.slug === 'free' ? '🎬 Dùng miễn phí' : 'Mua ngay' }}
+              <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              <span class="relative z-10">
+                {{ plan.slug === 'free' ? $t('pricing.useFree') : $t('pricing.buyNow') }}
               </span>
             </button>
           </div>
@@ -225,7 +196,7 @@
             v-if="plan.slug === 'premium' && hoveredPlan === plan.slug"
             class="mt-4 text-center text-yellow-400 text-sm font-bold animate-pulse"
           >
-            ⭐ Được 85% khách hàng lựa chọn
+            ⭐ {{ $t('pricing.popularChoice') }}
           </div>
         </div>
       </div>
@@ -249,6 +220,9 @@ import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useToast } from '@/composables/useToast';
 import PaymentModal from '@/components/PaymentModal.vue';
+import LoadingButton from '@/components/LoadingButton.vue';
+import SuccessAnimation from '@/components/SuccessAnimation.vue';
+import Breadcrumb from '@/components/Breadcrumb.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -262,6 +236,26 @@ const selectedPlan = ref(null);
 const hoveredPlan = ref(null);
 const billingPeriod = ref('monthly');
 const addingToCart = ref(null);
+const showSuccess = ref(false);
+const successMessage = ref('');
+const selectedDurations = ref({});
+
+// Duration options with discounts
+const durationOptions = [
+  { months: 1, label: '1 tháng', discount: 0 },
+  { months: 3, label: '3 tháng', discount: 5 },
+  { months: 6, label: '6 tháng', discount: 10 },
+  { months: 12, label: '12 tháng', discount: 15 }
+];
+
+// Breadcrumb items
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
+const breadcrumbItems = [
+  { label: t('common.home'), to: '/home' },
+  { label: t('pricing.title'), to: '/pricing' }
+];
 
 onMounted(async () => {
   await fetchPlans();
@@ -273,34 +267,73 @@ const fetchPlans = async () => {
     const response = await getPlans(true);
     if (response.success) {
       plans.value = response.data;
+      // Initialize selected durations (default to 1 month)
+      plans.value.forEach(plan => {
+        selectedDurations.value[plan.id] = 1;
+      });
     }
   } catch (err) {
-    toast.error('Không thể tải danh sách gói');
+    const { handleError } = await import('@/composables/useErrorHandler');
+    const errorHandler = handleError();
+    errorHandler.handleError(err, {
+      context: 'Fetch Plans',
+      fallbackMessage: 'Không thể tải danh sách gói. Vui lòng kiểm tra kết nối Internet và thử lại.'
+    });
   } finally {
     loading.value = false;
   }
+};
+
+// Calculate price with discount
+const calculatePrice = (basePrice, months, discount) => {
+  const totalPrice = basePrice * months;
+  const discountAmount = totalPrice * (discount / 100);
+  return Math.round(totalPrice - discountAmount);
 };
 
 // Thêm vào giỏ hàng
 const handleAddToCart = async (plan) => {
   // Kiểm tra đăng nhập
   if (!authStore.user) {
-    toast.warning('Vui lòng đăng nhập để thêm vào giỏ hàng');
+    toast.warning(t('pricing.loginToAddCart'));
     router.push('/account');
     return;
   }
 
+  // Confirm before adding
+  const { useConfirm } = await import('@/composables/useConfirm');
+  const { confirm } = useConfirm();
+  
+  const durationText = billingPeriod.value === 'yearly' ? t('pricing.twelveMonths') : t('pricing.oneMonth');
+  const confirmed = await confirm({
+    title: t('pricing.addToCartConfirm'),
+    message: t('pricing.addToCartMessage', { plan: plan.name, duration: durationText }),
+    type: 'info',
+    confirmText: t('pricing.addToCart'),
+    cancelText: t('common.cancel')
+  });
+  
+  if (!confirmed) return;
+
   addingToCart.value = plan.id;
 
   try {
-    // Tính duration_months dựa trên billingPeriod
-    const durationMonths = billingPeriod.value === 'yearly' ? 12 : 1;
-    const durationText = billingPeriod.value === 'yearly' ? '12 tháng' : '1 tháng';
+    // Lấy duration đã chọn
+    const durationMonths = selectedDurations.value[plan.id] || 1;
+    const durationOption = durationOptions.find(d => d.months === durationMonths);
+    const durationText = durationOption?.label || '1 tháng';
     
     await cartStore.addItem(plan.id, 1, durationMonths);
-    toast.success(`✅ Đã thêm gói ${plan.name} (${durationText}) vào giỏ hàng`);
+    
+    // Show success animation
+    successMessage.value = t('pricing.addedToCart', { plan: plan.name });
+    showSuccess.value = true;
+    
+    toast.success(t('pricing.addedToCartSuccess', { plan: plan.name, duration: durationText }));
   } catch (err) {
-    toast.error(err.message || 'Không thể thêm vào giỏ hàng');
+    const errorMsg = err.message || t('pricing.addToCartError');
+    const helpText = ' ' + t('pricing.tryAgainOrContact');
+    toast.error(errorMsg + helpText);
   } finally {
     addingToCart.value = null;
   }
@@ -310,14 +343,14 @@ const handleAddToCart = async (plan) => {
 const handleBuyNow = (plan) => {
   // Kiểm tra đăng nhập
   if (!authStore.user) {
-    toast.warning('Vui lòng đăng nhập để mua gói');
+    toast.warning(t('pricing.loginToBuy'));
     router.push('/account');
     return;
   }
 
   // Gói free không cần thanh toán
   if (plan.slug === 'free') {
-    toast.info('Bạn đang dùng gói miễn phí');
+    toast.info(t('pricing.usingFreePlan'));
     return;
   }
 
@@ -328,12 +361,12 @@ const handleBuyNow = (plan) => {
 
 const handlePaymentSuccess = () => {
   showPaymentModal.value = false;
-  toast.success('Thanh toán thành công! Gói đã được kích hoạt');
+  toast.success(t('pricing.paymentSuccess'));
   router.push('/account');
 };
 
 const formatPrice = (price) => {
-  if (price === 0) return 'Miễn phí';
+  if (price === 0) return t('pricing.free');
   return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
 };
 
@@ -349,17 +382,17 @@ const getDisplayPrice = (monthlyPrice) => {
 const getFeatures = (plan) => {
   const features = [
     {
-      text: plan.has_ads ? 'Có quảng cáo' : 'Không quảng cáo',
+      text: plan.has_ads ? t('pricing.hasAds') : t('pricing.noAds'),
       checked: !plan.has_ads,
       iconClass: plan.has_ads ? 'text-red-500' : 'text-green-500'
     },
     {
-      text: `${plan.max_devices} thiết bị đồng thời`,
+      text: t('pricing.devices', { count: plan.max_devices }),
       checked: true,
       iconClass: 'text-green-500'
     },
     {
-      text: plan.can_download ? 'Tải về xem offline' : 'Không tải về',
+      text: plan.can_download ? t('pricing.canDownload') : t('pricing.noDownload'),
       checked: plan.can_download,
       iconClass: plan.can_download ? 'text-green-500' : 'text-gray-500'
     }
@@ -367,7 +400,7 @@ const getFeatures = (plan) => {
   
   if (plan.early_access) {
     features.push({
-      text: 'Xem trước phim mới',
+      text: t('pricing.earlyAccess'),
       checked: true,
       iconClass: 'text-yellow-500'
     });

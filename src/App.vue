@@ -2,9 +2,18 @@
   <!-- Splash Screen -->
   <SplashScreen />
   
-  <div class="flex flex-col min-h-screen" :class="isHomepage ? 'bg-black' : 'bg-gray-50'">
+  <!-- Command Palette -->
+  <CommandPalette :show="showCommandPalette" @close="showCommandPalette = false" />
+  
+  <!-- Keyboard Shortcuts Help -->
+  <KeyboardShortcutsHelp :show="showShortcutsHelp" @close="showShortcutsHelp = false" />
+  
+  <!-- Offline Banner -->
+  <OfflineBanner />
+  
+  <div class="flex flex-col min-h-screen m-0 p-0 bg-black">
     <!-- Navbar (ẩn khi ở trang admin) -->
-    <Navbar v-if="!isAdminPage" :class="isHomepage ? 'bg-black/90' : 'shadow-md'" />
+    <Navbar v-if="!isAdminPage" />
 
     <!-- Trạng thái đang kiểm tra đăng nhập -->
     <div
@@ -52,21 +61,34 @@
     <FooterComponent v-if="!isAdminPage" />
   </div>
   
+  <!-- Scroll to Top Button (fixed to viewport) -->
+  <ScrollToTop />
+  
   <!-- Custom Toast -->
   <CustomToast ref="toastRef" />
+  
+  <!-- Global Components -->
+  <ConfirmDialog />
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Navbar from '@/components/NetflixNavbar.vue';
 import SplashScreen from '@/components/SplashScreen.vue';
 import CustomToast from '@/components/CustomToast.vue';
 import FooterComponent from '@/components/FooterComponent.vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
+import ScrollToTop from '@/components/ScrollToTop.vue';
+import CommandPalette from '@/components/CommandPalette.vue';
+import KeyboardShortcutsHelp from '@/components/KeyboardShortcutsHelp.vue';
+import OfflineBanner from '@/components/OfflineBanner.vue';
 import { setToastInstance, useToast } from '@/composables/useToast';
+import { useKeyboardShortcuts, isTyping } from '@/composables/useKeyboardShortcuts';
 
 const route = useRoute();
+const router = useRouter();
 const user = ref(undefined);
 const auth = getAuth();
 const toastRef = ref(null);
@@ -74,6 +96,48 @@ const toast = useToast();
 
 const isHomepage = computed(() => route.path === '/home');
 const isAdminPage = computed(() => route.path.startsWith('/admin'));
+
+// Command Palette & Shortcuts
+const showCommandPalette = ref(false);
+const showShortcutsHelp = ref(false);
+
+// Global keyboard shortcuts
+useKeyboardShortcuts({
+  'ctrl+k': (e) => {
+    if (!isTyping()) {
+      showCommandPalette.value = true;
+    }
+  },
+  '/': (e) => {
+    if (!isTyping()) {
+      const searchInput = document.querySelector('input[placeholder*="Tìm kiếm"]');
+      if (searchInput) {
+        searchInput.focus();
+      }
+    }
+  },
+  '?': (e) => {
+    if (!isTyping()) {
+      showShortcutsHelp.value = true;
+    }
+  },
+  'escape': () => {
+    showCommandPalette.value = false;
+    showShortcutsHelp.value = false;
+  },
+  'g+h': () => {
+    if (!isTyping()) router.push('/home');
+  },
+  'g+l': () => {
+    if (!isTyping()) router.push('/library');
+  },
+  'g+p': () => {
+    if (!isTyping()) router.push('/pricing');
+  },
+  'g+c': () => {
+    if (!isTyping()) router.push('/cart');
+  }
+});
 
 // Set toast instance and auth listener
 onMounted(() => {
@@ -115,12 +179,20 @@ onMounted(() => {
 
 <style>
 body {
-  padding-top: 0;
+  padding: 0;
+  margin: 0;
   overflow-x: hidden;
 }
 
 html {
   overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  margin: 0;
+  padding: 0;
 }
 
 /* Hide Scrollbar */

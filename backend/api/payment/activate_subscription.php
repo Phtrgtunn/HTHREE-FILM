@@ -54,7 +54,7 @@ try {
         exit;
     }
     
-    // Cập nhật trạng thái đơn hàng
+    // Cập nhật trạng thái đơn hàng - TỰ ĐỘNG THÀNH CÔNG
     $stmt = $conn->prepare("
         UPDATE orders 
         SET payment_status = 'paid', 

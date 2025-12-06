@@ -1,7 +1,7 @@
 <template>
-  <footer class="bg-gradient-to-b from-gray-900 to-black text-white border-t border-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+  <footer class="bg-gradient-to-b from-gray-900 to-black text-white border-t border-gray-800 mt-0 w-full">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-6">
         <!-- Logo & Description -->
         <div class="col-span-1 md:col-span-1">
           <div class="flex items-center gap-2 mb-4">
@@ -37,77 +37,92 @@
           </div>
         </div>
 
-        <!-- Hỗi Đáp -->
+        <!-- Sitemap - Điều hướng -->
         <div>
-          <h3 class="text-white font-semibold text-lg mb-4">Hỗi Đáp</h3>
+          <h3 class="text-white font-semibold text-lg mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+            </svg>
+            Điều hướng
+          </h3>
           <ul class="space-y-2">
-            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Chính sách bảo mật</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Điều khoản sử dụng</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Giới thiệu</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Liên hệ</a></li>
+            <li><router-link to="/home" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+              Trang chủ
+            </router-link></li>
+            <li><router-link to="/list/phim-le/page/1" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+              Phim Lẻ
+            </router-link></li>
+            <li><router-link to="/list/phim-bo/page/1" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+              Phim Bộ
+            </router-link></li>
+            <li><router-link to="/categories" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+              Tất cả thể loại
+            </router-link></li>
+            <li><router-link to="/library" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+              Thư viện của tôi
+            </router-link></li>
+            <li><router-link to="/pricing" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+              Gói dịch vụ
+            </router-link></li>
           </ul>
         </div>
 
-        <!-- Danh Mục -->
+        <!-- Thể Loại Phổ Biến -->
         <div>
-          <h3 class="text-white font-semibold text-lg mb-4">Danh Mục</h3>
+          <h3 class="text-white font-semibold text-lg mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
+            </svg>
+            Thể Loại
+          </h3>
           <ul class="space-y-2">
-            <li><router-link to="/list/phim-le/page/1" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Phim Lẻ</router-link></li>
-            <li><router-link to="/list/phim-bo/page/1" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Phim Bộ</router-link></li>
-            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Chiếu Rạp</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Mới Phát Hành</a></li>
+            <li><router-link to="/category/hanh-dong/page/1" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Hành Động</router-link></li>
+            <li><router-link to="/category/hai-huoc/page/1" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Hài Hước</router-link></li>
+            <li><router-link to="/category/kinh-di/page/1" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Kinh Dị</router-link></li>
+            <li><router-link to="/category/tinh-cam/page/1" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Tình Cảm</router-link></li>
+            <li><router-link to="/category/khoa-hoc-vien-tuong/page/1" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Khoa Học Viễn Tưởng</router-link></li>
+            <li><router-link to="/category/hoat-hinh/page/1" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Hoạt Hình</router-link></li>
           </ul>
         </div>
 
-        <!-- Thể Loại -->
+        <!-- Hỗ Trợ & Chính Sách -->
         <div>
-          <h3 class="text-white font-semibold text-lg mb-4">Thể Loại</h3>
+          <h3 class="text-white font-semibold text-lg mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            Hỗ Trợ
+          </h3>
           <ul class="space-y-2">
-            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Hành Động</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Hài Hước</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Kinh Dị</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">Tình Cảm</a></li>
+            <li><router-link to="/contact" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">📧 Liên hệ</router-link></li>
+            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">📜 Điều khoản sử dụng</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">🔒 Chính sách bảo mật</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">ℹ️ Giới thiệu</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">❓ Câu hỏi thường gặp</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-yellow-400 transition-colors text-sm">💳 Hướng dẫn thanh toán</a></li>
           </ul>
         </div>
       </div>
 
       <!-- Bottom -->
-      <div class="border-t border-gray-800 pt-6">
-        <p class="text-gray-500 text-sm text-center">© 2024 HTHREE</p>
+      <div class="border-t border-gray-800 pt-4">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+          <p class="text-gray-500 text-sm">© 2024 HTHREE Film. All rights reserved.</p>
+          <div class="flex items-center gap-4 text-xs text-gray-500">
+            <span>v1.0.0</span>
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- Scroll to Top -->
-    <button
-      v-if="showScrollTop"
-      @click="scrollToTop"
-      class="fixed bottom-6 right-6 w-12 h-12 bg-yellow-400 hover:bg-yellow-500 text-black rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 z-50"
-    >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-      </svg>
-    </button>
   </footer>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-
-const showScrollTop = ref(false);
-
-const handleScroll = () => {
-  showScrollTop.value = window.scrollY > 300;
-};
-
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll);
-});
+// No script needed - scroll to top is handled globally
 </script>

@@ -4,6 +4,7 @@
  */
 
 import axios from 'axios';
+import { apiCache } from '@/utils/apiCache';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost/HTHREE_film/backend/api';
 
@@ -16,10 +17,12 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost/HTHR
  */
 export const getPlans = async (activeOnly = true) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/plans.php`, {
-      params: { active_only: activeOnly }
-    });
-    return response.data;
+    const url = `${API_BASE_URL}/plans.php?active_only=${activeOnly}`;
+    // Cache plans for 10 minutes
+    return await apiCache.get(url, async () => {
+      const response = await axios.get(url);
+      return response.data;
+    }, 10 * 60 * 1000);
   } catch (error) {
     console.error('Error fetching plans:', error);
     throw error;

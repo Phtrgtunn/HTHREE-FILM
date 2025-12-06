@@ -4,11 +4,19 @@
  */
 
 class Database {
-    private $host = 'localhost';
-    private $db_name = 'hthree_film';
-    private $username = 'root';
-    private $password = 'mysql'; // AMPPS default password
+    private $host;
+    private $db_name;
+    private $username;
+    private $password;
     private $conn;
+    
+    public function __construct() {
+        // Railway environment variables (production)
+        $this->host = getenv('MYSQL_HOST') ?: 'localhost';
+        $this->db_name = getenv('MYSQL_DATABASE') ?: 'hthree_film';
+        $this->username = getenv('MYSQL_USER') ?: 'root';
+        $this->password = getenv('MYSQL_PASSWORD') ?: 'mysql';
+    }
     
     /**
      * Get database connection (PDO)
@@ -40,12 +48,14 @@ class Database {
  * Helper function to get MySQLi connection
  */
 function getDBConnection() {
-    $host = 'localhost';
-    $db_name = 'hthree_film';
-    $username = 'root';
-    $password = 'mysql';
+    // Railway environment variables (production)
+    $host = getenv('MYSQL_HOST') ?: 'localhost';
+    $db_name = getenv('MYSQL_DATABASE') ?: 'hthree_film';
+    $username = getenv('MYSQL_USER') ?: 'root';
+    $password = getenv('MYSQL_PASSWORD') ?: 'mysql';
+    $port = getenv('MYSQL_PORT') ?: 3306;
     
-    $conn = new mysqli($host, $username, $password, $db_name);
+    $conn = new mysqli($host, $username, $password, $db_name, $port);
     
     if ($conn->connect_error) {
         die(json_encode([

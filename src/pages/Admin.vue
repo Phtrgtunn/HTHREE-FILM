@@ -147,17 +147,23 @@
             <h4 class="text-lg font-bold text-white mb-2">Ghi chú</h4>
             <p class="text-gray-300">{{ selectedOrder.note }}</p>
           </div>
+
+          <!-- Thông báo tự động kích hoạt -->
+          <div v-if="selectedOrder.payment_status === 'paid'" class="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+            <div class="flex items-center gap-3">
+              <svg class="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <div>
+                <p class="text-green-400 font-bold">Đã kích hoạt tự động</p>
+                <p class="text-green-300 text-sm">Subscription đã được kích hoạt ngay sau khi thanh toán thành công</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Footer Actions -->
         <div class="sticky bottom-0 bg-gray-900 p-6 border-t border-gray-700 flex gap-4">
-          <button
-            v-if="selectedOrder?.payment_status === 'pending'"
-            @click="confirmPaymentFromModal"
-            class="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-6 rounded-xl transition-all"
-          >
-            ✓ Xác nhận thanh toán
-          </button>
           <button
             @click="showOrderDetail = false"
             class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-xl transition-all"
@@ -194,15 +200,15 @@
             :key="item.id"
             @click="activeTab = item.id"
             :class="[
-              'w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300',
+              'w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-left',
               activeTab === item.id
                 ? 'bg-gradient-to-r from-red-600 to-yellow-500 text-white shadow-lg shadow-red-500/20'
                 : 'text-gray-400 hover:text-white hover:bg-gray-800'
             ]"
           >
-            <component :is="item.icon" class="w-5 h-5" />
-            <span class="font-medium">{{ item.label }}</span>
-            <span v-if="item.badge" class="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">
+            <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
+            <span class="font-medium flex-1">{{ item.label }}</span>
+            <span v-if="item.badge" class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse flex-shrink-0">
               {{ item.badge }}
             </span>
           </button>
@@ -425,16 +431,6 @@
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                        </svg>
-                      </button>
-                      <button
-                        v-if="order.payment_status === 'pending'"
-                        @click="confirmPayment(order)"
-                        class="p-2 bg-green-600 hover:bg-green-700 rounded-lg transition-all"
-                        title="Xác nhận thanh toán"
-                      >
-                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                         </svg>
                       </button>
                     </div>
@@ -681,7 +677,7 @@ const currentTabTitle = computed(() => {
 const currentTabDescription = computed(() => {
   const descriptions = {
     dashboard: 'Tổng quan hệ thống',
-    orders: 'Quản lý đơn hàng',
+    orders: 'Xem thông tin đơn hàng (Thanh toán tự động kích hoạt)',
     users: 'Quản lý người dùng',
     plans: 'Quản lý gói dịch vụ',
     coupons: 'Quản lý mã giảm giá'
@@ -751,10 +747,7 @@ const viewOrder = async (order) => {
   }
 };
 
-const confirmPaymentFromModal = async () => {
-  await confirmPayment(selectedOrder.value);
-  showOrderDetail.value = false;
-};
+// Đã bỏ tính năng phê duyệt thủ công - Thanh toán tự động kích hoạt
 
 const formatMoney = (amount) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -830,49 +823,7 @@ const fetchOrders = async () => {
   }
 };
 
-// Confirm payment with beautiful modal
-const confirmPayment = async (order) => {
-  confirmData.value = {
-    title: 'Xác nhận thanh toán',
-    message: `Bạn có chắc chắn muốn xác nhận thanh toán cho đơn hàng ${order.order_code}? Hành động này sẽ kích hoạt subscription cho khách hàng.`,
-    type: 'success',
-    confirmText: 'Xác nhận thanh toán',
-    cancelText: 'Hủy',
-    onConfirm: async () => {
-      loading.value = true;
-      try {
-        const response = await axios.post(`${API_URL}/admin/orders.php`, {
-          order_id: order.id
-        });
-        
-        if (response.data.success) {
-          notification.value = {
-            type: 'success',
-            title: 'Thành công!',
-            message: response.data.message
-          };
-          showNotification.value = true;
-          
-          // Reload data immediately
-          await Promise.all([
-            fetchOrders(),
-            fetchStatistics()
-          ]);
-        }
-      } catch (error) {
-        notification.value = {
-          type: 'error',
-          title: 'Lỗi!',
-          message: error.response?.data?.message || 'Không thể xác nhận thanh toán'
-        };
-        showNotification.value = true;
-      } finally {
-        loading.value = false;
-      }
-    }
-  };
-  showConfirm.value = true;
-};
+// Đã bỏ function confirmPayment - Thanh toán tự động kích hoạt subscription
 
 // Get plan color
 const getPlanColor = (slug) => {

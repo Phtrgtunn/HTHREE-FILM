@@ -1,0 +1,141 @@
+================================================================================
+                    FIX: Đơn Hàng Hiển Thị "Chờ Xử Lý"
+================================================================================
+
+VẤN ĐỀ:
+- Khách đã thanh toán qua Chuyển khoản
+- Admin Panel vẫn hiển thị "Chờ xử lý" (màu vàng)
+- Subscription chưa được kích hoạt
+
+NGUYÊN NHÂN:
+- Chuyển khoản KHÔNG có callback tự động
+- Cần kích hoạt thủ công
+
+================================================================================
+                            GIẢI PHÁP NHANH
+================================================================================
+
+CÁCH 1: DÙNG SCRIPT PHP (KHUYẾN NGHỊ)
+--------------------------------------
+1. Mở browser, truy cập:
+   http://localhost/HTHREE_film/backend/activate_bank_transfer_orders.php
+
+2. Xem danh sách đơn chờ
+
+3. Kiểm tra đã nhận tiền chưa
+
+4. Click nút "✓ Kích hoạt"
+
+5. Xong! Khách xem phim ngay
+
+
+CÁCH 2: DÙNG SQL (NHANH HƠN)
+-----------------------------
+1. Mở phpMyAdmin
+
+2. Chạy SQL:
+   
+   UPDATE orders 
+   SET payment_status = 'paid',
+       paid_at = NOW(),
+       status = 'completed',
+       completed_at = NOW()
+   WHERE order_code = 'ORD20251284144';  -- Thay mã đơn
+
+3. Gọi API (dùng Postman hoặc curl):
+   
+   POST http://localhost/HTHREE_film/backend/api/payment/activate_subscription.php
+   Body: {"order_code": "ORD20251284144"}
+
+4. Xong!
+
+================================================================================
+                            FILES MỚI TẠO
+================================================================================
+
+✨ backend/activate_bank_transfer_orders.php
+   - Script kích hoạt đơn chuyển khoản
+   - Giao diện web đẹp
+   - Kích hoạt từng đơn hoặc hàng loạt
+
+✨ CHECK_ORDER_STATUS.sql
+   - SQL queries kiểm tra trạng thái
+   - Hướng dẫn update thủ công
+
+✨ HUONG_DAN_KICH_HOAT_CHUYEN_KHOAN.md
+   - Hướng dẫn chi tiết đầy đủ
+   - Troubleshooting
+   - Checklist
+
+✨ FIX_PENDING_ORDERS.txt
+   - File này (tóm tắt nhanh)
+
+================================================================================
+                            QUY TRÌNH
+================================================================================
+
+1. Khách chuyển khoản
+        ↓
+2. Admin kiểm tra tài khoản ngân hàng
+        ↓
+3. Đã nhận tiền?
+        ├─ Chưa → Chờ
+        └─ Rồi → Kích hoạt
+                  ↓
+4. Mở: activate_bank_transfer_orders.php
+        ↓
+5. Click "✓ Kích hoạt"
+        ↓
+6. ✅ Xong! Khách xem phim ngay
+
+================================================================================
+                            KIỂM TRA
+================================================================================
+
+SAU KHI KÍCH HOẠT:
+
+✅ Admin Panel:
+   - Vào /admin → Tab "Đơn hàng"
+   - Tìm mã đơn
+   - Trạng thái = "Đã thanh toán" (màu xanh)
+
+✅ Database:
+   SELECT payment_status FROM orders WHERE order_code = 'ORD123456';
+   -- Kết quả: paid
+
+✅ Khách hàng:
+   - Login vào /account
+   - Thấy gói đã kích hoạt
+   - Xem phim được
+
+================================================================================
+                            LƯU Ý
+================================================================================
+
+⚠️  CHỈ KÍCH HOẠT KHI:
+    - Đã nhận tiền trong tài khoản
+    - Số tiền khớp với đơn hàng
+    - Nội dung chuyển khoản đúng
+
+⚠️  KHÔNG KÍCH HOẠT NẾU:
+    - Chưa nhận tiền
+    - Số tiền không đủ
+    - Nội dung chuyển khoản sai
+
+================================================================================
+                            TƯƠNG LAI
+================================================================================
+
+Để tự động hóa hoàn toàn:
+- Tích hợp API ngân hàng (VietQR, Banking API)
+- Webhook từ ngân hàng
+- Cron job kiểm tra giao dịch
+- Matching tự động
+
+Hiện tại: Kích hoạt thủ công qua script PHP
+
+================================================================================
+
+📖 Đọc chi tiết: HUONG_DAN_KICH_HOAT_CHUYEN_KHOAN.md
+
+================================================================================
