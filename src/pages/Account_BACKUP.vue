@@ -7,91 +7,6 @@
       @save="handleSaveProfile"
     />
 
-    <!-- Delete Account Confirmation Modal -->
-    <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <div
-        v-if="showDeleteAccountModal"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-        @click.self="showDeleteAccountModal = false"
-      >
-        <Transition
-          enter-active-class="transition-all duration-300 ease-out"
-          enter-from-class="opacity-0 scale-95 translate-y-4"
-          enter-to-class="opacity-100 scale-100 translate-y-0"
-          leave-active-class="transition-all duration-200 ease-in"
-          leave-from-class="opacity-100 scale-100 translate-y-0"
-          leave-to-class="opacity-0 scale-95 translate-y-4"
-        >
-          <div v-if="showDeleteAccountModal" class="relative w-full max-w-md bg-gray-900 rounded-xl shadow-2xl overflow-hidden border border-red-500/30">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-red-500 to-red-600 px-5 py-4">
-              <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                </svg>
-                <h3 class="text-lg font-bold text-white">Xác nhận xóa tài khoản</h3>
-              </div>
-            </div>
-
-            <!-- Content -->
-            <div class="p-5 space-y-4">
-              <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-                <p class="text-red-400 font-semibold mb-2 text-sm">⚠️ Cảnh báo:</p>
-                <ul class="text-red-200 text-xs space-y-1.5">
-                  <li class="flex items-start gap-2">
-                    <span class="text-red-400 mt-0.5">•</span>
-                    <span>Tất cả thông tin cá nhân sẽ bị xóa vĩnh viễn</span>
-                  </li>
-                  <li class="flex items-start gap-2">
-                    <span class="text-red-400 mt-0.5">•</span>
-                    <span>Lịch sử giao dịch và gói đăng ký sẽ mất</span>
-                  </li>
-                  <li class="flex items-start gap-2">
-                    <span class="text-red-400 mt-0.5">•</span>
-                    <span>Không thể khôi phục tài khoản sau khi xóa</span>
-                  </li>
-                  <li class="flex items-start gap-2">
-                    <span class="text-red-400 mt-0.5">•</span>
-                    <span><strong>Hành động này KHÔNG THỂ HOÀN TÁC</strong></span>
-                  </li>
-                </ul>
-              </div>
-
-              <p class="text-gray-300 text-sm text-center">
-                Bạn có chắc chắn muốn xóa tài khoản vĩnh viễn không?
-              </p>
-            </div>
-
-            <!-- Footer -->
-            <div class="bg-gray-800/50 px-5 py-4 flex gap-3">
-              <button
-                @click="showDeleteAccountModal = false"
-                class="flex-1 px-4 py-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-medium transition-colors text-sm flex items-center justify-center"
-              >
-                Hủy bỏ
-              </button>
-              <button
-                @click="confirmDeleteAccount"
-                class="flex-1 px-4 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold transition-colors flex items-center justify-center gap-2 text-sm"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Xóa tài khoản
-              </button>
-            </div>
-          </div>
-        </Transition>
-      </div>
-    </Transition>
-
     <!-- Cancel Subscription Confirmation Modal -->
     <Transition name="modal">
       <div
@@ -972,13 +887,14 @@
 
                   <!-- Quick Links -->
                   <div class="space-y-3">
-                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                    <h3
+                      class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4"
+                    >
                       Liên kết nhanh
                     </h3>
 
-                    <!-- Xem lịch sử giao dịch -->
+                    <!-- Thay đổi gói dịch vụ -->
                     <button
-                      @click="activeSection = 'transactions'"
                       class="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg p-4 hover:border-yellow-400 hover:bg-[#2a2a2a] transition-all flex items-center justify-between group"
                     >
                       <div class="flex items-center">
@@ -992,10 +908,135 @@
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                            d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
                           />
                         </svg>
-                        <span class="text-white font-medium">Xem lịch sử giao dịch</span>
+                        <span class="text-white font-medium"
+                          >Thay đổi gói dịch vụ</span
+                        >
+                      </div>
+                      <svg
+                        class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+
+                    <!-- Quản lý phương thức thanh toán -->
+                    <button
+                      class="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg p-4 hover:border-yellow-400 hover:bg-[#2a2a2a] transition-all flex items-center justify-between group"
+                    >
+                      <div class="flex items-center">
+                        <svg
+                          class="w-5 h-5 mr-3 text-gray-300 group-hover:text-yellow-400 transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                          />
+                        </svg>
+                        <span class="text-white font-medium"
+                          >Quản lý phương thức thanh toán</span
+                        >
+                      </div>
+                      <svg
+                        class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+
+                    <!-- Mua thêm một suất thành viên bổ sung -->
+                    <button
+                      class="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg p-4 hover:border-yellow-400 hover:bg-[#2a2a2a] transition-all flex items-center justify-between group"
+                    >
+                      <div class="flex items-center flex-1">
+                        <svg
+                          class="w-5 h-5 mr-3 text-gray-300 group-hover:text-yellow-400 transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                          />
+                        </svg>
+                        <div class="text-left flex-1">
+                          <p class="text-white font-medium">
+                            Mua thêm một suất thành viên bổ sung
+                          </p>
+                          <p class="text-gray-400 text-sm">
+                            Chia sẻ HTHREE với người không sống cùng bạn.
+                          </p>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span
+                          class="bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded"
+                          >Mới</span
+                        >
+                        <svg
+                          class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </div>
+                    </button>
+
+                    <!-- Quản lý quyền truy cập và thiết bị -->
+                    <button
+                      @click="activeSection = 'devices'"
+                      class="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg p-4 hover:border-yellow-400 hover:bg-[#2a2a2a] transition-all flex items-center justify-between group"
+                    >
+                      <div class="flex items-center">
+                        <svg
+                          class="w-5 h-5 mr-3 text-gray-300 group-hover:text-yellow-400 transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <span class="text-white font-medium"
+                          >Quản lý quyền truy cập và thiết bị</span
+                        >
                       </div>
                       <svg
                         class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
@@ -1031,7 +1072,122 @@
                             d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                           />
                         </svg>
-                        <span class="text-white font-medium">Cập nhật mật khẩu</span>
+                        <span class="text-white font-medium"
+                          >Cập nhật mật khẩu</span
+                        >
+                      </div>
+                      <svg
+                        class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+
+                    <!-- Chuyển hồ sơ -->
+                    <button
+                      class="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg p-4 hover:border-yellow-400 hover:bg-[#2a2a2a] transition-all flex items-center justify-between group"
+                    >
+                      <div class="flex items-center">
+                        <svg
+                          class="w-5 h-5 mr-3 text-gray-300 group-hover:text-yellow-400 transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                          />
+                        </svg>
+                        <span class="text-white font-medium">Chuyển hồ sơ</span>
+                      </div>
+                      <svg
+                        class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+
+                    <!-- Điều chỉnh tính năng kiểm soát của cha mẹ -->
+                    <button
+                      class="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg p-4 hover:border-yellow-400 hover:bg-[#2a2a2a] transition-all flex items-center justify-between group"
+                    >
+                      <div class="flex items-center">
+                        <svg
+                          class="w-5 h-5 mr-3 text-gray-300 group-hover:text-yellow-400 transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                          />
+                        </svg>
+                        <span class="text-white font-medium"
+                          >Điều chỉnh tính năng kiểm soát của cha mẹ</span
+                        >
+                      </div>
+                      <svg
+                        class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+
+                    <!-- Quản lý hồ sơ -->
+                    <button
+                      @click="activeSection = 'profile'"
+                      class="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg p-4 hover:border-yellow-400 hover:bg-[#2a2a2a] transition-all flex items-center justify-between group"
+                    >
+                      <div class="flex items-center flex-1">
+                        <svg
+                          class="w-5 h-5 mr-3 text-gray-300 group-hover:text-yellow-400 transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <div class="text-left flex-1">
+                          <p class="text-white font-medium">Quản lý hồ sơ</p>
+                          <p class="text-gray-400 text-sm">
+                            Kiểm soát và cấp phép của cha mẹ
+                          </p>
+                        </div>
                       </div>
                       <svg
                         class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
@@ -1050,119 +1206,574 @@
                   </div>
                 </div>
 
-                <!-- Bảo mật -->
-                <div v-if="activeSection === 'password'">
-                  <h1 class="text-4xl font-bold text-white mb-2 tracking-tight">
-                    Bảo mật
+                <!-- Tư cách thành viên -->
+                <div v-if="activeSection === 'membership'">
+                  <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">
+                    Tư cách thành viên
                   </h1>
-                  <p class="text-gray-300 mb-8">Quản lý thông tin bảo mật của bạn</p>
+                  <p class="text-gray-400 mb-8">Thông tin gói dịch vụ</p>
 
-                  <!-- Thông tin đăng nhập -->
-                  <!-- Thông tin đăng nhập -->
-                  <div class="bg-[#1a1a1a] border border-gray-800 rounded-lg p-5 mb-6">
-                    <h3 class="text-base font-semibold text-white mb-4 flex items-center gap-2">
-                      <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
+                  <!-- Gói Cao cấp -->
+                  <div
+                    class="bg-gradient-to-r from-purple-900 to-indigo-900 border border-purple-700 rounded-lg p-6 mb-6"
+                  >
+                    <h2 class="text-2xl font-bold text-white mb-2">
+                      Gói Cao cấp
+                    </h2>
+                    <p class="text-gray-200 mb-4">
+                      Độ phân giải video 4K với âm thanh không gian, không quảng
+                      cáo khi xem và hơn thế nữa.
+                    </p>
+
+                    <!-- Thay đổi gói dịch vụ -->
+                    <button
+                      class="w-full bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-4 transition-all flex items-center justify-between group mt-4"
+                    >
+                      <span class="text-white font-medium"
+                        >Thay đổi gói dịch vụ</span
+                      >
+                      <svg
+                        class="w-5 h-5 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        />
                       </svg>
-                      Thông tin đăng nhập
+                    </button>
+
+                    <!-- Mua thêm một suất thành viên bổ sung -->
+                    <button
+                      class="w-full bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-4 transition-all flex items-center justify-between group mt-3"
+                    >
+                      <div class="text-left flex-1">
+                        <p class="text-white font-medium">
+                          Mua thêm một suất thành viên bổ sung
+                        </p>
+                        <p class="text-gray-300 text-sm">
+                          Chia sẻ HTHREE với người không sống cùng bạn.
+                        </p>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span
+                          class="bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded"
+                          >Mới</span
+                        >
+                        <svg
+                          class="w-5 h-5 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </div>
+                    </button>
+                  </div>
+
+                  <!-- Thông tin thanh toán -->
+                  <div
+                    class="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6 mb-6"
+                  >
+                    <h3 class="text-xl font-bold text-white mb-4">
+                      Thông tin thanh toán
                     </h3>
 
-                    <!-- Thông báo nếu đăng nhập bằng Google -->
-                    <div v-if="isGoogleUser" class="mb-4 bg-blue-500/10 rounded-lg p-3 border border-blue-500/30">
-                      <div class="flex items-center gap-3">
-                        <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
-                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    <!-- Lần thanh toán tiếp theo -->
+                    <div class="mb-6">
+                      <h4 class="text-white font-semibold mb-2">
+                        Lần thanh toán tiếp theo
+                      </h4>
+                      <p class="text-gray-300">{{ getNextPaymentDate() }}</p>
+                      <p class="text-gray-400 text-sm">
+                        Ghi nợ trực tiếp: {{ user.email }}
+                      </p>
+                    </div>
+
+                    <!-- Quản lý phương thức thanh toán -->
+                    <button
+                      class="w-full bg-[#2a2a2a] hover:bg-[#3a3a3a] border border-gray-700 rounded-lg p-4 transition-all flex items-center justify-between group mb-3"
+                    >
+                      <span class="text-white font-medium"
+                        >Quản lý phương thức thanh toán</span
+                      >
+                      <svg
+                        class="w-5 h-5 text-gray-400 group-hover:text-yellow-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+
+                    <!-- Đổi mã quà tặng hoặc khuyến mại -->
+                    <button
+                      class="w-full bg-[#2a2a2a] hover:bg-[#3a3a3a] border border-gray-700 rounded-lg p-4 transition-all flex items-center justify-between group mb-3"
+                    >
+                      <span class="text-white font-medium"
+                        >Đổi mã quà tặng hoặc khuyến mại</span
+                      >
+                      <svg
+                        class="w-5 h-5 text-gray-400 group-hover:text-yellow-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+
+                    <!-- Xem lịch sử thanh toán -->
+                    <button
+                      class="w-full bg-[#2a2a2a] hover:bg-[#3a3a3a] border border-gray-700 rounded-lg p-4 transition-all flex items-center justify-between group"
+                    >
+                      <span class="text-white font-medium"
+                        >Xem lịch sử thanh toán</span
+                      >
+                      <svg
+                        class="w-5 h-5 text-gray-400 group-hover:text-yellow-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Hủy tư cách thành viên -->
+                  <div
+                    class="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6"
+                  >
+                    <button
+                      class="w-full text-center text-red-400 hover:text-red-300 font-medium transition-colors"
+                    >
+                      Hủy tư cách thành viên
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Bảo mật -->
+                <div v-if="activeSection === 'password'">
+                  <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">
+                    Bảo mật
+                  </h1>
+                  <p class="text-gray-400 mb-8">Thông tin tài khoản</p>
+
+                  <!-- Thông tin tài khoản -->
+                  <div
+                    class="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6 mb-6"
+                  >
+                    <!-- Mật khẩu - Chỉ hiển thị nếu KHÔNG đăng nhập bằng Google -->
+                    <button
+                      v-if="!isGoogleUser"
+                      @click="openPasswordModal"
+                      class="w-full flex items-center justify-between p-4 hover:bg-[#2a2a2a] rounded-lg transition-colors group"
+                    >
+                      <div class="flex items-center">
+                        <svg
+                          class="w-6 h-6 mr-4 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                          />
                         </svg>
-                        <p class="text-blue-300 text-sm">Đăng nhập bằng Google - Mật khẩu được quản lý bởi Google</p>
+                        <span class="text-white font-medium">Mật khẩu</span>
+                      </div>
+                      <svg
+                        class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+
+                    <!-- Thông báo nếu đăng nhập bằng Google -->
+                    <div
+                      v-if="isGoogleUser"
+                      class="p-4 bg-[#2a2a2a] rounded-lg border border-gray-700"
+                    >
+                      <div class="flex items-start">
+                        <svg
+                          class="w-5 h-5 mr-3 text-blue-400 flex-shrink-0 mt-0.5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                        <div>
+                          <p class="text-white text-sm font-medium">
+                            Đăng nhập bằng Google
+                          </p>
+                          <p class="text-gray-400 text-xs mt-1">
+                            Bạn đang sử dụng tài khoản Google. Mật khẩu được
+                            quản lý bởi Google.
+                          </p>
+                        </div>
                       </div>
                     </div>
 
-                    <div class="space-y-3">
-                      <!-- Mật khẩu -->
+                    <!-- Email -->
+                    <div class="border-t border-gray-800 mt-2 pt-2">
                       <button
-                        v-if="!isGoogleUser"
-                        @click="openPasswordModal"
-                        class="w-full flex items-center justify-between p-3 bg-[#2a2a2a] hover:bg-[#3a3a3a] rounded-lg transition-all group border border-gray-700 hover:border-yellow-400"
+                        class="w-full flex items-center justify-between p-4 hover:bg-[#2a2a2a] rounded-lg transition-colors group"
                       >
-                        <div class="flex items-center gap-3">
-                          <div class="w-9 h-9 rounded-lg bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
-                            <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                          </div>
-                          <div class="text-left">
-                            <p class="text-white font-medium text-sm">Mật khẩu</p>
-                            <p class="text-gray-400 text-xs">••••••••</p>
+                        <div class="flex items-center flex-1">
+                          <svg
+                            class="w-6 h-6 mr-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                            />
+                          </svg>
+                          <div class="text-left flex-1">
+                            <p class="text-white font-medium">Email</p>
+                            <p class="text-gray-400 text-sm">
+                              {{ user.email }}
+                            </p>
+                            <div class="flex items-center gap-1 mt-1">
+                              <svg
+                                class="w-4 h-4 text-green-500"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fill-rule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                  clip-rule="evenodd"
+                                />
+                              </svg>
+                              <span class="text-green-500 text-xs"
+                                >Đã xác minh</span
+                              >
+                            </div>
                           </div>
                         </div>
-                        <svg class="w-4 h-4 text-gray-500 group-hover:text-yellow-400 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        <svg
+                          class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                          />
                         </svg>
                       </button>
+                    </div>
 
-                      <!-- Email -->
-                      <div class="w-full p-3 bg-[#2a2a2a] rounded-lg border border-gray-700">
-                        <div class="flex items-center gap-3">
-                          <div class="w-9 h-9 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                            <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                          </div>
-                          <div class="flex-1 min-w-0">
-                            <p class="text-white font-medium text-sm">Email</p>
-                            <p class="text-gray-400 text-xs truncate">{{ user.email }}</p>
-                          </div>
-                          <svg class="w-3 h-3 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                          </svg>
-                        </div>
-                      </div>
-
-                      <!-- Điện thoại -->
+                    <!-- Điện thoại di động -->
+                    <div class="border-t border-gray-800 mt-2 pt-2">
                       <button
                         @click="openPhoneModal"
-                        class="w-full flex items-center justify-between p-3 bg-[#2a2a2a] hover:bg-[#3a3a3a] rounded-lg transition-all group border border-gray-700 hover:border-yellow-400"
+                        class="w-full flex items-center justify-between p-4 hover:bg-[#2a2a2a] rounded-lg transition-colors group"
                       >
-                        <div class="flex items-center gap-3">
-                          <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" :class="savedPhoneNumber ? 'bg-green-500/20' : 'bg-gray-700'">
-                            <svg class="w-4 h-4" :class="savedPhoneNumber ? 'text-green-400' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                            </svg>
-                          </div>
-                          <div class="text-left">
-                            <p class="text-white font-medium text-sm">Số điện thoại</p>
-                            <p class="text-gray-400 text-xs">{{ savedPhoneNumber || 'Chưa có' }}</p>
+                        <div class="flex items-center flex-1">
+                          <svg
+                            class="w-6 h-6 mr-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                            />
+                          </svg>
+                          <div class="text-left flex-1">
+                            <p class="text-white font-medium">
+                              Điện thoại di động
+                            </p>
+                            <p
+                              v-if="savedPhoneNumber"
+                              class="text-gray-400 text-sm"
+                            >
+                              {{ savedPhoneNumber }}
+                            </p>
+                            <p v-else class="text-gray-400 text-sm">
+                              Thêm số điện thoại
+                            </p>
+                            <div
+                              v-if="savedPhoneNumber"
+                              class="flex items-center gap-1 mt-1"
+                            >
+                              <svg
+                                class="w-4 h-4 text-green-500"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fill-rule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                  clip-rule="evenodd"
+                                />
+                              </svg>
+                              <span class="text-green-500 text-xs">Đã lưu</span>
+                            </div>
                           </div>
                         </div>
-                        <svg class="w-4 h-4 text-gray-500 group-hover:text-yellow-400 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        <svg
+                          class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Truy cập và quyền riêng tư -->
+                  <div
+                    class="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6 mb-6"
+                  >
+                    <h3 class="text-lg font-semibold text-white mb-4">
+                      Truy cập và quyền riêng tư
+                    </h3>
+
+                    <!-- Truy cập và thiết bị -->
+                    <button
+                      @click="activeSection = 'devices'"
+                      class="w-full flex items-center justify-between p-4 hover:bg-[#2a2a2a] rounded-lg transition-colors group"
+                    >
+                      <div class="flex items-center flex-1">
+                        <svg
+                          class="w-6 h-6 mr-4 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <div class="text-left flex-1">
+                          <p class="text-white font-medium">
+                            Truy cập và thiết bị
+                          </p>
+                          <p class="text-gray-400 text-sm">
+                            Quản lý thiết bị đã đăng nhập
+                          </p>
+                        </div>
+                      </div>
+                      <svg
+                        class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+
+                    <!-- Chuyển hồ sơ -->
+                    <div class="border-t border-gray-800 mt-2 pt-2">
+                      <button
+                        class="w-full flex items-center justify-between p-4 hover:bg-[#2a2a2a] rounded-lg transition-colors group"
+                      >
+                        <div class="flex items-center flex-1">
+                          <svg
+                            class="w-6 h-6 mr-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                            />
+                          </svg>
+                          <div class="text-left flex-1">
+                            <p class="text-white font-medium">Chuyển hồ sơ</p>
+                            <div class="flex items-center gap-1 mt-1">
+                              <span
+                                class="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded"
+                                >Mới</span
+                              >
+                            </div>
+                          </div>
+                        </div>
+                        <svg
+                          class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <!-- Truy cập thông tin cá nhân -->
+                    <div class="border-t border-gray-800 mt-2 pt-2">
+                      <button
+                        class="w-full flex items-center justify-between p-4 hover:bg-[#2a2a2a] rounded-lg transition-colors group"
+                      >
+                        <div class="flex items-center flex-1">
+                          <svg
+                            class="w-6 h-6 mr-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                            />
+                          </svg>
+                          <div class="text-left flex-1">
+                            <p class="text-white font-medium">
+                              Truy cập thông tin cá nhân
+                            </p>
+                            <p class="text-gray-400 text-sm">
+                              Yêu cầu bản sao thông tin cá nhân của bạn
+                            </p>
+                          </div>
+                        </div>
+                        <svg
+                          class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <!-- Thử nghiệm tính năng -->
+                    <div class="border-t border-gray-800 mt-2 pt-2">
+                      <button
+                        class="w-full flex items-center justify-between p-4 hover:bg-[#2a2a2a] rounded-lg transition-colors group"
+                      >
+                        <div class="flex items-center flex-1">
+                          <svg
+                            class="w-6 h-6 mr-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                            />
+                          </svg>
+                          <div class="text-left flex-1">
+                            <p class="text-white font-medium">
+                              Thử nghiệm tính năng
+                            </p>
+                            <p class="text-gray-400 text-sm">Bật</p>
+                          </div>
+                        </div>
+                        <svg
+                          class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                          />
                         </svg>
                       </button>
                     </div>
                   </div>
 
                   <!-- Xóa tài khoản -->
-                  <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-5">
-                    <div class="flex items-center gap-3 mb-3">
-                      <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                      </svg>
-                      <div>
-                        <h3 class="text-red-400 font-semibold">Xóa tài khoản</h3>
-                        <p class="text-red-200 text-xs">Hành động này không thể hoàn tác</p>
-                      </div>
-                    </div>
+                  <div
+                    class="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6"
+                  >
                     <button
-                      @click="showDeleteAccountModal = true"
-                      class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
+                      class="w-full text-center text-red-400 hover:text-red-300 font-medium transition-colors"
                     >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                      Xóa tài khoản vĩnh viễn
+                      Xóa tài khoản
                     </button>
                   </div>
                 </div>
@@ -1298,6 +1909,110 @@
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                <!-- Thiết bị -->
+                <div v-if="activeSection === 'devices'">
+                  <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">
+                    Thiết bị
+                  </h1>
+                  <p class="text-gray-400 mb-8">Truy cập tài khoản</p>
+
+                  <!-- Truy cập và thiết bị -->
+                  <div
+                    class="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6 mb-6"
+                  >
+                    <button
+                      class="w-full flex items-center justify-between p-4 hover:bg-[#2a2a2a] rounded-lg transition-colors group"
+                    >
+                      <div class="flex items-center flex-1">
+                        <svg
+                          class="w-6 h-6 mr-4 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <div class="text-left flex-1">
+                          <p class="text-white font-medium">
+                            Truy cập và thiết bị
+                          </p>
+                          <p class="text-gray-400 text-sm">
+                            Quản lý thiết bị đã đăng nhập
+                          </p>
+                        </div>
+                      </div>
+                      <svg
+                        class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Tải xuống thiết bị di động -->
+                  <div
+                    class="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6"
+                  >
+                    <h3 class="text-lg font-semibold text-white mb-4">
+                      Tải xuống thiết bị di động
+                    </h3>
+
+                    <button
+                      class="w-full flex items-center justify-between p-4 hover:bg-[#2a2a2a] rounded-lg transition-colors group"
+                    >
+                      <div class="flex items-center flex-1">
+                        <svg
+                          class="w-6 h-6 mr-4 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                          />
+                        </svg>
+                        <div class="text-left flex-1">
+                          <p class="text-white font-medium">
+                            Thiết bị tải xuống di động
+                          </p>
+                          <p class="text-gray-400 text-sm">
+                            Đang dùng 0/6 thiết bị tải xuống
+                          </p>
+                        </div>
+                      </div>
+                      <svg
+                        class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
                   </div>
                 </div>
 
@@ -2300,7 +3015,7 @@ const profileForm = reactive({
   displayName: "",
 });
 
-// Menu items with icons - Simplified for movie streaming website
+// Menu items with icons
 const menuItems = [
   {
     id: "overview",
@@ -2320,6 +3035,50 @@ const menuItems = [
             "stroke-linejoin": "round",
             "stroke-width": "2",
             d: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
+          }),
+        ]
+      ),
+  },
+  {
+    id: "membership",
+    label: "Tư cách thành viên",
+    icon: () =>
+      h(
+        "svg",
+        {
+          class: "w-5 h-5",
+          fill: "none",
+          stroke: "currentColor",
+          viewBox: "0 0 24 24",
+        },
+        [
+          h("path", {
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round",
+            "stroke-width": "2",
+            d: "M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z",
+          }),
+        ]
+      ),
+  },
+  {
+    id: "password",
+    label: "Bảo mật",
+    icon: () =>
+      h(
+        "svg",
+        {
+          class: "w-5 h-5",
+          fill: "none",
+          stroke: "currentColor",
+          viewBox: "0 0 24 24",
+        },
+        [
+          h("path", {
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round",
+            "stroke-width": "2",
+            d: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z",
           }),
         ]
       ),
@@ -2347,8 +3106,8 @@ const menuItems = [
       ),
   },
   {
-    id: "password",
-    label: "Bảo mật",
+    id: "devices",
+    label: "Thiết bị",
     icon: () =>
       h(
         "svg",
@@ -2363,7 +3122,57 @@ const menuItems = [
             "stroke-linecap": "round",
             "stroke-linejoin": "round",
             "stroke-width": "2",
-            d: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z",
+            d: "M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z",
+          }),
+        ]
+      ),
+  },
+  {
+    id: "profile",
+    label: "Hồ sơ",
+    icon: () =>
+      h(
+        "svg",
+        {
+          class: "w-5 h-5",
+          fill: "none",
+          stroke: "currentColor",
+          viewBox: "0 0 24 24",
+        },
+        [
+          h("path", {
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round",
+            "stroke-width": "2",
+            d: "M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+          }),
+        ]
+      ),
+  },
+  {
+    id: "settings",
+    label: "Cài đặt",
+    icon: () =>
+      h(
+        "svg",
+        {
+          class: "w-5 h-5",
+          fill: "none",
+          stroke: "currentColor",
+          viewBox: "0 0 24 24",
+        },
+        [
+          h("path", {
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round",
+            "stroke-width": "2",
+            d: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z",
+          }),
+          h("path", {
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round",
+            "stroke-width": "2",
+            d: "M15 12a3 3 0 11-6 0 3 3 0 016 0z",
           }),
         ]
       ),
@@ -2502,16 +3311,6 @@ const showCancelConfirmModal = (sub) => {
 const cancellingSubscription = ref(null);
 const showCancelModal = ref(false);
 const subscriptionToCancel = ref(null);
-
-// Delete account
-const showDeleteAccountModal = ref(false);
-
-const confirmDeleteAccount = async () => {
-  // TODO: Implement delete account API call
-  console.log('Delete account confirmed');
-  toast.info('Chức năng xóa tài khoản đang được phát triển');
-  showDeleteAccountModal.value = false;
-};
 
 const confirmCancelSubscription = async () => {
   const sub = subscriptionToCancel.value;
