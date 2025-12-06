@@ -109,11 +109,11 @@ try {
                 $duration_months = $item['duration_months'];
                 $duration_days = $item['duration_days'] * $duration_months;
                 
-                // Kiểm tra đã có subscription chưa
+                // Kiểm tra đã có subscription chưa (chỉ check những gói chưa hết hạn và chưa bị hủy)
                 $check_stmt = $conn->prepare("
-                    SELECT id, end_date 
+                    SELECT id, end_date, status 
                     FROM user_subscriptions 
-                    WHERE user_id = ? AND plan_id = ? AND status = 'active'
+                    WHERE user_id = ? AND plan_id = ? AND status = 'active' AND end_date > NOW()
                     ORDER BY end_date DESC 
                     LIMIT 1
                 ");
@@ -122,7 +122,7 @@ try {
                 $check_result = $check_stmt->get_result();
                 
                 if ($check_result->num_rows > 0) {
-                    // Gia hạn
+                    // Gia hạn (chỉ khi gói còn hiệu lực)
                     $existing = $check_result->fetch_assoc();
                     $current_end = new DateTime($existing['end_date']);
                     $now = new DateTime();
@@ -142,7 +142,16 @@ try {
                     
                     echo "<p>✅ Đã gia hạn subscription (Plan ID: {$plan_id})</p>";
                 } else {
-                    // Tạo mới
+                    // Tạo mới (hoặc gói đã hết hạn/bị hủy)
+                    // Trước khi tạo mới, set các gói cũ thành 'expired' nếu đã hết hạn
+                    $expire_old = $conn->prepare("
+                        UPDATE user_subscriptions 
+                        SET status = 'expired', updated_at = NOW()
+                        WHERE user_id = ? AND plan_id = ? AND status = 'active' AND end_date <= NOW()
+                    ");
+                    $expire_old->bind_param("ii", $user_id, $plan_id);
+                    $expire_old->execute();
+                    
                     $insert_stmt = $conn->prepare("
                         INSERT INTO user_subscriptions (
                             user_id, plan_id, start_date, end_date, status, order_id, created_at, updated_at
@@ -151,7 +160,7 @@ try {
                     $insert_stmt->bind_param("iiii", $user_id, $plan_id, $duration_days, $order_id);
                     $insert_stmt->execute();
                     
-                    echo "<p>✅ Đã tạo subscription mới (Plan ID: {$plan_id})</p>";
+                    echo "<p>✅ Đã tạo subscription mới (Plan ID: {$plan_id}) - Thời gian được reset</p>";
                 }
             }
             
