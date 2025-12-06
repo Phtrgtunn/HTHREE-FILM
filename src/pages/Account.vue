@@ -3371,10 +3371,6 @@ const fetchTransactions = async () => {
   }
 };
 
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('vi-VN').format(price);
-};
-
 const getStatusText = (status) => {
   const statusMap = {
     completed: 'Thành công',
