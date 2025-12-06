@@ -300,7 +300,7 @@ const calculatePrice = (basePrice, months, discount) => {
   return Math.round(totalPrice - discountAmount);
 };
 
-// Mua ngay (chuyển thẳng đến checkout)
+// Mua ngay (hiển thị modal thanh toán)
 const handleBuyNow = (plan) => {
   // Kiểm tra đăng nhập
   if (!authStore.user) {
@@ -315,22 +315,9 @@ const handleBuyNow = (plan) => {
     return;
   }
 
-  // Lấy duration đã chọn (mặc định 1 tháng)
-  const duration = selectedDurations.value[plan.id] || 1;
-  
-  // Chuyển thẳng đến checkout với thông tin gói
-  router.push({
-    path: '/checkout',
-    query: {
-      plan_id: plan.id,
-      plan_slug: plan.slug,
-      plan_name: plan.name,
-      duration: duration,
-      price: plan.price
-    }
-  });
-  
-  toast.info('🛒 Đang chuyển đến trang thanh toán...');
+  // Hiển thị modal thanh toán với QR code
+  selectedPlan.value = plan;
+  showPaymentModal.value = true;
 };
 
 const handlePaymentSuccess = () => {
