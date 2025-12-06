@@ -64,8 +64,15 @@
             style="background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)"
           ></div> -->
 
+          <!-- Current Plan Badge -->
+          <div v-if="currentUserPlan === plan.slug" class="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+            <span class="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase shadow-lg">
+              ✓ Đang sử dụng
+            </span>
+          </div>
+          
           <!-- Popular Badge - Removed animate-pulse -->
-          <div v-if="plan.slug === 'premium'" class="absolute -top-3 left-1/2 -translate-x-1/2">
+          <div v-else-if="plan.slug === 'premium'" class="absolute -top-3 left-1/2 -translate-x-1/2">
             <span class="bg-gradient-to-r from-red-600 to-yellow-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase shadow-lg">
               ⭐ {{ $t('pricing.mostPopular') }}
             </span>
@@ -239,6 +246,7 @@ const addingToCart = ref(null);
 const showSuccess = ref(false);
 const successMessage = ref('');
 const selectedDurations = ref({});
+const currentUserPlan = ref(null);
 
 // Duration options with discounts
 const durationOptions = [
@@ -259,7 +267,35 @@ const breadcrumbItems = [
 
 onMounted(async () => {
   await fetchPlans();
+  await fetchCurrentUserPlan();
 });
+
+// Fetch current user's active plan
+const fetchCurrentUserPlan = async () => {
+  const storedUser = localStorage.getItem('user');
+  if (!storedUser) return;
+  
+  try {
+    const userData = JSON.parse(storedUser);
+    const userId = userData.id;
+    
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost/HTHREE_film/backend/api';
+    const response = await fetch(`${API_URL}/user_subscription.php?user_id=${userId}`);
+    const data = await response.json();
+    
+    if (data.success && data.data && data.data.length > 0) {
+      // Get the active subscription with highest priority
+      const activeSubs = data.data.filter(sub => sub.status === 'active');
+      if (activeSubs.length > 0) {
+        const priority = { vip: 4, premium: 3, basic: 2, free: 1 };
+        const topSub = activeSubs.sort((a, b) => (priority[b.plan_slug] || 0) - (priority[a.plan_slug] || 0))[0];
+        currentUserPlan.value = topSub.plan_slug;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch user plan:', error);
+  }
+};
 
 const fetchPlans = async () => {
   loading.value = true;

@@ -21,7 +21,7 @@
               <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
               </svg>
-              <h3 class="text-xl font-bold text-white">Xác nhận hủy gói</h3>
+              <h3 class="text-xl font-bold text-white">Xác nhận dừng gia hạn</h3>
             </div>
           </div>
 
@@ -32,7 +32,7 @@
               <ul class="text-red-200 text-sm space-y-2">
                 <li class="flex items-start gap-2">
                   <span class="text-red-400 mt-0.5">•</span>
-                  <span>Hủy gói sẽ <strong>KHÔNG HOÀN TIỀN</strong></span>
+                  <span>Dừng gia hạn sẽ <strong>KHÔNG HOÀN TIỀN</strong></span>
                 </li>
                 <li class="flex items-start gap-2">
                   <span class="text-red-400 mt-0.5">•</span>
@@ -57,7 +57,7 @@
             </div>
 
             <p class="text-gray-300 text-sm">
-              Bạn có chắc chắn muốn hủy gói này không?
+              Bạn có chắc chắn muốn dừng gia hạn gói này không?
             </p>
           </div>
 
@@ -513,18 +513,20 @@
                       <div
                         class="bg-black/20 backdrop-blur-sm rounded-xl p-5 mb-5"
                       >
-                        <div class="grid grid-cols-4 gap-4 mb-4">
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                           <div>
-                            <p class="text-white/60 text-xs mb-1">
-                              Ngày bắt đầu
+                            <p class="text-white/60 text-xs mb-1 flex items-center gap-1">
+                              <span>📅</span>
+                              <span>Ngày bắt đầu</span>
                             </p>
                             <p class="text-white font-bold">
                               {{ activeSubscription.start_date_formatted }}
                             </p>
                           </div>
                           <div>
-                            <p class="text-white/60 text-xs mb-1">
-                              Thời gian sử dụng
+                            <p class="text-white/60 text-xs mb-1 flex items-center gap-1">
+                              <span>⏱️</span>
+                              <span>Thời gian</span>
                             </p>
                             <p class="text-white font-bold">
                               {{ activeSubscription.used_days }}/{{
@@ -534,16 +536,18 @@
                             </p>
                           </div>
                           <div>
-                            <p class="text-white/60 text-xs mb-1">
-                              Ngày hết hạn
+                            <p class="text-white/60 text-xs mb-1 flex items-center gap-1">
+                              <span>📆</span>
+                              <span>Ngày hết hạn</span>
                             </p>
                             <p class="text-white font-bold">
                               {{ activeSubscription.end_date_formatted }}
                             </p>
                           </div>
-                          <div class="text-right">
-                            <p class="text-white/60 text-xs mb-1">
-                              Giá đã trả
+                          <div class="lg:text-right">
+                            <p class="text-white/60 text-xs mb-1 flex items-center gap-1 lg:justify-end">
+                              <span>💰</span>
+                              <span>Giá đã trả</span>
                             </p>
                             <p class="text-green-400 font-bold">
                               {{ formatPrice(activeSubscription.price) }}đ
@@ -623,7 +627,7 @@
                         
                         <!-- Nâng cấp gói -->
                         <button
-                          @click="router.push('/pricing')"
+                          @click="handleUpgrade"
                           class="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
                         >
                           <svg
@@ -642,7 +646,7 @@
                           <span>Nâng cấp</span>
                         </button>
                         
-                        <!-- Hủy gói -->
+                        <!-- Dừng gia hạn -->
                         <button
                           @click="showCancelConfirmModal(activeSubscription)"
                           :disabled="
@@ -663,7 +667,7 @@
                               stroke-linecap="round"
                               stroke-linejoin="round"
                               stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12"
+                              d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                           </svg>
                           <svg
@@ -688,8 +692,8 @@
                           </svg>
                           <span>{{
                             cancellingSubscription === activeSubscription.id
-                              ? "Đang hủy..."
-                              : "Hủy gói"
+                              ? "Đang xử lý..."
+                              : "Dừng gia hạn"
                           }}</span>
                         </button>
                       </div>
@@ -1900,12 +1904,9 @@
                           </svg>
                           <span>{{ transaction.payment_method_name || 'Chuyển khoản' }}</span>
                         </div>
-                        <button
-                          @click="viewTransactionDetail(transaction)"
-                          class="text-yellow-400 hover:text-yellow-300 text-sm font-medium transition-colors"
-                        >
-                          Xem chi tiết →
-                        </button>
+                        <div class="text-xs text-gray-500">
+                          Mã: {{ transaction.order_code }}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -3292,6 +3293,12 @@ const renewCurrentPlan = (sub) => {
     query: { plan: sub.plan_slug }
   });
   toast.success(`Đang chuyển đến trang mua gói ${sub.plan_name}...`);
+};
+
+// Handle upgrade
+const handleUpgrade = () => {
+  router.push('/pricing');
+  toast.info('💎 Khám phá các gói cao cấp hơn!');
 };
 
 // Show cancel confirmation modal
