@@ -295,13 +295,22 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             </div>
-            <!-- User Avatar -->
-            <img 
-              v-else-if="user"
-              :src="user?.avatar || user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.full_name || user?.displayName || user?.username || 'User')}&background=f59e0b&color=000`"
-              class="w-7 h-7 rounded-full border-2 border-yellow-400 shadow-lg"
-              :alt="user?.full_name || user?.displayName || user?.username || 'User'"
-            />
+            <!-- User Avatar with Badge -->
+            <div v-else-if="user" class="relative">
+              <img 
+                :src="user?.avatar || user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.full_name || user?.displayName || user?.username || 'User')}&background=f59e0b&color=000`"
+                class="w-7 h-7 rounded-full border-2 border-yellow-400 shadow-lg"
+                :alt="user?.full_name || user?.displayName || user?.username || 'User'"
+              />
+              <!-- Subscription Badge Icon (Small) -->
+              <div 
+                v-if="subscriptionBadge"
+                :class="subscriptionBadge.color"
+                class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold border-2 border-gray-900 shadow-lg"
+              >
+                {{ subscriptionBadge.icon }}
+              </div>
+            </div>
             <!-- Default Icon if not logged in -->
             <svg v-else class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -322,16 +331,26 @@
                   :alt="user?.full_name || user?.displayName || user?.username || 'User'"
                 />
                 <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-1.5">
+                  <div class="flex items-center gap-1.5 mb-0.5">
                     <p class="text-white font-bold truncate text-sm">
                       {{ user?.full_name || user?.displayName || user?.username }}
                     </p>
-                    <svg class="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
+                    <!-- Subscription Badge (inline with name) -->
+                    <span 
+                      v-if="subscriptionBadge"
+                      :class="subscriptionBadge.color"
+                      class="px-1.5 py-0.5 rounded text-[9px] font-bold flex items-center gap-0.5 flex-shrink-0"
+                    >
+                      <span>{{ subscriptionBadge.icon }}</span>
+                      <span>{{ subscriptionBadge.label }}</span>
+                    </span>
                   </div>
-                  <p class="text-gray-400 text-[10px] truncate">
+                  <p class="text-gray-400 text-[10px] truncate mb-0.5">
                     {{ user?.email }}
+                  </p>
+                  <!-- Subscription expiry info -->
+                  <p v-if="subscriptionBadge" class="text-gray-500 text-[9px] truncate">
+                    {{ subscriptionTooltip }}
                   </p>
                 </div>
               </div>
@@ -357,25 +376,7 @@
               </div>
             </div>
 
-            <!-- Stats -->
-            <div v-if="user" class="px-4 py-2.5 bg-gray-800/50 border-b border-gray-700/50">
-              <div class="flex items-center justify-between text-xs">
-                <div class="flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z"/>
-                    <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
-                  </svg>
-                  <span class="text-gray-300">Số dư</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <span class="text-white font-bold">0</span>
-                  <span class="text-yellow-400 font-bold text-xs">Ⓡ</span>
-                  <button class="bg-gray-700 hover:bg-gray-600 hover:scale-110 text-white px-2 py-0.5 rounded text-[10px] font-medium transition-all duration-300">
-                    + Nạp
-                  </button>
-                </div>
-              </div>
-            </div>
+
 
             <!-- Menu Items -->
             <div class="py-1.5">
@@ -775,6 +776,67 @@ const mobileCategoriesOpen = ref(false);
 const mobileCountriesOpen = ref(false);
 const showShortcutsHelp = ref(false);
 
+// Subscription state
+const userSubscription = ref(null);
+const loadingSubscription = ref(false);
+
+// Fetch user subscription
+const fetchUserSubscription = async () => {
+  if (!user.value?.id) return;
+  
+  try {
+    loadingSubscription.value = true;
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost/HTHREE_film/backend/api';
+    const response = await fetch(`${API_URL}/user_subscription.php?user_id=${user.value.id}`);
+    const data = await response.json();
+    
+    if (data.success && data.data && data.data.length > 0) {
+      // Get active subscription with highest priority
+      const active = data.data.filter(sub => sub.status === 'active');
+      if (active.length > 0) {
+        const priority = { vip: 4, premium: 3, basic: 2, free: 1 };
+        userSubscription.value = active.sort((a, b) => {
+          return (priority[b.plan_slug] || 0) - (priority[a.plan_slug] || 0);
+        })[0];
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch subscription:', error);
+  } finally {
+    loadingSubscription.value = false;
+  }
+};
+
+// Computed: Subscription badge info
+const subscriptionBadge = computed(() => {
+  if (!userSubscription.value) return null;
+  
+  const badges = {
+    vip: { label: 'VIP', color: 'bg-purple-600 text-white', icon: '👑' },
+    premium: { label: 'PREMIUM', color: 'bg-red-600 text-white', icon: '⭐' },
+    basic: { label: 'BASIC', color: 'bg-blue-600 text-white', icon: '✓' },
+    free: { label: 'FREE', color: 'bg-gray-600 text-white', icon: '○' }
+  };
+  
+  return badges[userSubscription.value.plan_slug] || null;
+});
+
+// Computed: Subscription tooltip
+const subscriptionTooltip = computed(() => {
+  if (!userSubscription.value) return '';
+  
+  const daysRemaining = userSubscription.value.days_remaining;
+  const endDate = userSubscription.value.end_date_formatted;
+  
+  if (daysRemaining <= 0) {
+    return `Đã hết hạn: ${endDate}`;
+  } else if (daysRemaining <= 7) {
+    return `⚠️ Sắp hết hạn: ${endDate} (còn ${daysRemaining} ngày)`;
+  } else {
+    return `Hết hạn: ${endDate} (còn ${daysRemaining} ngày)`;
+  }
+});
+
 // Countries list
 const countries = ref([
   { name: '🇻🇳 Việt Nam', slug: 'viet-nam' },
@@ -959,6 +1021,20 @@ onMounted(async () => {
   
   // Load cart
   await cartStore.fetchCart();
+  
+  // Fetch subscription if user is logged in
+  if (user.value) {
+    await fetchUserSubscription();
+  }
+  
+  // Watch for user changes to refetch subscription
+  onAuthStateChanged(auth, async (currentUser) => {
+    if (currentUser) {
+      await fetchUserSubscription();
+    } else {
+      userSubscription.value = null;
+    }
+  });
 });
 
 onUnmounted(() => {

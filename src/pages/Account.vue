@@ -7,6 +7,98 @@
       @save="handleSaveProfile"
     />
 
+    <!-- Cancel Subscription Confirmation Modal -->
+    <Transition name="modal">
+      <div
+        v-if="showCancelModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+        @click.self="showCancelModal = false"
+      >
+        <div class="relative w-full max-w-md bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-red-500/30">
+          <!-- Header -->
+          <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
+            <div class="flex items-center gap-3">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              <h3 class="text-xl font-bold text-white">Xác nhận hủy gói</h3>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-6 space-y-4">
+            <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+              <p class="text-red-400 font-bold mb-2">⚠️ Lưu ý quan trọng:</p>
+              <ul class="text-red-200 text-sm space-y-2">
+                <li class="flex items-start gap-2">
+                  <span class="text-red-400 mt-0.5">•</span>
+                  <span>Hủy gói sẽ <strong>KHÔNG HOÀN TIỀN</strong></span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-red-400 mt-0.5">•</span>
+                  <span>Bạn vẫn có thể sử dụng gói đến hết ngày <strong>{{ subscriptionToCancel?.end_date_formatted }}</strong></span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-red-400 mt-0.5">•</span>
+                  <span>Sau khi hết hạn, gói sẽ không tự động gia hạn</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg p-4">
+              <p class="text-gray-300 text-sm mb-2">Thông tin gói:</p>
+              <div class="flex items-center justify-between">
+                <span class="text-white font-bold">{{ subscriptionToCancel?.plan_name }}</span>
+                <span class="text-yellow-400 font-bold">{{ subscriptionToCancel?.quality }}</span>
+              </div>
+              <p class="text-gray-400 text-xs mt-2">
+                Còn lại {{ getRealtimeProgress(subscriptionToCancel).daysRemaining }} ngày
+              </p>
+            </div>
+
+            <p class="text-gray-300 text-sm">
+              Bạn có chắc chắn muốn hủy gói này không?
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div class="bg-gray-800/50 px-6 py-4 flex gap-3">
+            <button
+              @click="showCancelModal = false"
+              class="flex-1 px-4 py-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-medium transition-colors flex items-center justify-center"
+            >
+              Giữ lại gói
+            </button>
+            <button
+              @click="confirmCancelSubscription"
+              :disabled="cancellingSubscription"
+              class="flex-1 px-4 py-3 rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <svg
+                v-if="!cancellingSubscription"
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+              <svg
+                v-else
+                class="w-5 h-5 animate-spin"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>{{ cancellingSubscription ? 'Đang hủy...' : 'Đồng ý hủy' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Top Header with Logo -->
     <div class="bg-black border-b border-gray-800 px-8 py-4">
       <div class="flex items-center justify-between">
@@ -316,29 +408,30 @@
 
                   <!-- Active Subscription -->
                   <div v-if="activeSubscription" class="mb-6">
-                    <div class="flex items-center justify-between mb-4">
-                      <h3 class="text-white font-bold text-lg flex items-center gap-2">
-                        <svg
-                          class="w-5 h-5"
-                          :class="{
-                            'text-green-400':
-                              getRealtimeProgress(activeSubscription).status ===
-                              'active',
-                            'text-yellow-400':
-                              getRealtimeProgress(activeSubscription).status ===
-                              'expiring_soon',
-                            'text-red-400':
-                              getRealtimeProgress(activeSubscription).status ===
-                              'expired',
-                          }"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clip-rule="evenodd"
-                          />
+                    <h3
+                      class="text-white font-bold text-lg mb-4 flex items-center gap-2"
+                    >
+                      <svg
+                        class="w-5 h-5"
+                        :class="{
+                          'text-green-400':
+                            getRealtimeProgress(activeSubscription).status ===
+                            'active',
+                          'text-yellow-400':
+                            getRealtimeProgress(activeSubscription).status ===
+                            'expiring_soon',
+                          'text-red-400':
+                            getRealtimeProgress(activeSubscription).status ===
+                            'expired',
+                        }"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clip-rule="evenodd"
+                        />
                       </svg>
                       <span>Gói đang sử dụng</span>
                       <span
@@ -498,10 +591,32 @@
                       </div>
 
                       <!-- Actions -->
-                      <div class="flex gap-3">
+                      <div class="grid grid-cols-3 gap-3">
+                        <!-- Gia hạn gói hiện tại -->
+                        <button
+                          @click="renewCurrentPlan(activeSubscription)"
+                          class="bg-green-500/20 hover:bg-green-500/30 text-green-400 font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
+                        >
+                          <svg
+                            class="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                            />
+                          </svg>
+                          <span>Gia hạn</span>
+                        </button>
+                        
+                        <!-- Nâng cấp gói -->
                         <button
                           @click="router.push('/pricing')"
-                          class="flex-1 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
+                          class="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
                         >
                           <svg
                             class="w-5 h-5"
@@ -516,14 +631,16 @@
                               d="M5 10l7-7m0 0l7 7m-7-7v18"
                             />
                           </svg>
-                          <span>Nâng cấp gói</span>
+                          <span>Nâng cấp</span>
                         </button>
+                        
+                        <!-- Hủy gói -->
                         <button
-                          @click="cancelSubscription(activeSubscription)"
+                          @click="showCancelConfirmModal(activeSubscription)"
                           :disabled="
                             cancellingSubscription === activeSubscription.id
                           "
-                          class="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold py-3 rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                          class="bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold py-3 rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                           <svg
                             v-if="
@@ -1649,6 +1766,117 @@
                   </div>
                 </div>
 
+                <!-- Lịch sử giao dịch -->
+                <div v-if="activeSection === 'transactions'">
+                  <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">
+                    Lịch sử giao dịch
+                  </h1>
+                  <p class="text-gray-400 mb-8">Tất cả giao dịch mua gói của bạn</p>
+
+                  <!-- Loading -->
+                  <div v-if="loadingTransactions" class="flex justify-center items-center py-12">
+                    <svg class="animate-spin h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+
+                  <!-- No transactions -->
+                  <div v-else-if="!transactions || transactions.length === 0" class="text-center py-12">
+                    <svg class="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <p class="text-gray-400 text-lg mb-2">Chưa có giao dịch nào</p>
+                    <p class="text-gray-500 text-sm mb-6">Lịch sử mua gói của bạn sẽ hiển thị ở đây</p>
+                    <button
+                      @click="router.push('/pricing')"
+                      class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-3 rounded-lg transition-colors"
+                    >
+                      Mua gói ngay
+                    </button>
+                  </div>
+
+                  <!-- Transactions list -->
+                  <div v-else class="space-y-4">
+                    <div
+                      v-for="transaction in transactions"
+                      :key="transaction.id"
+                      class="bg-[#1a1a1a] border border-gray-800 rounded-xl p-6 hover:border-gray-700 transition-all"
+                    >
+                      <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-start gap-4">
+                          <!-- Icon -->
+                          <div class="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                            </svg>
+                          </div>
+                          
+                          <!-- Info -->
+                          <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                              <h3 class="text-white font-bold text-lg">{{ transaction.plan_name }}</h3>
+                              <span class="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded text-xs font-bold">
+                                {{ transaction.quality }}
+                              </span>
+                            </div>
+                            <p class="text-gray-400 text-sm mb-2">
+                              Mã đơn: <span class="text-gray-300 font-mono">#{{ transaction.order_code }}</span>
+                            </p>
+                            <div class="flex items-center gap-4 text-sm">
+                              <div class="flex items-center gap-1 text-gray-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <span>{{ transaction.created_at_formatted }}</span>
+                              </div>
+                              <div class="flex items-center gap-1 text-gray-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>{{ transaction.duration }} ngày</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Price & Status -->
+                        <div class="text-right">
+                          <p class="text-yellow-400 font-bold text-xl mb-2">
+                            {{ formatPrice(transaction.total_price) }}đ
+                          </p>
+                          <span
+                            class="inline-block px-3 py-1 rounded-full text-xs font-bold"
+                            :class="{
+                              'bg-green-500/20 text-green-400': transaction.status === 'completed',
+                              'bg-yellow-500/20 text-yellow-400': transaction.status === 'pending',
+                              'bg-red-500/20 text-red-400': transaction.status === 'cancelled'
+                            }"
+                          >
+                            {{ getStatusText(transaction.status) }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <!-- Payment method -->
+                      <div class="flex items-center justify-between pt-4 border-t border-gray-800">
+                        <div class="flex items-center gap-2 text-sm text-gray-400">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                          </svg>
+                          <span>{{ transaction.payment_method_name || 'Chuyển khoản' }}</span>
+                        </div>
+                        <button
+                          @click="viewTransactionDetail(transaction)"
+                          class="text-yellow-400 hover:text-yellow-300 text-sm font-medium transition-colors"
+                        >
+                          Xem chi tiết →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Thiết bị -->
                 <div v-if="activeSection === 'devices'">
                   <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">
@@ -2704,20 +2932,10 @@
       </div>
     </div>
   </div>
-
-  <!-- Confirm Cancel Modal -->
-  <ConfirmModal
-    v-model="showCancelModal"
-    title="Hủy gói đăng ký"
-    :message="`Bạn có chắc muốn hủy gói ${subscriptionToCancel?.plan_name}?\n\nGói sẽ bị hủy ngay lập tức và bạn sẽ mất quyền truy cập.`"
-    confirm-text="Hủy gói"
-    cancel-text="Giữ lại"
-    @confirm="confirmCancelSubscription"
-  />
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, reactive, h, computed } from "vue";
+import { ref, onMounted, onUnmounted, reactive, h, computed, watch } from "vue";
 import {
   getAuth,
   onAuthStateChanged,
@@ -2726,7 +2944,6 @@ import {
 } from "firebase/auth";
 import { useToast } from "@/composables/useToast";
 import { useRouter } from "vue-router";
-import ConfirmModal from "@/components/ConfirmModal.vue";
 import EditProfileModal from "@/components/EditProfileModal.vue";
 
 const auth = getAuth();
@@ -2832,6 +3049,28 @@ const menuItems = [
       ),
   },
   {
+    id: "transactions",
+    label: "Lịch sử giao dịch",
+    icon: () =>
+      h(
+        "svg",
+        {
+          class: "w-5 h-5",
+          fill: "none",
+          stroke: "currentColor",
+          viewBox: "0 0 24 24",
+        },
+        [
+          h("path", {
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round",
+            "stroke-width": "2",
+            d: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01",
+          }),
+        ]
+      ),
+  },
+  {
     id: "devices",
     label: "Thiết bị",
     icon: () =>
@@ -2925,37 +3164,6 @@ const pendingSubscriptions = computed(() => {
   return subscriptions.value.filter((sub) => sub.status === "pending");
 });
 const currentTime = ref(new Date());
-const serverTime = ref(null);
-const timeOffset = ref(0); // Chênh lệch giữa server và client
-
-// Fetch server time để validate
-const fetchServerTime = async () => {
-  try {
-    const API_URL =
-      import.meta.env.VITE_API_BASE_URL ||
-      "http://localhost/HTHREE_film/HTHREE_film/backend/api";
-    const response = await fetch(`${API_URL}/server_time.php`);
-    const data = await response.json();
-
-    if (data.success && data.server_time) {
-      serverTime.value = new Date(data.server_time);
-      const clientTime = new Date();
-      timeOffset.value = serverTime.value - clientTime;
-
-      // Cảnh báo nếu client time sai lệch quá 5 phút
-      const offsetMinutes = Math.abs(timeOffset.value) / (1000 * 60);
-      if (offsetMinutes > 5) {
-        console.warn(
-          `⚠️ Client time sai lệch ${offsetMinutes.toFixed(
-            0
-          )} phút so với server`
-        );
-      }
-    }
-  } catch (error) {
-    console.error("Failed to fetch server time:", error);
-  }
-};
 
 // Fetch user subscriptions (multiple)
 const fetchSubscription = async () => {
@@ -3012,13 +3220,7 @@ const getPlanDescription = (slug) => {
 const getRealtimeProgress = (sub) => {
   const start = new Date(sub.start_date);
   const end = new Date(sub.end_date);
-
-  // Sử dụng server time nếu có, fallback về client time
-  let now = currentTime.value;
-  if (serverTime.value) {
-    // Tính server time hiện tại dựa trên offset
-    now = new Date(new Date().getTime() + timeOffset.value);
-  }
+  const now = currentTime.value;
 
   const totalMs = end - start;
   const usedMs = now - start;
@@ -3030,19 +3232,6 @@ const getRealtimeProgress = (sub) => {
     0,
     Math.ceil(remainingMs / (1000 * 60 * 60 * 24))
   );
-
-  // Cảnh báo nếu client time bị chỉnh sửa (sai lệch > 1 ngày)
-  const clientNow = new Date();
-  const clientDaysRemaining = Math.ceil(
-    (end - clientNow) / (1000 * 60 * 60 * 24)
-  );
-  const daysDiff = Math.abs(daysRemaining - clientDaysRemaining);
-
-  if (daysDiff > 1 && serverTime.value) {
-    console.warn(
-      `⚠️ Phát hiện client time có thể bị chỉnh sửa. Sử dụng server time.`
-    );
-  }
 
   return {
     progress: progress.toFixed(2),
@@ -3056,26 +3245,37 @@ const getRealtimeProgress = (sub) => {
   };
 };
 
+// Renew current plan
+const renewCurrentPlan = (sub) => {
+  // Navigate to pricing page with plan pre-selected
+  router.push({
+    path: '/pricing',
+    query: { plan: sub.plan_slug }
+  });
+  toast.success(`Đang chuyển đến trang mua gói ${sub.plan_name}...`);
+};
+
+// Show cancel confirmation modal
+const showCancelConfirmModal = (sub) => {
+  subscriptionToCancel.value = sub;
+  showCancelModal.value = true;
+};
+
 // Cancel subscription
 const cancellingSubscription = ref(null);
 const showCancelModal = ref(false);
 const subscriptionToCancel = ref(null);
 
-const cancelSubscription = (sub) => {
-  subscriptionToCancel.value = sub;
-  showCancelModal.value = true;
-};
-
 const confirmCancelSubscription = async () => {
   const sub = subscriptionToCancel.value;
   if (!sub) return;
 
-  cancellingSubscription.value = sub.id;
+  cancellingSubscription.value = true;
 
   try {
     const API_URL =
       import.meta.env.VITE_API_BASE_URL ||
-      "http://localhost/HTHREE_film/HTHREE_film/backend/api";
+      "http://localhost/HTHREE_film/backend/api";
     const response = await fetch(`${API_URL}/cancel_subscription.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -3085,7 +3285,8 @@ const confirmCancelSubscription = async () => {
     const data = await response.json();
 
     if (data.success) {
-      toast.success("Gói đã được hủy thành công!");
+      toast.success("Gói đã được hủy thành công! Bạn vẫn có thể sử dụng đến hết hạn.");
+      showCancelModal.value = false;
       // Refresh subscriptions
       await fetchSubscription();
     } else {
@@ -3095,8 +3296,58 @@ const confirmCancelSubscription = async () => {
     console.error("Error cancelling subscription:", error);
     toast.error("Có lỗi xảy ra khi hủy gói");
   } finally {
-    cancellingSubscription.value = null;
+    cancellingSubscription.value = false;
   }
+};
+
+// Transactions
+const transactions = ref([]);
+const loadingTransactions = ref(false);
+
+const fetchTransactions = async () => {
+  const storedUser = localStorage.getItem("user");
+  if (!storedUser) return;
+
+  try {
+    const userData = JSON.parse(storedUser);
+    const userId = userData.id;
+
+    loadingTransactions.value = true;
+    const API_URL =
+      import.meta.env.VITE_API_BASE_URL ||
+      "http://localhost/HTHREE_film/backend/api";
+    const response = await fetch(
+      `${API_URL}/user_transactions.php?user_id=${userId}`
+    );
+    const data = await response.json();
+
+    if (data.success && data.transactions) {
+      transactions.value = data.transactions;
+      console.log("💳 Transactions:", transactions.value);
+    }
+  } catch (error) {
+    console.error("Failed to fetch transactions:", error);
+  } finally {
+    loadingTransactions.value = false;
+  }
+};
+
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('vi-VN').format(price);
+};
+
+const getStatusText = (status) => {
+  const statusMap = {
+    completed: 'Thành công',
+    pending: 'Đang xử lý',
+    cancelled: 'Đã hủy'
+  };
+  return statusMap[status] || status;
+};
+
+const viewTransactionDetail = (transaction) => {
+  toast.info(`Chi tiết đơn hàng #${transaction.order_code}`);
+  // TODO: Open transaction detail modal
 };
 
 // Update current time every second for real-time progress
@@ -3104,9 +3355,6 @@ let timeInterval = null;
 let refreshInterval = null;
 
 onMounted(() => {
-  // Fetch server time ngay khi mount
-  fetchServerTime();
-
   onAuthStateChanged(auth, (currentUser) => {
     user.value = currentUser;
     if (currentUser) {
@@ -3128,11 +3376,6 @@ onMounted(() => {
       refreshInterval = setInterval(() => {
         fetchSubscription();
       }, 30000);
-
-      // Refresh server time every 5 minutes
-      setInterval(() => {
-        fetchServerTime();
-      }, 5 * 60 * 1000);
     } else {
       // Nếu không có user (đã đăng xuất), chuyển về Homepage
       router.push("/home");
@@ -3145,6 +3388,13 @@ onMounted(() => {
 onUnmounted(() => {
   if (timeInterval) clearInterval(timeInterval);
   if (refreshInterval) clearInterval(refreshInterval);
+});
+
+// Watch activeSection to fetch transactions when needed
+watch(activeSection, (newSection) => {
+  if (newSection === 'transactions' && transactions.value.length === 0) {
+    fetchTransactions();
+  }
 });
 
 // Handle save profile

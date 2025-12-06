@@ -66,8 +66,9 @@ export const useAuthStore = defineStore('auth', {
           this.loading = false;
           console.log('⚡ AuthStore - User restored INSTANTLY from localStorage:', syncUser.email);
           
-          // Background: Verify with persistent storage (IndexedDB)
+          // Background: Verify with persistent storage (IndexedDB) AND fetch fresh avatar
           this.verifyPersistentStorage();
+          this.refreshUserData();
           
           return syncUser;
         }
@@ -143,6 +144,48 @@ export const useAuthStore = defineStore('auth', {
         }
       } catch (error) {
         console.warn('⚠️ Persistent storage verification failed:', error);
+      }
+    },
+
+    /**
+     * Refresh user data from database (fetch latest avatar, etc.)
+     */
+    async refreshUserData() {
+      try {
+        if (!this.user) return;
+        
+        const userId = this.user.id || this.user.uid;
+        if (!userId) return;
+        
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost/HTHREE_film/backend/api';
+        
+        const response = await fetch(`${API_URL}/get_user.php?user_id=${userId}`);
+        const data = await response.json();
+        
+        if (data.success && data.user) {
+          // Update user with fresh data from database
+          const updatedUser = {
+            ...this.user,
+            avatar: data.user.avatar || this.user.avatar,
+            photoURL: data.user.avatar || this.user.photoURL,
+            full_name: data.user.full_name || this.user.full_name,
+            phone: data.user.phone || this.user.phone,
+            bio: data.user.bio || this.user.bio
+          };
+          
+          // Update store
+          this.user = updatedUser;
+          
+          // Update localStorage
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          
+          console.log('✅ AuthStore - User data refreshed from database:', {
+            avatar: data.user.avatar,
+            full_name: data.user.full_name
+          });
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to refresh user data:', error);
       }
     },
 

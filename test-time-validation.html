@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Time Validation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        button {
+            background: #fbbf24;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover {
+            background: #f59e0b;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 6px;
+            border-left: 4px solid #fbbf24;
+        }
+        .warning {
+            color: #fbbf24;
+        }
+        .error {
+            color: #ef4444;
+        }
+        .success {
+            color: #10b981;
+        }
+        pre {
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Time Validation</h1>
+    <p>Test tính năng chống gian lận thời gian client</p>
+
+    <div class="test-section">
+        <h2>1. Kiểm tra Server Time</h2>
+        <button onclick="testServerTime()">Test Server Time API</button>
+        <div id="serverTimeResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Giả lập Client Time Sai</h2>
+        <button onclick="simulateWrongTime(2026)">Giả lập năm 2026</button>
+        <button onclick="simulateWrongTime(2020)">Giả lập năm 2020</button>
+        <button onclick="simulateWrongTime(null)">Reset về bình thường</button>
+        <div id="simulateResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Test Subscription Progress</h2>
+        <p>Nhập thông tin subscription để test:</p>
+        <div style="margin: 10px 0;">
+            <label>Start Date: <input type="date" id="startDate" value="2024-12-01"></label>
+        </div>
+        <div style="margin: 10px 0;">
+            <label>End Date: <input type="date" id="endDate" value="2025-01-01"></label>
+        </div>
+        <button onclick="testProgress()">Tính Progress</button>
+        <div id="progressResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Test Time Offset Detection</h2>
+        <button onclick="testTimeOffset()">Kiểm tra Offset</button>
+        <div id="offsetResult" class="result" style="display:none;"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost/HTHREE_film/HTHREE_film/backend/api';
+        let serverTime = null;
+        let timeOffset = 0;
+        let fakeYear = null;
+
+        // Override Date nếu cần
+        const OriginalDate = Date;
+        function applyFakeDate() {
+            if (fakeYear) {
+                window.Date = class extends OriginalDate {
+                    constructor(...args) {
+                        if (args.length === 0) {
+                            super();
+                            this.setFullYear(fakeYear);
+                        } else {
+                            super(...args);
+                        }
+                    }
+                    static now() {
+                        const d = new OriginalDate();
+                        d.setFullYear(fakeYear);
+                        return d.getTime();
+                    }
+                };
+            } else {
+                window.Date = OriginalDate;
+            }
+        }
+
+        async function testServerTime() {
+            const result = document.getElementById('serverTimeResult');
+            result.style.display = 'block';
+            result.innerHTML = '<p>⏳ Đang gọi API...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}/server_time.php`);
+                const data = await response.json();
+
+                if (data.success) {
+                    serverTime = new Date(data.server_time);
+                    const clientTime = new Date();
+                    timeOffset = serverTime - clientTime;
+                    const offsetMinutes = Math.abs(timeOffset) / (1000 * 60);
+
+                    result.innerHTML = `
+                        <p class="success">✅ Server Time API hoạt động!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p><strong>Server Time:</strong> ${serverTime.toLocaleString('vi-VN')}</p>
+                        <p><strong>Client Time:</strong> ${clientTime.toLocaleString('vi-VN')}</p>
+                        <p class="${offsetMinutes > 5 ? 'warning' : 'success'}">
+                            <strong>Offset:</strong> ${offsetMinutes.toFixed(2)} phút
+                            ${offsetMinutes > 5 ? '⚠️ Sai lệch lớn!' : '✓ Bình thường'}
+                        </p>
+                    `;
+                } else {
+                    result.innerHTML = `<p class="error">❌ API trả về lỗi</p>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<p class="error">❌ Lỗi: ${error.message}</p>`;
+            }
+        }
+
+        function simulateWrongTime(year) {
+            const result = document.getElementById('simulateResult');
+            result.style.display = 'block';
+
+            fakeYear = year;
+            applyFakeDate();
+
+            if (year) {
+                const fakeDate = new Date();
+                result.innerHTML = `
+                    <p class="warning">⚠️ Đã giả lập client time sang năm ${year}</p>
+                    <p><strong>Fake Client Time:</strong> ${fakeDate.toLocaleString('vi-VN')}</p>
+                    <p>Bây giờ test lại các chức năng khác để xem hệ thống có bị lừa không.</p>
+                `;
+            } else {
+                result.innerHTML = `
+                    <p class="success">✅ Đã reset về thời gian bình thường</p>
+                `;
+            }
+        }
+
+        async function testProgress() {
+            const result = document.getElementById('progressResult');
+            result.style.display = 'block';
+
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+
+            // Tính với client time
+            const clientNow = new Date();
+            const clientProgress = ((clientNow - startDate) / (endDate - startDate)) * 100;
+            const clientDaysRemaining = Math.ceil((endDate - clientNow) / (1000 * 60 * 60 * 24));
+
+            // Tính với server time (nếu có)
+            let serverProgress = clientProgress;
+            let serverDaysRemaining = clientDaysRemaining;
+            if (serverTime) {
+                const serverNow = new Date(new Date().getTime() + timeOffset);
+                serverProgress = ((serverNow - startDate) / (endDate - startDate)) * 100;
+                serverDaysRemaining = Math.ceil((endDate - serverNow) / (1000 * 60 * 60 * 24));
+            }
+
+            const daysDiff = Math.abs(serverDaysRemaining - clientDaysRemaining);
+
+            result.innerHTML = `
+                <h3>Kết quả tính toán:</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4>📱 Client Time</h4>
+                        <p><strong>Progress:</strong> ${clientProgress.toFixed(2)}%</p>
+                        <p><strong>Còn lại:</strong> ${clientDaysRemaining} ngày</p>
+                    </div>
+                    <div>
+                        <h4>🖥️ Server Time</h4>
+                        <p><strong>Progress:</strong> ${serverProgress.toFixed(2)}%</p>
+                        <p><strong>Còn lại:</strong> ${serverDaysRemaining} ngày</p>
+                    </div>
+                </div>
+                <p class="${daysDiff > 1 ? 'warning' : 'success'}">
+                    <strong>Chênh lệch:</strong> ${daysDiff} ngày
+                    ${daysDiff > 1 ? '⚠️ Phát hiện client time bị chỉnh sửa!' : '✓ Bình thường'}
+                </p>
+            `;
+        }
+
+        async function testTimeOffset() {
+            const result = document.getElementById('offsetResult');
+            result.style.display = 'block';
+
+            if (!serverTime) {
+                result.innerHTML = '<p class="warning">⚠️ Chưa fetch server time. Click "Test Server Time API" trước.</p>';
+                return;
+            }
+
+            const clientNow = new Date();
+            const serverNow = new Date(clientNow.getTime() + timeOffset);
+            const offsetMinutes = Math.abs(timeOffset) / (1000 * 60);
+            const offsetHours = offsetMinutes / 60;
+
+            result.innerHTML = `
+                <h3>Time Offset Detection:</h3>
+                <p><strong>Client Time:</strong> ${clientNow.toLocaleString('vi-VN')}</p>
+                <p><strong>Server Time (calculated):</strong> ${serverNow.toLocaleString('vi-VN')}</p>
+                <p><strong>Offset:</strong> ${offsetMinutes.toFixed(2)} phút (${offsetHours.toFixed(2)} giờ)</p>
+                <p class="${offsetMinutes > 5 ? 'warning' : 'success'}">
+                    ${offsetMinutes > 5 ? 
+                        '⚠️ Client time sai lệch đáng kể! Hệ thống sẽ sử dụng server time.' : 
+                        '✅ Client time chính xác, không phát hiện gian lận.'}
+                </p>
+            `;
+        }
+
+        // Auto test server time khi load
+        window.onload = () => {
+            testServerTime();
+        };
+    </script>
+</body>
+</html>

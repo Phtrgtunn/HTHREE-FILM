@@ -15,7 +15,7 @@ class Database {
         $this->host = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: 'localhost';
         $this->db_name = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: 'hthree_film';
         $this->username = 'root';
-        $this->password = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: 'mysql';
+        $this->password = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: 'tuan1412';
     }
     
     /**
@@ -52,7 +52,7 @@ function getDBConnection() {
     $host = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: 'localhost';
     $db_name = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: 'hthree_film';
     $username = 'root';
-    $password = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: 'mysql';
+    $password = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: 'tuan1412';
     $port = getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: 3306;
     
     $conn = new mysqli($host, $username, $password, $db_name, $port);

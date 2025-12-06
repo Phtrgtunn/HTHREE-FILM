@@ -3,9 +3,9 @@ header('Content-Type: application/json');
 
 $host = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: 'localhost';
 $port = getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: 3306;
-$database = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: 'railway';
+$database = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: 'hthree_film';
 $username = 'root';
-$password = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: '';
+$password = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: 'tuan1412';
 
 try {
     $conn = new mysqli($host, $username, $password, $database, $port);

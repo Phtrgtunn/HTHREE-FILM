@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check User Storage</title>
+</head>
+<body>
+    <h1>Check User in localStorage</h1>
+    <pre id="output"></pre>
+    
+    <script>
+        const user = localStorage.getItem('user');
+        const output = document.getElementById('output');
+        
+        if (user) {
+            const userData = JSON.parse(user);
+            output.textContent = JSON.stringify(userData, null, 2);
+            console.log('User data:', userData);
+            console.log('User ID:', userData.id);
+        } else {
+            output.textContent = 'No user found in localStorage';
+        }
+    </script>
+</body>
+</html>

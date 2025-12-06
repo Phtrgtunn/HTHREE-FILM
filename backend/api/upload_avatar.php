@@ -1,74 +1,87 @@
 <?php
-// CORS headers - PHẢI đặt trước bất kỳ output nào
+header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
-header('Access-Control-Max-Age: 86400');
-header('Content-Type: application/json; charset=UTF-8');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-// Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204);
+    http_response_code(200);
     exit();
 }
 
-require_once '../config/database.php';
+require_once __DIR__ . '/../config/database.php';
 
-$db = getDBConnection();
+$conn = getDBConnection();
 
 try {
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-    $firebase_uid = $data['firebase_uid'] ?? null;
-    $photo_url = $data['photo_url'] ?? null;
-    
-    if (!$firebase_uid || !$photo_url) {
-        throw new Exception('Missing required fields');
+    // Check if file was uploaded
+    if (!isset($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('No file uploaded or upload error');
     }
     
-    // Download image from URL
-    $image_data = @file_get_contents($photo_url);
-    
-    if ($image_data === false) {
-        throw new Exception('Failed to download image');
+    $user_id = $_POST['user_id'] ?? null;
+    if (!$user_id) {
+        throw new Exception('User ID is required');
     }
     
-    // Create avatars directory if not exists
-    $upload_dir = __DIR__ . '/../uploads/avatars/';
+    $file = $_FILES['avatar'];
+    
+    // Validate file size (max 2MB)
+    if ($file['size'] > 2 * 1024 * 1024) {
+        throw new Exception('File size must be less than 2MB');
+    }
+    
+    // Validate file type
+    $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime_type = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+    
+    if (!in_array($mime_type, $allowed_types)) {
+        throw new Exception('Only JPG, PNG, and WEBP images are allowed');
+    }
+    
+    // Create uploads directory if not exists
+    $upload_dir = __DIR__ . '/../../public/uploads/avatars';
     if (!file_exists($upload_dir)) {
         mkdir($upload_dir, 0777, true);
     }
     
-    // Generate filename
-    $filename = $firebase_uid . '_' . time() . '.jpg';
-    $filepath = $upload_dir . $filename;
+    // Generate unique filename
+    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $filename = 'avatar_' . $user_id . '_' . time() . '.' . $extension;
+    $filepath = $upload_dir . '/' . $filename;
     
-    // Save image
-    if (file_put_contents($filepath, $image_data) === false) {
-        throw new Exception('Failed to save image');
+    // Move uploaded file
+    if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+        throw new Exception('Failed to save file');
     }
     
-    // Update database with mysqli
-    $avatar_url = 'http://localhost/HTHREE_film/backend/uploads/avatars/' . $filename;
-    $stmt = $db->prepare("UPDATE users SET avatar = ? WHERE firebase_uid = ?");
-    $stmt->bind_param('ss', $avatar_url, $firebase_uid);
+    // Generate URL
+    $avatar_url = '/uploads/avatars/' . $filename;
+    
+    // Update database
+    $stmt = $conn->prepare("UPDATE users SET avatar = ? WHERE id = ?");
+    $stmt->bind_param("si", $avatar_url, $user_id);
     
     if (!$stmt->execute()) {
+        // Delete uploaded file if database update fails
+        unlink($filepath);
         throw new Exception('Failed to update database');
     }
     
     echo json_encode([
         'success' => true,
-        'avatar_url' => $avatar_url,
-        'message' => 'Avatar uploaded and saved to database'
+        'message' => 'Avatar uploaded successfully',
+        'avatar_url' => $avatar_url
     ]);
     
 } catch (Exception $e) {
-    http_response_code(500);
+    http_response_code(400);
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()
     ]);
 }
 
-$db->close();
+$conn->close();
