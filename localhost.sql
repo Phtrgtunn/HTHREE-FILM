@@ -2,10 +2,10 @@
 -- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: localhost
--- Thời gian đã tạo: Th10 25, 2025 lúc 03:10 PM
--- Phiên bản máy phục vụ: 8.0.44
--- Phiên bản PHP: 8.2.29
+-- Host: localhost
+-- Generation Time: Dec 06, 2025 at 08:28 AM
+-- Server version: 8.0.44
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Cơ sở dữ liệu: `hthree_film`
+-- Database: `hthree_film`
 --
 CREATE DATABASE IF NOT EXISTS `hthree_film` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `hthree_film`;
@@ -26,7 +26,7 @@ USE `hthree_film`;
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `cart`
+-- Table structure for table `cart`
 --
 
 CREATE TABLE `cart` (
@@ -39,7 +39,7 @@ CREATE TABLE `cart` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `cart`
+-- Dumping data for table `cart`
 --
 
 INSERT INTO `cart` (`id`, `user_id`, `plan_id`, `quantity`, `created_at`, `updated_at`) VALUES
@@ -50,7 +50,7 @@ INSERT INTO `cart` (`id`, `user_id`, `plan_id`, `quantity`, `created_at`, `updat
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `comments`
+-- Table structure for table `comments`
 --
 
 CREATE TABLE `comments` (
@@ -65,7 +65,7 @@ CREATE TABLE `comments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `comments`
+-- Dumping data for table `comments`
 --
 
 INSERT INTO `comments` (`id`, `user_id`, `movie_slug`, `parent_id`, `content`, `likes`, `created_at`, `updated_at`) VALUES
@@ -76,7 +76,7 @@ INSERT INTO `comments` (`id`, `user_id`, `movie_slug`, `parent_id`, `content`, `
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `coupons`
+-- Table structure for table `coupons`
 --
 
 CREATE TABLE `coupons` (
@@ -98,7 +98,7 @@ CREATE TABLE `coupons` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `coupons`
+-- Dumping data for table `coupons`
 --
 
 INSERT INTO `coupons` (`id`, `code`, `description`, `discount_type`, `discount_value`, `min_order_value`, `max_discount`, `usage_limit`, `usage_count`, `user_limit`, `start_date`, `end_date`, `is_active`, `created_at`, `updated_at`) VALUES
@@ -109,7 +109,7 @@ INSERT INTO `coupons` (`id`, `code`, `description`, `discount_type`, `discount_v
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `coupon_usage`
+-- Table structure for table `coupon_usage`
 --
 
 CREATE TABLE `coupon_usage` (
@@ -124,7 +124,7 @@ CREATE TABLE `coupon_usage` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `favorites`
+-- Table structure for table `favorites`
 --
 
 CREATE TABLE `favorites` (
@@ -139,7 +139,7 @@ CREATE TABLE `favorites` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `favorites`
+-- Dumping data for table `favorites`
 --
 
 INSERT INTO `favorites` (`id`, `user_id`, `movie_slug`, `movie_name`, `movie_poster`, `movie_year`, `movie_quality`, `added_at`) VALUES
@@ -149,7 +149,7 @@ INSERT INTO `favorites` (`id`, `user_id`, `movie_slug`, `movie_name`, `movie_pos
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `orders`
+-- Table structure for table `orders`
 --
 
 CREATE TABLE `orders` (
@@ -162,7 +162,7 @@ CREATE TABLE `orders` (
   `subtotal` decimal(10,2) NOT NULL,
   `discount` decimal(10,2) DEFAULT '0.00',
   `total` decimal(10,2) NOT NULL,
-  `payment_method` enum('vnpay','momo','zalopay','bank_transfer','cod') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payment_method` enum('vnpay','momo','zalopay','bank_transfer','cod','vietqr') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `payment_status` enum('pending','paid','failed','refunded') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
   `status` enum('pending','processing','completed','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
   `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -171,30 +171,46 @@ CREATE TABLE `orders` (
   `completed_at` timestamp NULL DEFAULT NULL,
   `cancelled_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `qr_code_url` text COLLATE utf8mb4_unicode_ci COMMENT 'URL của mã QR',
+  `transfer_content` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Nội dung chuyển khoản',
+  `expires_at` datetime DEFAULT NULL COMMENT 'Thời gian hết hạn đơn hàng',
+  `transaction_id` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ID giao dịch từ Casso',
+  `payment_note` text COLLATE utf8mb4_unicode_ci COMMENT 'Ghi chú thanh toán'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `orders`
+-- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `order_code`, `user_id`, `customer_name`, `customer_email`, `customer_phone`, `subtotal`, `discount`, `total`, `payment_method`, `payment_status`, `status`, `note`, `admin_note`, `paid_at`, `completed_at`, `cancelled_at`, `created_at`, `updated_at`) VALUES
-(1, 'ORD202511255917', 6, 'Admin', 'hient7182@gmail.com', '', 100000.00, 0.00, 100000.00, 'vnpay', 'paid', 'completed', '', NULL, '2025-11-25 14:46:24', '2025-11-25 14:46:24', NULL, '2025-11-25 12:32:24', '2025-11-25 14:46:24'),
-(2, 'ORD202511253238', 6, 'Admin', 'hient7182@gmail.com', '', 100000.00, 0.00, 100000.00, 'bank_transfer', 'paid', 'completed', '', NULL, '2025-11-25 14:27:09', '2025-11-25 14:27:09', NULL, '2025-11-25 12:33:35', '2025-11-25 14:27:09'),
-(7, 'ORD20251125260', 1, 'adasfdas', 'admin@hthree.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:26:53', '2025-11-25 14:26:53', NULL, '2025-11-25 13:49:55', '2025-11-25 14:26:53'),
-(8, 'ORD202511255262', 1, 'admin', 'admin@hthree.com', '0825591211', 400000.00, 0.00, 400000.00, 'bank_transfer', 'paid', 'completed', '', NULL, '2025-11-25 14:24:04', '2025-11-25 14:24:04', NULL, '2025-11-25 13:52:04', '2025-11-25 14:24:04'),
-(9, 'ORD20251125383', 1, 'trungtuan', 'admin@hthree.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:15:04', '2025-11-25 14:15:04', NULL, '2025-11-25 14:08:31', '2025-11-25 14:15:04'),
-(10, 'ORD20251125918', 1, 'sdaf', 'admin@hthree.com', '0825591211', 200000.00, 0.00, 200000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:23:40', '2025-11-25 14:23:40', NULL, '2025-11-25 14:16:21', '2025-11-25 14:23:40'),
-(11, 'ORD20251125972', 1, 'trungtuan', 'admin@hthree.com', '0825591211', 200000.00, 0.00, 200000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:22:54', '2025-11-25 14:22:54', NULL, '2025-11-25 14:19:04', '2025-11-25 14:22:54'),
-(12, 'ORD20251125644', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-11-25 14:51:49', '2025-11-25 14:51:49'),
-(13, 'ORD20251125029', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:56:19', '2025-11-25 14:56:19', NULL, '2025-11-25 14:56:19', '2025-11-25 14:56:19'),
-(14, 'ORD20251125728', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 100000.00, 0.00, 100000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:57:52', '2025-11-25 14:57:52', NULL, '2025-11-25 14:57:52', '2025-11-25 14:57:52'),
-(15, 'ORD20251125730', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:58:07', '2025-11-25 14:58:07', NULL, '2025-11-25 14:58:07', '2025-11-25 14:58:07'),
-(16, 'ORD20251125401', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 15:00:10', '2025-11-25 15:00:10', NULL, '2025-11-25 15:00:10', '2025-11-25 15:00:10'),
-(17, 'ORD20251125535', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 15:02:49', '2025-11-25 15:02:49', NULL, '2025-11-25 15:02:49', '2025-11-25 15:02:49');
+INSERT INTO `orders` (`id`, `order_code`, `user_id`, `customer_name`, `customer_email`, `customer_phone`, `subtotal`, `discount`, `total`, `payment_method`, `payment_status`, `status`, `note`, `admin_note`, `paid_at`, `completed_at`, `cancelled_at`, `created_at`, `updated_at`, `qr_code_url`, `transfer_content`, `expires_at`, `transaction_id`, `payment_note`) VALUES
+(1, 'ORD202511255917', 6, 'Admin', 'hient7182@gmail.com', '', 100000.00, 0.00, 100000.00, 'vnpay', 'paid', 'completed', '', NULL, '2025-11-25 14:46:24', '2025-11-25 14:46:24', NULL, '2025-11-25 12:32:24', '2025-11-25 14:46:24', NULL, NULL, NULL, NULL, NULL),
+(2, 'ORD202511253238', 6, 'Admin', 'hient7182@gmail.com', '', 100000.00, 0.00, 100000.00, 'bank_transfer', 'paid', 'completed', '', NULL, '2025-11-25 14:27:09', '2025-11-25 14:27:09', NULL, '2025-11-25 12:33:35', '2025-11-25 14:27:09', NULL, NULL, NULL, NULL, NULL),
+(7, 'ORD20251125260', 1, 'adasfdas', 'admin@hthree.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:26:53', '2025-11-25 14:26:53', NULL, '2025-11-25 13:49:55', '2025-11-25 14:26:53', NULL, NULL, NULL, NULL, NULL),
+(8, 'ORD202511255262', 1, 'admin', 'admin@hthree.com', '0825591211', 400000.00, 0.00, 400000.00, 'bank_transfer', 'paid', 'completed', '', NULL, '2025-11-25 14:24:04', '2025-11-25 14:24:04', NULL, '2025-11-25 13:52:04', '2025-11-25 14:24:04', NULL, NULL, NULL, NULL, NULL),
+(9, 'ORD20251125383', 1, 'trungtuan', 'admin@hthree.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:15:04', '2025-11-25 14:15:04', NULL, '2025-11-25 14:08:31', '2025-11-25 14:15:04', NULL, NULL, NULL, NULL, NULL),
+(10, 'ORD20251125918', 1, 'sdaf', 'admin@hthree.com', '0825591211', 200000.00, 0.00, 200000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:23:40', '2025-11-25 14:23:40', NULL, '2025-11-25 14:16:21', '2025-11-25 14:23:40', NULL, NULL, NULL, NULL, NULL),
+(11, 'ORD20251125972', 1, 'trungtuan', 'admin@hthree.com', '0825591211', 200000.00, 0.00, 200000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:22:54', '2025-11-25 14:22:54', NULL, '2025-11-25 14:19:04', '2025-11-25 14:22:54', NULL, NULL, NULL, NULL, NULL),
+(12, 'ORD20251125644', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'processing', NULL, NULL, '2025-12-04 12:56:07', NULL, NULL, '2025-11-25 14:51:49', '2025-12-04 12:56:07', NULL, NULL, NULL, NULL, NULL),
+(13, 'ORD20251125029', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:56:19', '2025-11-25 14:56:19', NULL, '2025-11-25 14:56:19', '2025-11-25 14:56:19', NULL, NULL, NULL, NULL, NULL),
+(14, 'ORD20251125728', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 100000.00, 0.00, 100000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:57:52', '2025-11-25 14:57:52', NULL, '2025-11-25 14:57:52', '2025-11-25 14:57:52', NULL, NULL, NULL, NULL, NULL),
+(15, 'ORD20251125730', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 14:58:07', '2025-11-25 14:58:07', NULL, '2025-11-25 14:58:07', '2025-11-25 14:58:07', NULL, NULL, NULL, NULL, NULL),
+(16, 'ORD20251125401', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 15:00:10', '2025-11-25 15:00:10', NULL, '2025-11-25 15:00:10', '2025-11-25 15:00:10', NULL, NULL, NULL, NULL, NULL),
+(17, 'ORD20251125535', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 15:02:49', '2025-11-25 15:02:49', NULL, '2025-11-25 15:02:49', '2025-11-25 15:02:49', NULL, NULL, NULL, NULL, NULL),
+(18, 'ORD20251204621', 1, 'Phạm Trung Tuấn', 'admin@hthree.com', '0825591211', 100000.00, 0.00, 100000.00, 'bank_transfer', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-04 13:04:16', '2025-12-04 13:04:16', NULL, NULL, NULL, NULL, NULL),
+(19, 'ORD20251204144', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'bank_transfer', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-04 13:27:04', '2025-12-04 13:27:04', NULL, NULL, NULL, NULL, NULL),
+(20, 'ORD20251205716', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'bank_transfer', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-05 15:57:28', '2025-12-05 15:57:28', NULL, NULL, NULL, NULL, NULL),
+(21, 'ORD20251205714', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'vietqr', 'paid', 'completed', NULL, NULL, '2025-12-05 16:13:42', '2025-12-05 16:13:42', NULL, '2025-12-05 16:06:11', '2025-12-05 16:13:42', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=50000.00&addInfo=HTHREE+ORD20251205714&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251205714', '2025-12-05 16:21:12', '12021672908', NULL),
+(22, 'ORD20251205560', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'vietqr', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-05 16:11:09', '2025-12-05 16:11:09', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=50000.00&addInfo=HTHREE+ORD20251205560&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251205560', '2025-12-05 16:26:09', NULL, NULL),
+(23, 'ORD20251205261', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'vietqr', 'paid', 'completed', NULL, NULL, '2025-12-05 16:16:40', '2025-12-05 16:16:40', NULL, '2025-12-05 16:14:57', '2025-12-05 16:16:40', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=50000.00&addInfo=HTHREE+ORD20251205261&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251205261', '2025-12-05 16:29:58', 'MANUAL_TEST_1764951400074', NULL),
+(24, 'ORD20251205004', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'vietqr', 'paid', 'pending', NULL, NULL, '2025-12-05 16:32:48', NULL, NULL, '2025-12-05 16:32:37', '2025-12-05 16:32:48', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=50000.00&addInfo=HTHREE+ORD20251205004&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251205004', '2025-12-05 16:47:37', '12864350', 'Thanh toán qua VietQR - Casso'),
+(25, 'ORD20251205591', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 2400000.00, 0.00, 2400000.00, 'vietqr', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-05 16:51:18', '2025-12-05 16:51:18', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=2400000.00&addInfo=HTHREE+ORD20251205591&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251205591', '2025-12-05 17:06:18', NULL, NULL),
+(26, 'ORD20251206389', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 150000.00, 0.00, 150000.00, 'vietqr', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-06 07:38:24', '2025-12-06 07:38:24', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=150000.00&addInfo=HTHREE+ORD20251206389&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251206389', '2025-12-06 07:53:24', NULL, NULL),
+(27, 'ORD20251206204', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 150000.00, 7500.00, 142500.00, 'vietqr', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-06 07:49:51', '2025-12-06 07:49:51', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=142500.00&addInfo=HTHREE+ORD20251206204&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251206204', '2025-12-06 08:04:51', NULL, NULL),
+(28, 'ORD20251206211', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'vietqr', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-06 07:50:56', '2025-12-06 07:50:56', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=50000.00&addInfo=HTHREE+ORD20251206211&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251206211', '2025-12-06 08:05:56', NULL, NULL);
 
 --
--- Bẫy `orders`
+-- Triggers `orders`
 --
 DELIMITER $$
 CREATE TRIGGER `tr_activate_subscription_after_payment` AFTER UPDATE ON `orders` FOR EACH ROW BEGIN
@@ -218,7 +234,7 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `order_items`
+-- Table structure for table `order_items`
 --
 
 CREATE TABLE `order_items` (
@@ -235,7 +251,7 @@ CREATE TABLE `order_items` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `order_items`
+-- Dumping data for table `order_items`
 --
 
 INSERT INTO `order_items` (`id`, `order_id`, `plan_id`, `plan_name`, `plan_price`, `duration_months`, `quantity`, `price`, `total`, `created_at`) VALUES
@@ -253,12 +269,23 @@ INSERT INTO `order_items` (`id`, `order_id`, `plan_id`, `plan_name`, `plan_price
 (12, 14, 3, 'Premium', 100000.00, 1, 1, 100000.00, 100000.00, '2025-11-25 14:57:52'),
 (13, 15, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-11-25 14:58:07'),
 (14, 16, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-11-25 15:00:10'),
-(15, 17, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-11-25 15:02:49');
+(15, 17, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-11-25 15:02:49'),
+(16, 18, 3, 'Premium', 100000.00, 1, 1, 100000.00, 100000.00, '2025-12-04 13:04:16'),
+(17, 19, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-04 13:27:04'),
+(18, 20, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-05 15:57:28'),
+(19, 21, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-05 16:06:11'),
+(20, 22, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-05 16:11:09'),
+(21, 23, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-05 16:14:57'),
+(22, 24, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-05 16:32:37'),
+(23, 25, 4, 'VIP', 200000.00, 12, 1, 2400000.00, 2400000.00, '2025-12-05 16:51:18'),
+(24, 26, 2, 'Basic', 50000.00, 3, 1, 150000.00, 150000.00, '2025-12-06 07:38:24'),
+(25, 27, 2, 'Basic', 50000.00, 3, 1, 142500.00, 142500.00, '2025-12-06 07:49:51'),
+(26, 28, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-06 07:50:56');
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `password_reset_tokens`
+-- Table structure for table `password_reset_tokens`
 --
 
 CREATE TABLE `password_reset_tokens` (
@@ -273,7 +300,30 @@ CREATE TABLE `password_reset_tokens` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `ratings`
+-- Table structure for table `payment_logs`
+--
+
+CREATE TABLE `payment_logs` (
+  `id` int NOT NULL,
+  `order_id` int DEFAULT NULL,
+  `order_code` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `event_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'webhook_received, payment_verified, subscription_activated',
+  `message` text COLLATE utf8mb4_unicode_ci,
+  `data` json DEFAULT NULL COMMENT 'Dữ liệu chi tiết',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `payment_logs`
+--
+
+INSERT INTO `payment_logs` (`id`, `order_id`, `order_code`, `event_type`, `message`, `data`, `created_at`) VALUES
+(1, 23, 'ORD20251205261', 'manual_approval', 'Order manually approved', '{\"method\": \"manual\", \"approved_at\": \"2025-12-05 16:16:40\", \"transaction_id\": \"MANUAL_TEST_1764951400074\"}', '2025-12-05 16:16:40');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ratings`
 --
 
 CREATE TABLE `ratings` (
@@ -289,7 +339,7 @@ CREATE TABLE `ratings` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `subscription_plans`
+-- Table structure for table `subscription_plans`
 --
 
 CREATE TABLE `subscription_plans` (
@@ -311,7 +361,7 @@ CREATE TABLE `subscription_plans` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `subscription_plans`
+-- Dumping data for table `subscription_plans`
 --
 
 INSERT INTO `subscription_plans` (`id`, `name`, `slug`, `description`, `price`, `duration_days`, `quality`, `max_devices`, `has_ads`, `can_download`, `early_access`, `is_active`, `display_order`, `created_at`, `updated_at`) VALUES
@@ -323,7 +373,7 @@ INSERT INTO `subscription_plans` (`id`, `name`, `slug`, `description`, `price`, 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `transactions`
+-- Table structure for table `transactions`
 --
 
 CREATE TABLE `transactions` (
@@ -342,7 +392,7 @@ CREATE TABLE `transactions` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `users`
+-- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
@@ -357,44 +407,46 @@ CREATE TABLE `users` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `last_login` timestamp NULL DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT '1',
-  `role` enum('user','admin') COLLATE utf8mb4_unicode_ci DEFAULT 'user'
+  `role` enum('user','admin') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'user'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `users`
+-- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `firebase_uid`, `password`, `full_name`, `avatar`, `created_at`, `updated_at`, `last_login`, `is_active`, `role`) VALUES
-(1, 'admin', 'admin@hthree.com', 'dEd8RaIyoCcNmynpV5mXOTiGUd22', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrator', NULL, '2025-11-22 06:39:59', '2025-11-25 14:45:57', '2025-11-25 14:45:57', 1, 'admin'),
+(1, 'admin', 'admin@hthree.com', 'dEd8RaIyoCcNmynpV5mXOTiGUd22', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrator', NULL, '2025-11-22 06:39:59', '2025-12-05 15:57:15', '2025-12-05 15:57:15', 1, 'admin'),
 (2, 'user1', 'user1@hthree.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'User Demo', NULL, '2025-11-22 06:39:59', '2025-11-22 06:39:59', NULL, 1, 'user'),
 (3, 'khatu', 'tranlackhatucute@gmail.com', NULL, '$2y$10$498nga1O5Rv5gT4UM5js7eJ0s/9ahKx4mUwWOAscbwcRQoVJJzb8e', 'Trần Lạc Khả Tú', NULL, '2025-11-22 06:44:08', '2025-11-22 06:44:15', '2025-11-22 06:44:15', 1, 'user'),
 (4, 'user_nXFrwoZy', 'user_nXFrwoZy@firebase.temp', 'nXFrwoZyZyTBxz7sDri1NhG1mJ62', '$2y$10$ceCy5ytgsSOacTUWW6FVy.VYCjkvNUvMXiL10Ouau7fD7mljZuYs.', NULL, NULL, '2025-11-25 06:34:22', '2025-11-25 06:34:22', NULL, 1, 'user'),
-(5, 'user_pMHzrqR7', 'user_pMHzrqR7@firebase.temp', 'pMHzrqR71FN0IyJv8fxFHC19d482', '$2y$10$I6.3fJJFAsbaC08qj5jOReWa7YuyJeCkk1v22Au370T/LTATMhyR.', 'Phạm Trung Tuấn', 'https://lh3.googleusercontent.com/a/ACg8ocKT35jtuQm0v9FNmkZlFyqYDOLFuGXLhzZBybMo2tIHXZS_e3YKig=s96-c', '2025-11-25 10:54:55', '2025-11-25 12:35:48', '2025-11-25 12:35:48', 1, 'user'),
+(5, 'user_pMHzrqR7', 'user_pMHzrqR7@firebase.temp', 'pMHzrqR71FN0IyJv8fxFHC19d482', '$2y$10$I6.3fJJFAsbaC08qj5jOReWa7YuyJeCkk1v22Au370T/LTATMhyR.', 'Phạm Trung Tuấn', 'https://lh3.googleusercontent.com/a/ACg8ocKT35jtuQm0v9FNmkZlFyqYDOLFuGXLhzZBybMo2tIHXZS_e3YKig=s96-c', '2025-11-25 10:54:55', '2025-12-04 15:41:51', '2025-12-04 15:41:51', 1, 'user'),
 (6, 'hient7182', 'hient7182@gmail.com', 'firebase_uid_placeholder', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin', NULL, '2025-11-25 12:04:02', '2025-11-25 12:04:02', NULL, 1, 'admin'),
 (99, 'admin_test', 'admin@test.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin Test', NULL, '2025-11-25 13:03:09', '2025-11-25 13:03:09', NULL, 1, 'admin'),
 (100, 'Phạm Tuấn', 'tuan1412@gmail.com', 'siYwEOlLUEdhp7UK3m57SZien8v2', '$2y$10$wBB4KfaCwqkx1Rz3Kf9vR.cXRJ27EH4XEGAirJKV24FuJf8LiN6MK', 'Phạm Tuấn', NULL, '2025-11-25 13:13:02', '2025-11-25 13:14:42', '2025-11-25 13:14:42', 1, 'user'),
-(101, 'gsdfgsd', 'phadshada@gmail.com', 'MkIEC3eXIbQYjLdLAqakBANaF8D2', '$2y$10$xBFDUvrCtrxXUUIBUOnWPOOa1amNef/E01G2tj.nwA83nISUw0j6S', 'gsdfgsd', NULL, '2025-11-25 13:18:46', '2025-11-25 13:18:52', '2025-11-25 13:18:52', 1, 'user'),
-(103, 'ầdasdasd', 'vngs009@gmail.com', 'X2QNNes7PHNQkxjdBLAmVegxuBk2', '$2y$10$xd2iNTCFQOXfOdIVQ3FjeuZtWmecAF9COEqNNAmaM2hL.38H1gH6.', 'ầdasdasd', NULL, '2025-11-25 14:51:31', '2025-11-25 14:51:37', '2025-11-25 14:51:37', 1, 'user');
+(101, 'gsdfgsd', 'phadshada@gmail.com', 'MkIEC3eXIbQYjLdLAqakBANaF8D2', '$2y$10$xBFDUvrCtrxXUUIBUOnWPOOa1amNef/E01G2tj.nwA83nISUw0j6S', 'gsdfgsd', NULL, '2025-11-25 13:18:46', '2025-12-05 17:36:43', '2025-12-05 17:36:43', 1, 'user'),
+(103, 'ầdasdasd', 'vngs009@gmail.com', 'X2QNNes7PHNQkxjdBLAmVegxuBk2', '$2y$10$xd2iNTCFQOXfOdIVQ3FjeuZtWmecAF9COEqNNAmaM2hL.38H1gH6.', 'ầdasdasd', NULL, '2025-11-25 14:51:31', '2025-11-25 14:51:37', '2025-11-25 14:51:37', 1, 'user'),
+(104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', 'LT4zP89aznM5BdyGwg2Q4i8JpJz1', '$2y$10$KoyHsB21sLk.9vIQKq4AOuJxTEScWA4WiOQFjjiwNH3rl1epGfNHm', 'Phạm Trung Tuấn', NULL, '2025-12-04 13:26:42', '2025-12-05 17:27:55', '2025-12-05 17:27:55', 1, 'user'),
+(105, 'user_Rq1RoEtk', 'user_Rq1RoEtk@firebase.temp', 'Rq1RoEtksIOagfuCH7zqbij4QV12', '$2y$10$u9YxC0xxtJGxFx.cWnc2Yu7GpwDDdpf2fsru2gdWwbUOaD0BpF9ce', NULL, NULL, '2025-12-05 14:08:24', '2025-12-05 14:08:24', NULL, 1, 'user');
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc đóng vai cho view `user_stats`
+-- Stand-in structure for view `user_stats`
 -- (See below for the actual view)
 --
 CREATE TABLE `user_stats` (
-`id` int
-,`username` varchar(50)
-,`email` varchar(100)
-,`movies_watched` bigint
+`email` varchar(100)
 ,`favorites_count` bigint
+,`id` int
+,`movies_watched` bigint
 ,`ratings_count` bigint
+,`username` varchar(50)
 );
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `user_subscriptions`
+-- Table structure for table `user_subscriptions`
 --
 
 CREATE TABLE `user_subscriptions` (
@@ -411,7 +463,7 @@ CREATE TABLE `user_subscriptions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `user_subscriptions`
+-- Dumping data for table `user_subscriptions`
 --
 
 INSERT INTO `user_subscriptions` (`id`, `user_id`, `plan_id`, `start_date`, `end_date`, `status`, `auto_renew`, `order_id`, `created_at`, `updated_at`) VALUES
@@ -422,63 +474,68 @@ INSERT INTO `user_subscriptions` (`id`, `user_id`, `plan_id`, `start_date`, `end
 (21, 103, 2, '2025-11-25 14:56:19', '2026-02-23 14:56:19', 'cancelled', 0, 13, '2025-11-25 14:56:19', '2025-11-25 14:59:43'),
 (22, 103, 3, '2025-11-25 14:57:52', '2026-01-24 14:57:52', 'cancelled', 0, 14, '2025-11-25 14:57:52', '2025-11-25 14:59:45'),
 (23, 103, 2, '2025-11-25 14:58:07', '2025-12-25 14:58:07', 'cancelled', 0, 15, '2025-11-25 14:58:07', '2025-11-25 14:59:47'),
-(25, 103, 2, '2025-11-25 15:02:49', '2025-12-25 15:02:49', 'active', 0, 17, '2025-11-25 15:02:49', '2025-11-25 15:02:49');
+(25, 103, 2, '2025-11-25 15:02:49', '2025-12-25 15:02:49', 'active', 0, 17, '2025-11-25 15:02:49', '2025-11-25 15:02:49'),
+(26, 103, 2, '2025-12-04 12:56:07', '2026-01-03 12:56:07', 'active', 0, 12, '2025-12-04 12:56:07', '2025-12-04 12:56:07'),
+(27, 104, 2, '2025-12-05 16:13:42', '2026-01-04 16:13:42', 'cancelled', 0, 21, '2025-12-05 16:13:42', '2025-12-05 16:56:19'),
+(28, 104, 2, '2025-12-05 16:16:40', '2026-01-04 16:16:40', 'cancelled', 0, 23, '2025-12-05 16:16:40', '2025-12-05 16:56:18'),
+(29, 104, 2, '2025-12-05 16:16:40', '2026-01-04 09:16:40', 'active', 0, 23, '2025-12-05 16:16:40', '2025-12-05 16:16:40'),
+(30, 104, 2, '2025-12-05 16:32:48', '2026-01-04 16:32:48', 'cancelled', 0, 24, '2025-12-05 16:32:48', '2025-12-05 16:56:15');
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc đóng vai cho view `v_active_subscriptions`
+-- Stand-in structure for view `v_active_subscriptions`
 -- (See below for the actual view)
 --
 CREATE TABLE `v_active_subscriptions` (
-`id` int
-,`user_id` int
-,`username` varchar(50)
+`days_remaining` int
 ,`email` varchar(100)
+,`end_date` timestamp
+,`id` int
+,`max_devices` int
 ,`plan_name` varchar(50)
 ,`plan_slug` varchar(50)
 ,`quality` varchar(20)
-,`max_devices` int
 ,`start_date` timestamp
-,`end_date` timestamp
 ,`status` enum('active','expired','cancelled')
-,`days_remaining` int
+,`user_id` int
+,`username` varchar(50)
 );
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc đóng vai cho view `v_order_stats`
+-- Stand-in structure for view `v_order_stats`
 -- (See below for the actual view)
 --
 CREATE TABLE `v_order_stats` (
-`order_date` date
-,`total_orders` bigint
+`cancelled_orders` decimal(23,0)
 ,`completed_orders` decimal(23,0)
+,`order_date` date
 ,`pending_orders` decimal(23,0)
-,`cancelled_orders` decimal(23,0)
+,`total_orders` bigint
 ,`total_revenue` decimal(32,2)
 );
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc đóng vai cho view `v_top_selling_plans`
+-- Stand-in structure for view `v_top_selling_plans`
 -- (See below for the actual view)
 --
 CREATE TABLE `v_top_selling_plans` (
 `id` int
 ,`name` varchar(50)
-,`slug` varchar(50)
 ,`price` decimal(10,2)
-,`total_sold` bigint
+,`slug` varchar(50)
 ,`total_revenue` decimal(32,2)
+,`total_sold` bigint
 );
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `watch_history`
+-- Table structure for table `watch_history`
 --
 
 CREATE TABLE `watch_history` (
@@ -494,11 +551,11 @@ CREATE TABLE `watch_history` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Chỉ mục cho các bảng đã đổ
+-- Indexes for dumped tables
 --
 
 --
--- Chỉ mục cho bảng `cart`
+-- Indexes for table `cart`
 --
 ALTER TABLE `cart`
   ADD PRIMARY KEY (`id`),
@@ -507,7 +564,7 @@ ALTER TABLE `cart`
   ADD KEY `idx_user_id` (`user_id`);
 
 --
--- Chỉ mục cho bảng `comments`
+-- Indexes for table `comments`
 --
 ALTER TABLE `comments`
   ADD PRIMARY KEY (`id`),
@@ -517,7 +574,7 @@ ALTER TABLE `comments`
   ADD KEY `idx_created_at` (`created_at`);
 
 --
--- Chỉ mục cho bảng `coupons`
+-- Indexes for table `coupons`
 --
 ALTER TABLE `coupons`
   ADD PRIMARY KEY (`id`),
@@ -526,7 +583,7 @@ ALTER TABLE `coupons`
   ADD KEY `idx_active` (`is_active`);
 
 --
--- Chỉ mục cho bảng `coupon_usage`
+-- Indexes for table `coupon_usage`
 --
 ALTER TABLE `coupon_usage`
   ADD PRIMARY KEY (`id`),
@@ -535,7 +592,7 @@ ALTER TABLE `coupon_usage`
   ADD KEY `idx_coupon_user` (`coupon_id`,`user_id`);
 
 --
--- Chỉ mục cho bảng `favorites`
+-- Indexes for table `favorites`
 --
 ALTER TABLE `favorites`
   ADD PRIMARY KEY (`id`),
@@ -544,7 +601,7 @@ ALTER TABLE `favorites`
   ADD KEY `idx_added_at` (`added_at`);
 
 --
--- Chỉ mục cho bảng `orders`
+-- Indexes for table `orders`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id`),
@@ -556,7 +613,7 @@ ALTER TABLE `orders`
   ADD KEY `idx_created_at` (`created_at`);
 
 --
--- Chỉ mục cho bảng `order_items`
+-- Indexes for table `order_items`
 --
 ALTER TABLE `order_items`
   ADD PRIMARY KEY (`id`),
@@ -564,7 +621,7 @@ ALTER TABLE `order_items`
   ADD KEY `idx_order_id` (`order_id`);
 
 --
--- Chỉ mục cho bảng `password_reset_tokens`
+-- Indexes for table `password_reset_tokens`
 --
 ALTER TABLE `password_reset_tokens`
   ADD PRIMARY KEY (`id`),
@@ -573,7 +630,16 @@ ALTER TABLE `password_reset_tokens`
   ADD KEY `idx_expires_at` (`expires_at`);
 
 --
--- Chỉ mục cho bảng `ratings`
+-- Indexes for table `payment_logs`
+--
+ALTER TABLE `payment_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_order_id` (`order_id`),
+  ADD KEY `idx_order_code` (`order_code`),
+  ADD KEY `idx_created_at` (`created_at`);
+
+--
+-- Indexes for table `ratings`
 --
 ALTER TABLE `ratings`
   ADD PRIMARY KEY (`id`),
@@ -581,7 +647,7 @@ ALTER TABLE `ratings`
   ADD KEY `idx_movie_slug` (`movie_slug`);
 
 --
--- Chỉ mục cho bảng `subscription_plans`
+-- Indexes for table `subscription_plans`
 --
 ALTER TABLE `subscription_plans`
   ADD PRIMARY KEY (`id`),
@@ -590,7 +656,7 @@ ALTER TABLE `subscription_plans`
   ADD KEY `idx_active` (`is_active`);
 
 --
--- Chỉ mục cho bảng `transactions`
+-- Indexes for table `transactions`
 --
 ALTER TABLE `transactions`
   ADD PRIMARY KEY (`id`),
@@ -600,7 +666,7 @@ ALTER TABLE `transactions`
   ADD KEY `idx_status` (`status`);
 
 --
--- Chỉ mục cho bảng `users`
+-- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
@@ -611,7 +677,7 @@ ALTER TABLE `users`
   ADD KEY `idx_firebase_uid` (`firebase_uid`);
 
 --
--- Chỉ mục cho bảng `user_subscriptions`
+-- Indexes for table `user_subscriptions`
 --
 ALTER TABLE `user_subscriptions`
   ADD PRIMARY KEY (`id`),
@@ -620,7 +686,7 @@ ALTER TABLE `user_subscriptions`
   ADD KEY `idx_end_date` (`end_date`);
 
 --
--- Chỉ mục cho bảng `watch_history`
+-- Indexes for table `watch_history`
 --
 ALTER TABLE `watch_history`
   ADD PRIMARY KEY (`id`),
@@ -628,89 +694,95 @@ ALTER TABLE `watch_history`
   ADD KEY `idx_watched_at` (`watched_at`);
 
 --
--- AUTO_INCREMENT cho các bảng đã đổ
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT cho bảng `cart`
+-- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
--- AUTO_INCREMENT cho bảng `comments`
+-- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT cho bảng `coupons`
+-- AUTO_INCREMENT for table `coupons`
 --
 ALTER TABLE `coupons`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT cho bảng `coupon_usage`
+-- AUTO_INCREMENT for table `coupon_usage`
 --
 ALTER TABLE `coupon_usage`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `favorites`
+-- AUTO_INCREMENT for table `favorites`
 --
 ALTER TABLE `favorites`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT cho bảng `orders`
+-- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
--- AUTO_INCREMENT cho bảng `order_items`
+-- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
--- AUTO_INCREMENT cho bảng `password_reset_tokens`
+-- AUTO_INCREMENT for table `password_reset_tokens`
 --
 ALTER TABLE `password_reset_tokens`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `ratings`
+-- AUTO_INCREMENT for table `payment_logs`
+--
+ALTER TABLE `payment_logs`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `ratings`
 --
 ALTER TABLE `ratings`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `subscription_plans`
+-- AUTO_INCREMENT for table `subscription_plans`
 --
 ALTER TABLE `subscription_plans`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT cho bảng `transactions`
+-- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `users`
+-- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=104;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
 
 --
--- AUTO_INCREMENT cho bảng `user_subscriptions`
+-- AUTO_INCREMENT for table `user_subscriptions`
 --
 ALTER TABLE `user_subscriptions`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
--- AUTO_INCREMENT cho bảng `watch_history`
+-- AUTO_INCREMENT for table `watch_history`
 --
 ALTER TABLE `watch_history`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
@@ -718,7 +790,7 @@ ALTER TABLE `watch_history`
 -- --------------------------------------------------------
 
 --
--- Cấu trúc cho view `user_stats`
+-- Structure for view `user_stats`
 --
 DROP TABLE IF EXISTS `user_stats`;
 
@@ -727,7 +799,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc cho view `v_active_subscriptions`
+-- Structure for view `v_active_subscriptions`
 --
 DROP TABLE IF EXISTS `v_active_subscriptions`;
 
@@ -736,7 +808,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc cho view `v_order_stats`
+-- Structure for view `v_order_stats`
 --
 DROP TABLE IF EXISTS `v_order_stats`;
 
@@ -745,32 +817,32 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc cho view `v_top_selling_plans`
+-- Structure for view `v_top_selling_plans`
 --
 DROP TABLE IF EXISTS `v_top_selling_plans`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_top_selling_plans`  AS SELECT `sp`.`id` AS `id`, `sp`.`name` AS `name`, `sp`.`slug` AS `slug`, `sp`.`price` AS `price`, count(`oi`.`id`) AS `total_sold`, sum(`oi`.`total`) AS `total_revenue` FROM ((`subscription_plans` `sp` left join `order_items` `oi` on((`sp`.`id` = `oi`.`plan_id`))) left join `orders` `o` on((`oi`.`order_id` = `o`.`id`))) WHERE (`o`.`payment_status` = 'paid') GROUP BY `sp`.`id`, `sp`.`name`, `sp`.`slug`, `sp`.`price` ORDER BY `total_sold` DESC ;
 
 --
--- Ràng buộc đối với các bảng kết xuất
+-- Constraints for dumped tables
 --
 
 --
--- Ràng buộc cho bảng `cart`
+-- Constraints for table `cart`
 --
 ALTER TABLE `cart`
   ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `subscription_plans` (`id`) ON DELETE CASCADE;
 
 --
--- Ràng buộc cho bảng `comments`
+-- Constraints for table `comments`
 --
 ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE;
 
 --
--- Ràng buộc cho bảng `coupon_usage`
+-- Constraints for table `coupon_usage`
 --
 ALTER TABLE `coupon_usage`
   ADD CONSTRAINT `coupon_usage_ibfk_1` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`),
@@ -778,45 +850,45 @@ ALTER TABLE `coupon_usage`
   ADD CONSTRAINT `coupon_usage_ibfk_3` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`);
 
 --
--- Ràng buộc cho bảng `favorites`
+-- Constraints for table `favorites`
 --
 ALTER TABLE `favorites`
   ADD CONSTRAINT `favorites_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Ràng buộc cho bảng `orders`
+-- Constraints for table `orders`
 --
 ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
--- Ràng buộc cho bảng `order_items`
+-- Constraints for table `order_items`
 --
 ALTER TABLE `order_items`
   ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `subscription_plans` (`id`);
 
 --
--- Ràng buộc cho bảng `ratings`
+-- Constraints for table `ratings`
 --
 ALTER TABLE `ratings`
   ADD CONSTRAINT `ratings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Ràng buộc cho bảng `transactions`
+-- Constraints for table `transactions`
 --
 ALTER TABLE `transactions`
   ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`);
 
 --
--- Ràng buộc cho bảng `user_subscriptions`
+-- Constraints for table `user_subscriptions`
 --
 ALTER TABLE `user_subscriptions`
   ADD CONSTRAINT `user_subscriptions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `user_subscriptions_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `subscription_plans` (`id`);
 
 --
--- Ràng buộc cho bảng `watch_history`
+-- Constraints for table `watch_history`
 --
 ALTER TABLE `watch_history`
   ADD CONSTRAINT `watch_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;

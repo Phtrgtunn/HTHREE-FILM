@@ -7,6 +7,16 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
+// Handle GET request for testing
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    echo json_encode([
+        'success' => true,
+        'message' => 'Casso webhook endpoint is ready',
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
+    exit;
+}
+
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/config_payment.php';
 
