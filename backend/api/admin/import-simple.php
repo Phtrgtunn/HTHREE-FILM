@@ -31,7 +31,7 @@ if ($conn->connect_error) {
 
 echo "Connected!\n\n";
 
-$sqlFile = __DIR__ . '/../../localhost-railway.sql';
+$sqlFile = __DIR__ . '/../../localhost-notriggers.sql';
 $sql = file_get_contents($sqlFile);
 
 echo "SQL file size: " . strlen($sql) . " bytes\n\n";
