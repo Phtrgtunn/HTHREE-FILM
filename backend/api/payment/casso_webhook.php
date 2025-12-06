@@ -118,29 +118,31 @@ try {
         
         // ✅ THANH TOÁN HỢP LỆ - KÍCH HOẠT GÓI
         
-        // 1. Cập nhật trạng thái đơn hàng
+        // 1. Cập nhật trạng thái đơn hàng thành COMPLETED
         $stmt = $conn->prepare("
             UPDATE orders 
             SET 
                 payment_status = 'paid',
+                status = 'completed',
                 paid_at = NOW(),
+                completed_at = NOW(),
                 transaction_id = ?,
                 payment_note = ?
             WHERE id = ?
         ");
         $stmt->execute([
             $transactionId,
-            "Thanh toán qua VietQR - Casso",
+            "Thanh toán qua VietQR - Casso (Tự động)",
             $order['id']
         ]);
         
-        logWebhook("Order marked as paid: {$orderCode}");
+        logWebhook("Order marked as COMPLETED: {$orderCode}");
         
-        // 2. Kích hoạt subscription
-        $activated = activateSubscription(
-            $order['user_id'],
-            $order['plan_id'],
-            $order['duration_months']
+        // 2. Kích hoạt subscription tự động
+        $activated = activateSubscriptionAuto(
+            $conn,
+            $order['id'],
+            $order['user_id']
         );
         
         if ($activated) {
@@ -176,9 +178,20 @@ try {
  * Extract order code từ description
  */
 function extractOrderCode($description) {
-    // Pattern: HTHREE 20241205ABC123 hoặc HTHREE20241205ABC123
-    $pattern = '/' . ORDER_PREFIX . '\s*([A-Z0-9]+)/i';
+    // Pattern 1: HTHREE ORD20241205ABC (có khoảng trắng)
+    // Pattern 2: HTHREEORD20241205ABC (không khoảng trắng)
+    // Pattern 3: ORD20241205ABC (chỉ có mã đơn)
     
+    // Try pattern with ORDER_PREFIX first
+    if (defined('ORDER_PREFIX')) {
+        $pattern = '/' . ORDER_PREFIX . '\s*(ORD[A-Z0-9]+)/i';
+        if (preg_match($pattern, $description, $matches)) {
+            return $matches[1];
+        }
+    }
+    
+    // Try direct ORD pattern
+    $pattern = '/(ORD[0-9]{8,}[A-Z0-9]*)/i';
     if (preg_match($pattern, $description, $matches)) {
         return $matches[1];
     }
@@ -187,66 +200,80 @@ function extractOrderCode($description) {
 }
 
 /**
- * Kích hoạt subscription cho user
+ * Kích hoạt subscription tự động (sử dụng logic từ activate_bank_transfer_orders.php)
  */
-function activateSubscription($userId, $planId, $durationMonths) {
-    global $conn;
-    
+function activateSubscriptionAuto($conn, $order_id, $user_id) {
     try {
-        // Lấy thông tin plan
-        $stmt = $conn->prepare("SELECT * FROM plans WHERE id = ?");
-        $stmt->execute([$planId]);
-        $plan = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Lấy thông tin order items
+        $stmt = $conn->prepare("
+            SELECT oi.*, sp.slug, sp.quality, sp.duration_days
+            FROM order_items oi
+            JOIN subscription_plans sp ON oi.plan_id = sp.id
+            WHERE oi.order_id = ?
+        ");
+        $stmt->execute([$order_id]);
+        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        if (!$plan) {
-            throw new Exception('Plan not found');
+        if (empty($items)) {
+            logWebhook("No order items found for order: {$order_id}");
+            return false;
         }
         
-        // Tính ngày bắt đầu và kết thúc
-        $startDate = date('Y-m-d H:i:s');
-        $endDate = date('Y-m-d H:i:s', strtotime("+{$durationMonths} months"));
-        
-        // Kiểm tra xem user đã có subscription chưa
-        $stmt = $conn->prepare("
-            SELECT * FROM subscriptions 
-            WHERE user_id = ? 
-            AND plan_id = ?
-            AND status = 'active'
-        ");
-        $stmt->execute([$userId, $planId]);
-        $existingSub = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($existingSub) {
-            // Gia hạn subscription hiện tại
-            $newEndDate = date('Y-m-d H:i:s', strtotime($existingSub['end_date'] . " +{$durationMonths} months"));
+        foreach ($items as $item) {
+            $plan_id = $item['plan_id'];
+            $duration_months = $item['duration_months'];
+            $duration_days = $item['duration_days'] * $duration_months;
             
-            $stmt = $conn->prepare("
-                UPDATE subscriptions 
-                SET end_date = ?
-                WHERE id = ?
+            logWebhook("Processing plan_id: {$plan_id}, duration: {$duration_days} days");
+            
+            // Kiểm tra đã có subscription chưa (chỉ check những gói chưa hết hạn)
+            $check_stmt = $conn->prepare("
+                SELECT id, end_date, status 
+                FROM user_subscriptions 
+                WHERE user_id = ? AND plan_id = ? AND status = 'active' AND end_date > NOW()
+                ORDER BY end_date DESC 
+                LIMIT 1
             ");
-            $stmt->execute([$newEndDate, $existingSub['id']]);
+            $check_stmt->execute([$user_id, $plan_id]);
+            $existing = $check_stmt->fetch(PDO::FETCH_ASSOC);
             
-            logWebhook("Extended subscription: {$existingSub['id']} to {$newEndDate}");
-        } else {
-            // Tạo subscription mới
-            $stmt = $conn->prepare("
-                INSERT INTO subscriptions (
-                    user_id, plan_id, plan_name, plan_slug, quality,
-                    start_date, end_date, status, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, 'active', NOW())
-            ");
-            $stmt->execute([
-                $userId,
-                $planId,
-                $plan['name'],
-                $plan['slug'],
-                $plan['quality'],
-                $startDate,
-                $endDate
-            ]);
-            
-            logWebhook("Created new subscription for user: {$userId}");
+            if ($existing) {
+                // Gia hạn
+                $current_end = new DateTime($existing['end_date']);
+                $now = new DateTime();
+                
+                $start_from = $current_end > $now ? $current_end : $now;
+                $new_end = clone $start_from;
+                $new_end->modify("+{$duration_days} days");
+                
+                $update_stmt = $conn->prepare("
+                    UPDATE user_subscriptions 
+                    SET end_date = ?, updated_at = NOW()
+                    WHERE id = ?
+                ");
+                $new_end_str = $new_end->format('Y-m-d H:i:s');
+                $update_stmt->execute([$new_end_str, $existing['id']]);
+                
+                logWebhook("Extended subscription to: {$new_end_str}");
+            } else {
+                // Tạo mới (hoặc gói đã hết hạn)
+                // Set các gói cũ thành expired
+                $expire_old = $conn->prepare("
+                    UPDATE user_subscriptions 
+                    SET status = 'expired', updated_at = NOW()
+                    WHERE user_id = ? AND plan_id = ? AND status = 'active' AND end_date <= NOW()
+                ");
+                $expire_old->execute([$user_id, $plan_id]);
+                
+                $insert_stmt = $conn->prepare("
+                    INSERT INTO user_subscriptions (
+                        user_id, plan_id, start_date, end_date, status, order_id, created_at, updated_at
+                    ) VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? DAY), 'active', ?, NOW(), NOW())
+                ");
+                $insert_stmt->execute([$user_id, $plan_id, $duration_days, $order_id]);
+                
+                logWebhook("Created new subscription (reset time)");
+            }
         }
         
         return true;
