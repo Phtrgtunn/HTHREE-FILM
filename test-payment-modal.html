@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Payment Modal</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 50px;
+        }
+        button {
+            background: #e50914;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #f40612;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #222;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Payment Modal</h1>
+    
+    <button onclick="testClick()">TEST CLICK</button>
+    <button onclick="testPaymentModal()">TEST PAYMENT MODAL</button>
+    
+    <div id="result"></div>
+
+    <script>
+        function testClick() {
+            console.log('✅ TEST BUTTON CLICKED');
+            document.getElementById('result').innerHTML = '✅ Button clicked successfully!';
+        }
+
+        function testPaymentModal() {
+            console.log('🛒 Opening payment modal...');
+            document.getElementById('result').innerHTML = '🛒 Payment modal test...';
+            
+            // Simulate modal
+            alert('Payment Modal would open here');
+        }
+
+        console.log('🚀 Test page loaded');
+    </script>
+</body>
+</html>

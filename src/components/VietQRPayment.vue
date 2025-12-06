@@ -18,6 +18,65 @@
         <p class="text-gray-400">Sử dụng app ngân hàng để quét mã QR</p>
       </div>
 
+      <!-- Hướng dẫn chuyển khoản (Dropdown) -->
+      <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg overflow-hidden">
+        <button
+          @click="showGuide = !showGuide"
+          class="w-full p-4 flex items-center justify-between hover:bg-blue-500/5 transition-colors duration-200"
+        >
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            <h4 class="text-blue-400 font-bold">Hướng dẫn chuyển khoản</h4>
+            <span class="text-xs text-blue-300/60">(Click để {{ showGuide ? 'ẩn' : 'xem' }})</span>
+          </div>
+          <svg 
+            class="w-5 h-5 text-blue-400 transition-transform duration-200 ease-out"
+            :class="{ 'rotate-180': showGuide }"
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        
+        <Transition
+          enter-active-class="transition-all duration-200 ease-out origin-top"
+          enter-from-class="opacity-0 scale-y-0"
+          enter-to-class="opacity-100 scale-y-100"
+          leave-active-class="transition-all duration-150 ease-in origin-top"
+          leave-from-class="opacity-100 scale-y-100"
+          leave-to-class="opacity-0 scale-y-0"
+        >
+          <div v-show="showGuide" class="border-t border-blue-500/20">
+            <div class="px-4 py-4 space-y-3 text-sm text-gray-300">
+              <div class="flex items-start gap-2">
+                <span class="text-blue-400 font-bold">📱 Bước 1:</span>
+                <span>Mở app ngân hàng của bạn</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-blue-400 font-bold">📸 Bước 2:</span>
+                <span>Quét mã QR bên dưới</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-blue-400 font-bold">✍️ Bước 3:</span>
+                <span>Kiểm tra nội dung chuyển khoản (tự động điền)</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-blue-400 font-bold">✅ Bước 4:</span>
+                <span>Xác nhận chuyển khoản</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-blue-400 font-bold">⚡ Bước 5:</span>
+                <span>Gói sẽ tự động kích hoạt trong 10-30 giây</span>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </div>
+
       <!-- QR Code -->
       <div class="bg-white p-6 rounded-2xl mx-auto max-w-sm">
         <img
@@ -296,6 +355,7 @@ const checkingPayment = ref(false);
 const paymentSuccess = ref(false);
 const timeRemaining = ref(900); // 15 minutes
 const copied = ref(false);
+const showGuide = ref(false); // Dropdown state
 
 let checkInterval = null;
 let countdownInterval = null;
