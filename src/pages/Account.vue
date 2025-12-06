@@ -2926,6 +2926,37 @@ const pendingSubscriptions = computed(() => {
   return subscriptions.value.filter((sub) => sub.status === "pending");
 });
 const currentTime = ref(new Date());
+const serverTime = ref(null);
+const timeOffset = ref(0); // Chênh lệch giữa server và client
+
+// Fetch server time để validate
+const fetchServerTime = async () => {
+  try {
+    const API_URL =
+      import.meta.env.VITE_API_BASE_URL ||
+      "http://localhost/HTHREE_film/HTHREE_film/backend/api";
+    const response = await fetch(`${API_URL}/server_time.php`);
+    const data = await response.json();
+
+    if (data.success && data.server_time) {
+      serverTime.value = new Date(data.server_time);
+      const clientTime = new Date();
+      timeOffset.value = serverTime.value - clientTime;
+
+      // Cảnh báo nếu client time sai lệch quá 5 phút
+      const offsetMinutes = Math.abs(timeOffset.value) / (1000 * 60);
+      if (offsetMinutes > 5) {
+        console.warn(
+          `⚠️ Client time sai lệch ${offsetMinutes.toFixed(
+            0
+          )} phút so với server`
+        );
+      }
+    }
+  } catch (error) {
+    console.error("Failed to fetch server time:", error);
+  }
+};
 
 // Fetch user subscriptions (multiple)
 const fetchSubscription = async () => {
@@ -2982,7 +3013,13 @@ const getPlanDescription = (slug) => {
 const getRealtimeProgress = (sub) => {
   const start = new Date(sub.start_date);
   const end = new Date(sub.end_date);
-  const now = currentTime.value;
+
+  // Sử dụng server time nếu có, fallback về client time
+  let now = currentTime.value;
+  if (serverTime.value) {
+    // Tính server time hiện tại dựa trên offset
+    now = new Date(new Date().getTime() + timeOffset.value);
+  }
 
   const totalMs = end - start;
   const usedMs = now - start;
@@ -2994,6 +3031,19 @@ const getRealtimeProgress = (sub) => {
     0,
     Math.ceil(remainingMs / (1000 * 60 * 60 * 24))
   );
+
+  // Cảnh báo nếu client time bị chỉnh sửa (sai lệch > 1 ngày)
+  const clientNow = new Date();
+  const clientDaysRemaining = Math.ceil(
+    (end - clientNow) / (1000 * 60 * 60 * 24)
+  );
+  const daysDiff = Math.abs(daysRemaining - clientDaysRemaining);
+
+  if (daysDiff > 1 && serverTime.value) {
+    console.warn(
+      `⚠️ Phát hiện client time có thể bị chỉnh sửa. Sử dụng server time.`
+    );
+  }
 
   return {
     progress: progress.toFixed(2),
@@ -3055,6 +3105,9 @@ let timeInterval = null;
 let refreshInterval = null;
 
 onMounted(() => {
+  // Fetch server time ngay khi mount
+  fetchServerTime();
+
   onAuthStateChanged(auth, (currentUser) => {
     user.value = currentUser;
     if (currentUser) {
@@ -3076,6 +3129,11 @@ onMounted(() => {
       refreshInterval = setInterval(() => {
         fetchSubscription();
       }, 30000);
+
+      // Refresh server time every 5 minutes
+      setInterval(() => {
+        fetchServerTime();
+      }, 5 * 60 * 1000);
     } else {
       // Nếu không có user (đã đăng xuất), chuyển về Homepage
       router.push("/home");

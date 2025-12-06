@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 05, 2025 at 03:50 PM
+-- Generation Time: Dec 06, 2025 at 11:00 AM
 -- Server version: 8.0.44
 -- PHP Version: 8.2.12
 
@@ -160,7 +160,7 @@ CREATE TABLE `orders` (
   `subtotal` decimal(10,2) NOT NULL,
   `discount` decimal(10,2) DEFAULT '0.00',
   `total` decimal(10,2) NOT NULL,
-  `payment_method` enum('vnpay','momo','zalopay','bank_transfer','cod') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payment_method` enum('vnpay','momo','zalopay','bank_transfer','cod','vietqr') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `payment_status` enum('pending','paid','failed','refunded') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
   `status` enum('pending','processing','completed','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
   `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -196,7 +196,16 @@ INSERT INTO `orders` (`id`, `order_code`, `user_id`, `customer_name`, `customer_
 (16, 'ORD20251125401', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 15:00:10', '2025-11-25 15:00:10', NULL, '2025-11-25 15:00:10', '2025-11-25 15:00:10', NULL, NULL, NULL, NULL, NULL),
 (17, 'ORD20251125535', 103, 'ầdasdasd', 'vngs009@gmail.com', '0825591211', 50000.00, 0.00, 50000.00, 'bank_transfer', 'paid', 'completed', NULL, NULL, '2025-11-25 15:02:49', '2025-11-25 15:02:49', NULL, '2025-11-25 15:02:49', '2025-11-25 15:02:49', NULL, NULL, NULL, NULL, NULL),
 (18, 'ORD20251204621', 1, 'Phạm Trung Tuấn', 'admin@hthree.com', '0825591211', 100000.00, 0.00, 100000.00, 'bank_transfer', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-04 13:04:16', '2025-12-04 13:04:16', NULL, NULL, NULL, NULL, NULL),
-(19, 'ORD20251204144', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'bank_transfer', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-04 13:27:04', '2025-12-04 13:27:04', NULL, NULL, NULL, NULL, NULL);
+(19, 'ORD20251204144', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'bank_transfer', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-04 13:27:04', '2025-12-04 13:27:04', NULL, NULL, NULL, NULL, NULL),
+(20, 'ORD20251205716', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'bank_transfer', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-05 15:57:28', '2025-12-05 15:57:28', NULL, NULL, NULL, NULL, NULL),
+(21, 'ORD20251205714', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'vietqr', 'paid', 'completed', NULL, NULL, '2025-12-05 16:13:42', '2025-12-05 16:13:42', NULL, '2025-12-05 16:06:11', '2025-12-05 16:13:42', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=50000.00&addInfo=HTHREE+ORD20251205714&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251205714', '2025-12-05 16:21:12', '12021672908', NULL),
+(22, 'ORD20251205560', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'vietqr', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-05 16:11:09', '2025-12-05 16:11:09', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=50000.00&addInfo=HTHREE+ORD20251205560&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251205560', '2025-12-05 16:26:09', NULL, NULL),
+(23, 'ORD20251205261', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'vietqr', 'paid', 'completed', NULL, NULL, '2025-12-05 16:16:40', '2025-12-05 16:16:40', NULL, '2025-12-05 16:14:57', '2025-12-05 16:16:40', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=50000.00&addInfo=HTHREE+ORD20251205261&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251205261', '2025-12-05 16:29:58', 'MANUAL_TEST_1764951400074', NULL),
+(24, 'ORD20251205004', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'vietqr', 'paid', 'pending', NULL, NULL, '2025-12-05 16:32:48', NULL, NULL, '2025-12-05 16:32:37', '2025-12-05 16:32:48', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=50000.00&addInfo=HTHREE+ORD20251205004&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251205004', '2025-12-05 16:47:37', '12864350', 'Thanh toán qua VietQR - Casso'),
+(25, 'ORD20251205591', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 2400000.00, 0.00, 2400000.00, 'vietqr', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-05 16:51:18', '2025-12-05 16:51:18', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=2400000.00&addInfo=HTHREE+ORD20251205591&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251205591', '2025-12-05 17:06:18', NULL, NULL),
+(26, 'ORD20251206389', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 150000.00, 0.00, 150000.00, 'vietqr', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-06 07:38:24', '2025-12-06 07:38:24', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=150000.00&addInfo=HTHREE+ORD20251206389&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251206389', '2025-12-06 07:53:24', NULL, NULL),
+(27, 'ORD20251206204', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 150000.00, 7500.00, 142500.00, 'vietqr', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-06 07:49:51', '2025-12-06 07:49:51', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=142500.00&addInfo=HTHREE+ORD20251206204&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251206204', '2025-12-06 08:04:51', NULL, NULL),
+(28, 'ORD20251206211', 104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', '', 50000.00, 0.00, 50000.00, 'vietqr', 'pending', 'pending', NULL, NULL, NULL, NULL, NULL, '2025-12-06 07:50:56', '2025-12-06 07:50:56', 'https://img.vietqr.io/image/970422-0825591211-compact2.png?amount=50000.00&addInfo=HTHREE+ORD20251206211&accountName=PHAM+TRUNG+TUAN', 'HTHREE ORD20251206211', '2025-12-06 08:05:56', NULL, NULL);
 
 --
 -- Triggers `orders`
@@ -260,7 +269,16 @@ INSERT INTO `order_items` (`id`, `order_id`, `plan_id`, `plan_name`, `plan_price
 (14, 16, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-11-25 15:00:10'),
 (15, 17, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-11-25 15:02:49'),
 (16, 18, 3, 'Premium', 100000.00, 1, 1, 100000.00, 100000.00, '2025-12-04 13:04:16'),
-(17, 19, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-04 13:27:04');
+(17, 19, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-04 13:27:04'),
+(18, 20, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-05 15:57:28'),
+(19, 21, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-05 16:06:11'),
+(20, 22, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-05 16:11:09'),
+(21, 23, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-05 16:14:57'),
+(22, 24, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-05 16:32:37'),
+(23, 25, 4, 'VIP', 200000.00, 12, 1, 2400000.00, 2400000.00, '2025-12-05 16:51:18'),
+(24, 26, 2, 'Basic', 50000.00, 3, 1, 150000.00, 150000.00, '2025-12-06 07:38:24'),
+(25, 27, 2, 'Basic', 50000.00, 3, 1, 142500.00, 142500.00, '2025-12-06 07:49:51'),
+(26, 28, 2, 'Basic', 50000.00, 1, 1, 50000.00, 50000.00, '2025-12-06 07:50:56');
 
 -- --------------------------------------------------------
 
@@ -292,6 +310,13 @@ CREATE TABLE `payment_logs` (
   `data` json DEFAULT NULL COMMENT 'Dữ liệu chi tiết',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `payment_logs`
+--
+
+INSERT INTO `payment_logs` (`id`, `order_id`, `order_code`, `event_type`, `message`, `data`, `created_at`) VALUES
+(1, 23, 'ORD20251205261', 'manual_approval', 'Order manually approved', '{\"method\": \"manual\", \"approved_at\": \"2025-12-05 16:16:40\", \"transaction_id\": \"MANUAL_TEST_1764951400074\"}', '2025-12-05 16:16:40');
 
 -- --------------------------------------------------------
 
@@ -388,7 +413,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `firebase_uid`, `password`, `full_name`, `avatar`, `created_at`, `updated_at`, `last_login`, `is_active`, `role`) VALUES
-(1, 'admin', 'admin@hthree.com', 'dEd8RaIyoCcNmynpV5mXOTiGUd22', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrator', NULL, '2025-11-22 06:39:59', '2025-12-04 17:49:07', '2025-12-04 17:49:07', 1, 'admin'),
+(1, 'admin', 'admin@hthree.com', 'dEd8RaIyoCcNmynpV5mXOTiGUd22', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrator', NULL, '2025-11-22 06:39:59', '2025-12-05 15:57:15', '2025-12-05 15:57:15', 1, 'admin'),
 (2, 'user1', 'user1@hthree.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'User Demo', NULL, '2025-11-22 06:39:59', '2025-11-22 06:39:59', NULL, 1, 'user'),
 (3, 'khatu', 'tranlackhatucute@gmail.com', NULL, '$2y$10$498nga1O5Rv5gT4UM5js7eJ0s/9ahKx4mUwWOAscbwcRQoVJJzb8e', 'Trần Lạc Khả Tú', NULL, '2025-11-22 06:44:08', '2025-11-22 06:44:15', '2025-11-22 06:44:15', 1, 'user'),
 (4, 'user_nXFrwoZy', 'user_nXFrwoZy@firebase.temp', 'nXFrwoZyZyTBxz7sDri1NhG1mJ62', '$2y$10$ceCy5ytgsSOacTUWW6FVy.VYCjkvNUvMXiL10Ouau7fD7mljZuYs.', NULL, NULL, '2025-11-25 06:34:22', '2025-11-25 06:34:22', NULL, 1, 'user'),
@@ -396,9 +421,9 @@ INSERT INTO `users` (`id`, `username`, `email`, `firebase_uid`, `password`, `ful
 (6, 'hient7182', 'hient7182@gmail.com', 'firebase_uid_placeholder', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin', NULL, '2025-11-25 12:04:02', '2025-11-25 12:04:02', NULL, 1, 'admin'),
 (99, 'admin_test', 'admin@test.com', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin Test', NULL, '2025-11-25 13:03:09', '2025-11-25 13:03:09', NULL, 1, 'admin'),
 (100, 'Phạm Tuấn', 'tuan1412@gmail.com', 'siYwEOlLUEdhp7UK3m57SZien8v2', '$2y$10$wBB4KfaCwqkx1Rz3Kf9vR.cXRJ27EH4XEGAirJKV24FuJf8LiN6MK', 'Phạm Tuấn', NULL, '2025-11-25 13:13:02', '2025-11-25 13:14:42', '2025-11-25 13:14:42', 1, 'user'),
-(101, 'gsdfgsd', 'phadshada@gmail.com', 'MkIEC3eXIbQYjLdLAqakBANaF8D2', '$2y$10$xBFDUvrCtrxXUUIBUOnWPOOa1amNef/E01G2tj.nwA83nISUw0j6S', 'gsdfgsd', NULL, '2025-11-25 13:18:46', '2025-11-25 13:18:52', '2025-11-25 13:18:52', 1, 'user'),
+(101, 'gsdfgsd', 'phadshada@gmail.com', 'MkIEC3eXIbQYjLdLAqakBANaF8D2', '$2y$10$xBFDUvrCtrxXUUIBUOnWPOOa1amNef/E01G2tj.nwA83nISUw0j6S', 'gsdfgsd', NULL, '2025-11-25 13:18:46', '2025-12-05 17:36:43', '2025-12-05 17:36:43', 1, 'user'),
 (103, 'ầdasdasd', 'vngs009@gmail.com', 'X2QNNes7PHNQkxjdBLAmVegxuBk2', '$2y$10$xd2iNTCFQOXfOdIVQ3FjeuZtWmecAF9COEqNNAmaM2hL.38H1gH6.', 'ầdasdasd', NULL, '2025-11-25 14:51:31', '2025-11-25 14:51:37', '2025-11-25 14:51:37', 1, 'user'),
-(104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', 'LT4zP89aznM5BdyGwg2Q4i8JpJz1', '$2y$10$KoyHsB21sLk.9vIQKq4AOuJxTEScWA4WiOQFjjiwNH3rl1epGfNHm', 'Phạm Trung Tuấn', NULL, '2025-12-04 13:26:42', '2025-12-04 13:26:47', '2025-12-04 13:26:47', 1, 'user'),
+(104, 'Phạm Trung Tuấn', 'vngs007@gmail.com', 'LT4zP89aznM5BdyGwg2Q4i8JpJz1', '$2y$10$KoyHsB21sLk.9vIQKq4AOuJxTEScWA4WiOQFjjiwNH3rl1epGfNHm', 'Phạm Trung Tuấn', NULL, '2025-12-04 13:26:42', '2025-12-05 17:27:55', '2025-12-05 17:27:55', 1, 'user'),
 (105, 'user_Rq1RoEtk', 'user_Rq1RoEtk@firebase.temp', 'Rq1RoEtksIOagfuCH7zqbij4QV12', '$2y$10$u9YxC0xxtJGxFx.cWnc2Yu7GpwDDdpf2fsru2gdWwbUOaD0BpF9ce', NULL, NULL, '2025-12-05 14:08:24', '2025-12-05 14:08:24', NULL, 1, 'user');
 
 -- --------------------------------------------------------
@@ -408,12 +433,12 @@ INSERT INTO `users` (`id`, `username`, `email`, `firebase_uid`, `password`, `ful
 -- (See below for the actual view)
 --
 CREATE TABLE `user_stats` (
-`id` int
-,`username` varchar(50)
-,`email` varchar(100)
-,`movies_watched` bigint
+`email` varchar(100)
 ,`favorites_count` bigint
+,`id` int
+,`movies_watched` bigint
 ,`ratings_count` bigint
+,`username` varchar(50)
 );
 
 -- --------------------------------------------------------
@@ -448,7 +473,11 @@ INSERT INTO `user_subscriptions` (`id`, `user_id`, `plan_id`, `start_date`, `end
 (22, 103, 3, '2025-11-25 14:57:52', '2026-01-24 14:57:52', 'cancelled', 0, 14, '2025-11-25 14:57:52', '2025-11-25 14:59:45'),
 (23, 103, 2, '2025-11-25 14:58:07', '2025-12-25 14:58:07', 'cancelled', 0, 15, '2025-11-25 14:58:07', '2025-11-25 14:59:47'),
 (25, 103, 2, '2025-11-25 15:02:49', '2025-12-25 15:02:49', 'active', 0, 17, '2025-11-25 15:02:49', '2025-11-25 15:02:49'),
-(26, 103, 2, '2025-12-04 12:56:07', '2026-01-03 12:56:07', 'active', 0, 12, '2025-12-04 12:56:07', '2025-12-04 12:56:07');
+(26, 103, 2, '2025-12-04 12:56:07', '2026-01-03 12:56:07', 'active', 0, 12, '2025-12-04 12:56:07', '2025-12-04 12:56:07'),
+(27, 104, 2, '2025-12-05 16:13:42', '2026-01-04 16:13:42', 'cancelled', 0, 21, '2025-12-05 16:13:42', '2025-12-05 16:56:19'),
+(28, 104, 2, '2025-12-05 16:16:40', '2026-01-04 16:16:40', 'cancelled', 0, 23, '2025-12-05 16:16:40', '2025-12-05 16:56:18'),
+(29, 104, 2, '2025-12-05 16:16:40', '2026-01-04 09:16:40', 'active', 0, 23, '2025-12-05 16:16:40', '2025-12-05 16:16:40'),
+(30, 104, 2, '2025-12-05 16:32:48', '2026-01-04 16:32:48', 'cancelled', 0, 24, '2025-12-05 16:32:48', '2025-12-05 16:56:15');
 
 -- --------------------------------------------------------
 
@@ -457,18 +486,18 @@ INSERT INTO `user_subscriptions` (`id`, `user_id`, `plan_id`, `start_date`, `end
 -- (See below for the actual view)
 --
 CREATE TABLE `v_active_subscriptions` (
-`id` int
-,`user_id` int
-,`username` varchar(50)
+`days_remaining` int
 ,`email` varchar(100)
+,`end_date` timestamp
+,`id` int
+,`max_devices` int
 ,`plan_name` varchar(50)
 ,`plan_slug` varchar(50)
 ,`quality` varchar(20)
-,`max_devices` int
 ,`start_date` timestamp
-,`end_date` timestamp
 ,`status` enum('active','expired','cancelled')
-,`days_remaining` int
+,`user_id` int
+,`username` varchar(50)
 );
 
 -- --------------------------------------------------------
@@ -478,11 +507,11 @@ CREATE TABLE `v_active_subscriptions` (
 -- (See below for the actual view)
 --
 CREATE TABLE `v_order_stats` (
-`order_date` date
-,`total_orders` bigint
+`cancelled_orders` decimal(23,0)
 ,`completed_orders` decimal(23,0)
+,`order_date` date
 ,`pending_orders` decimal(23,0)
-,`cancelled_orders` decimal(23,0)
+,`total_orders` bigint
 ,`total_revenue` decimal(32,2)
 );
 
@@ -495,10 +524,10 @@ CREATE TABLE `v_order_stats` (
 CREATE TABLE `v_top_selling_plans` (
 `id` int
 ,`name` varchar(50)
-,`slug` varchar(50)
 ,`price` decimal(10,2)
-,`total_sold` bigint
+,`slug` varchar(50)
 ,`total_revenue` decimal(32,2)
+,`total_sold` bigint
 );
 
 -- --------------------------------------------------------
@@ -700,13 +729,13 @@ ALTER TABLE `favorites`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `password_reset_tokens`
@@ -718,7 +747,7 @@ ALTER TABLE `password_reset_tokens`
 -- AUTO_INCREMENT for table `payment_logs`
 --
 ALTER TABLE `payment_logs`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `ratings`
@@ -748,7 +777,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `user_subscriptions`
 --
 ALTER TABLE `user_subscriptions`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `watch_history`
