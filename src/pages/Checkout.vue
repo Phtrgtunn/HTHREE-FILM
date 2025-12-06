@@ -457,7 +457,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { createOrder, validateCoupon } from '@/services/ecommerceApi';
@@ -542,6 +542,24 @@ const isFormValid = computed(() => {
 });
 
 onMounted(async () => {
+  // Check if coming from Pricing page with plan info
+  const route = useRoute();
+  if (route.query.plan_id) {
+    // Add plan to cart automatically
+    try {
+      const planId = parseInt(route.query.plan_id);
+      const duration = parseInt(route.query.duration) || 1;
+      
+      await cartStore.addItem(planId, 1, duration);
+      toast.success(`Đã thêm gói ${route.query.plan_name} vào giỏ hàng`);
+    } catch (error) {
+      console.error('Error adding plan to cart:', error);
+      toast.error('Không thể thêm gói vào giỏ hàng');
+      router.push('/pricing');
+      return;
+    }
+  }
+  
   await cartStore.fetchCart();
 
   // Try to restore form draft first

@@ -149,54 +149,28 @@
             </li>
           </ul>
 
-          <!-- Action Buttons -->
-          <div class="space-y-3">
-            <!-- Add to Cart Button -->
-            <button
-              v-if="plan.slug !== 'free'"
-              @click.stop="handleAddToCart(plan)"
-              :disabled="addingToCart === plan.id"
-              class="w-full py-3.5 rounded-xl font-bold text-center transition-all duration-300 border-2 flex items-center justify-center gap-2"
-              :class="[
-                plan.slug === 'basic' ? 'border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white hover:scale-105' : '',
-                plan.slug === 'premium' ? 'border-red-500 text-red-400 hover:bg-red-500 hover:text-white hover:scale-105' : '',
-                plan.slug === 'vip' ? 'border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white hover:scale-105' : '',
-                addingToCart === plan.id ? 'opacity-50 cursor-not-allowed' : ''
-              ]"
-            >
-              <svg v-if="addingToCart === plan.id" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-              </svg>
-              {{ $t('pricing.addToCart') }}
-            </button>
-
-            <!-- Buy Now Button -->
-            <button
-              @click.stop="handleBuyNow(plan)"
-              class="relative w-full py-4 rounded-xl font-bold text-center transition-all duration-300 overflow-hidden flex items-center justify-center gap-2"
-              :class="[
-                getButtonClass(plan.slug),
-                hoveredPlan === plan.slug ? 'scale-105 shadow-2xl' : ''
-              ]"
-            >
-              <!-- Button Shine -->
-              <div 
-                v-if="hoveredPlan === plan.slug"
-                class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine"
-              ></div>
-              
-              <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-              <span class="relative z-10">
-                {{ plan.slug === 'free' ? $t('pricing.useFree') : $t('pricing.buyNow') }}
-              </span>
-            </button>
-          </div>
+          <!-- Action Button -->
+          <button
+            @click.stop="handleBuyNow(plan)"
+            class="relative w-full py-4 rounded-xl font-bold text-center transition-all duration-300 overflow-hidden flex items-center justify-center gap-2"
+            :class="[
+              getButtonClass(plan.slug),
+              hoveredPlan === plan.slug ? 'scale-105 shadow-2xl' : ''
+            ]"
+          >
+            <!-- Button Shine -->
+            <div 
+              v-if="hoveredPlan === plan.slug"
+              class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine"
+            ></div>
+            
+            <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            <span class="relative z-10">
+              {{ plan.slug === 'free' ? $t('pricing.useFree') : $t('pricing.buyNow') }}
+            </span>
+          </button>
           
           <!-- Popular Choice Indicator -->
           <div 
@@ -242,7 +216,6 @@ const showPaymentModal = ref(false);
 const selectedPlan = ref(null);
 const hoveredPlan = ref(null);
 const billingPeriod = ref('monthly');
-const addingToCart = ref(null);
 const showSuccess = ref(false);
 const successMessage = ref('');
 const selectedDurations = ref({});
@@ -327,55 +300,7 @@ const calculatePrice = (basePrice, months, discount) => {
   return Math.round(totalPrice - discountAmount);
 };
 
-// Thêm vào giỏ hàng
-const handleAddToCart = async (plan) => {
-  // Kiểm tra đăng nhập
-  if (!authStore.user) {
-    toast.warning(t('pricing.loginToAddCart'));
-    router.push('/account');
-    return;
-  }
-
-  // Confirm before adding
-  const { useConfirm } = await import('@/composables/useConfirm');
-  const { confirm } = useConfirm();
-  
-  const durationText = billingPeriod.value === 'yearly' ? t('pricing.twelveMonths') : t('pricing.oneMonth');
-  const confirmed = await confirm({
-    title: t('pricing.addToCartConfirm'),
-    message: t('pricing.addToCartMessage', { plan: plan.name, duration: durationText }),
-    type: 'info',
-    confirmText: t('pricing.addToCart'),
-    cancelText: t('common.cancel')
-  });
-  
-  if (!confirmed) return;
-
-  addingToCart.value = plan.id;
-
-  try {
-    // Lấy duration đã chọn
-    const durationMonths = selectedDurations.value[plan.id] || 1;
-    const durationOption = durationOptions.find(d => d.months === durationMonths);
-    const durationText = durationOption?.label || '1 tháng';
-    
-    await cartStore.addItem(plan.id, 1, durationMonths);
-    
-    // Show success animation
-    successMessage.value = t('pricing.addedToCart', { plan: plan.name });
-    showSuccess.value = true;
-    
-    toast.success(t('pricing.addedToCartSuccess', { plan: plan.name, duration: durationText }));
-  } catch (err) {
-    const errorMsg = err.message || t('pricing.addToCartError');
-    const helpText = ' ' + t('pricing.tryAgainOrContact');
-    toast.error(errorMsg + helpText);
-  } finally {
-    addingToCart.value = null;
-  }
-};
-
-// Mua ngay (thanh toán trực tiếp)
+// Mua ngay (chuyển thẳng đến checkout)
 const handleBuyNow = (plan) => {
   // Kiểm tra đăng nhập
   if (!authStore.user) {
@@ -390,9 +315,22 @@ const handleBuyNow = (plan) => {
     return;
   }
 
-  // Hiện modal thanh toán
-  selectedPlan.value = plan;
-  showPaymentModal.value = true;
+  // Lấy duration đã chọn (mặc định 1 tháng)
+  const duration = selectedDurations.value[plan.id] || 1;
+  
+  // Chuyển thẳng đến checkout với thông tin gói
+  router.push({
+    path: '/checkout',
+    query: {
+      plan_id: plan.id,
+      plan_slug: plan.slug,
+      plan_name: plan.name,
+      duration: duration,
+      price: plan.price
+    }
+  });
+  
+  toast.info('🛒 Đang chuyển đến trang thanh toán...');
 };
 
 const handlePaymentSuccess = () => {

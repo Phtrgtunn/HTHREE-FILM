@@ -18,7 +18,6 @@ const DemoUI = () => import(/* webpackChunkName: "demo" */ '../pages/DemoUI.vue'
 const TestImages = () => import(/* webpackChunkName: "test" */ '../pages/TestImages.vue');
 const SearchResults = () => import(/* webpackChunkName: "search" */ '../pages/SearchResults.vue');
 const Pricing = () => import(/* webpackChunkName: "pricing" */ '../pages/Pricing.vue');
-const Cart = () => import(/* webpackChunkName: "cart" */ '../pages/Cart.vue');
 const Checkout = () => import(/* webpackChunkName: "checkout" */ '../pages/Checkout.vue');
 const PaymentProcessing = () => import(/* webpackChunkName: "payment" */ '../pages/PaymentProcessing.vue');
 const Admin = () => import(/* webpackChunkName: "admin" */ '../pages/Admin.vue');
@@ -31,7 +30,6 @@ const routes = [
   { path: '/categories', name: 'Categories', component: Categories }, // Tất cả thể loại
   { path: '/library', name: 'Library', component: Library }, // Thư viện của tôi
   { path: '/pricing', name: 'Pricing', component: Pricing }, // Trang giá gói
-  { path: '/cart', name: 'Cart', component: Cart }, // Giỏ hàng
   { path: '/checkout', name: 'Checkout', component: Checkout }, // Thanh toán
   { path: '/payment-processing', name: 'PaymentProcessing', component: PaymentProcessing }, // Xử lý thanh toán
   { path: '/admin', name: 'Admin', component: Admin }, // Trang quản trị

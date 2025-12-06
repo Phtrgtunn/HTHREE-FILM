@@ -261,26 +261,6 @@
           </svg>
         </router-link>
 
-        <!-- Cart (Ẩn với admin và khi chưa đăng nhập) -->
-        <router-link
-          v-if="user && !isAdmin"
-          to="/cart"
-          class="relative p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
-          :title="`Giỏ hàng${cartStore.count > 0 ? ` (${cartStore.count} gói)` : ''}`"
-          aria-label="Giỏ hàng"
-        >
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-          </svg>
-          <span
-            v-if="cartStore.count > 0"
-            class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
-            aria-label="`${cartStore.count} items trong giỏ`"
-          >
-            {{ cartStore.count }}
-          </span>
-        </router-link>
-
         <!-- User -->
         <div class="relative group">
           <button 
@@ -729,7 +709,6 @@ import { useRouter, useRoute } from 'vue-router';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import { useAuthStore } from '@/stores/authStore';
 import { useCategoryStore } from '@/stores/Category/category.js';
-import { useCartStore } from '@/stores/cartStore';
 import authService from '@/services/authService';
 import AuthModal from './AuthModal.vue';
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp.vue';
@@ -742,7 +721,6 @@ const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 const categoryStore = useCategoryStore();
-const cartStore = useCartStore();
 const auth = getAuth();
 const toast = useToast();
 const { recentSearches, addSearch, clearSearches } = useRecentSearches();
@@ -1018,9 +996,6 @@ onMounted(async () => {
   }
 
   // User is loaded by authStore.initAuth() in main.js
-  
-  // Load cart
-  await cartStore.fetchCart();
   
   // Fetch subscription if user is logged in
   if (user.value) {
