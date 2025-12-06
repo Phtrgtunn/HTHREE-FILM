@@ -778,9 +778,9 @@ const handleSubmit = async () => {
           window.location.href = paymentResponse.payment_url;
         }
       } else if (form.payment_method === 'bank_transfer') {
-        // Bank Transfer - Chờ xác nhận
+        // Bank Transfer - Redirect to processing page
         toast.success('Đặt hàng thành công! Vui lòng chuyển khoản để kích hoạt gói.');
-        router.push(`/payment-return?order_code=${orderCode}&status=pending&method=bank_transfer`);
+        router.push(`/payment-processing?order_code=${orderCode}`);
       } else {
         // COD - Kích hoạt ngay
         toast.success('Đặt hàng thành công!');

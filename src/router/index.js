@@ -20,6 +20,7 @@ const SearchResults = () => import(/* webpackChunkName: "search" */ '../pages/Se
 const Pricing = () => import(/* webpackChunkName: "pricing" */ '../pages/Pricing.vue');
 const Cart = () => import(/* webpackChunkName: "cart" */ '../pages/Cart.vue');
 const Checkout = () => import(/* webpackChunkName: "checkout" */ '../pages/Checkout.vue');
+const PaymentProcessing = () => import(/* webpackChunkName: "payment" */ '../pages/PaymentProcessing.vue');
 const Admin = () => import(/* webpackChunkName: "admin" */ '../pages/Admin.vue');
 const Categories = () => import(/* webpackChunkName: "categories" */ '../pages/Categories.vue');
 const Library = () => import(/* webpackChunkName: "library" */ '../pages/Library.vue');
@@ -32,6 +33,7 @@ const routes = [
   { path: '/pricing', name: 'Pricing', component: Pricing }, // Trang giá gói
   { path: '/cart', name: 'Cart', component: Cart }, // Giỏ hàng
   { path: '/checkout', name: 'Checkout', component: Checkout }, // Thanh toán
+  { path: '/payment-processing', name: 'PaymentProcessing', component: PaymentProcessing }, // Xử lý thanh toán
   { path: '/admin', name: 'Admin', component: Admin }, // Trang quản trị
   { path: '/netflix', name: 'NetflixHome', component: NetflixHomepage }, // Netflix style (backup)
   { path: '/demo', name: 'DemoUI', component: DemoUI }, // Trang demo DaisyUI

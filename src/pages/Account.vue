@@ -513,7 +513,7 @@
                       <div
                         class="bg-black/20 backdrop-blur-sm rounded-xl p-5 mb-5"
                       >
-                        <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div class="grid grid-cols-4 gap-4 mb-4">
                           <div>
                             <p class="text-white/60 text-xs mb-1">
                               Ngày bắt đầu
@@ -522,7 +522,7 @@
                               {{ activeSubscription.start_date_formatted }}
                             </p>
                           </div>
-                          <div class="text-center">
+                          <div>
                             <p class="text-white/60 text-xs mb-1">
                               Thời gian sử dụng
                             </p>
@@ -533,12 +533,20 @@
                               ngày
                             </p>
                           </div>
-                          <div class="text-right">
+                          <div>
                             <p class="text-white/60 text-xs mb-1">
                               Ngày hết hạn
                             </p>
                             <p class="text-white font-bold">
                               {{ activeSubscription.end_date_formatted }}
+                            </p>
+                          </div>
+                          <div class="text-right">
+                            <p class="text-white/60 text-xs mb-1">
+                              Giá đã trả
+                            </p>
+                            <p class="text-green-400 font-bold">
+                              {{ formatPrice(activeSubscription.price) }}đ
                             </p>
                           </div>
                         </div>
@@ -3240,6 +3248,11 @@ const getPlanDescription = (slug) => {
     vip: "Xem phim 4K trên 4 thiết bị, xem trước phim mới",
   };
   return descriptions[slug] || "";
+};
+
+// Format price
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('vi-VN').format(price);
 };
 
 // Calculate real-time progress and days remaining
