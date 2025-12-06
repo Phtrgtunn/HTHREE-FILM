@@ -31,7 +31,7 @@ if ($conn->connect_error) {
 
 echo "Connected!\n\n";
 
-$sqlFile = __DIR__ . '/../../localhost-notriggers.sql';
+$sqlFile = __DIR__ . '/../../localhost-complete.sql';
 $sql = file_get_contents($sqlFile);
 
 echo "SQL file size: " . strlen($sql) . " bytes\n\n";
