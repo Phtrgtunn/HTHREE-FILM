@@ -1768,10 +1768,36 @@
 
                 <!-- Lịch sử giao dịch -->
                 <div v-if="activeSection === 'transactions'">
-                  <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">
-                    Lịch sử giao dịch
-                  </h1>
-                  <p class="text-gray-400 mb-8">Tất cả giao dịch mua gói của bạn</p>
+                  <div class="flex items-center justify-between mb-4">
+                    <div>
+                      <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">
+                        Lịch sử giao dịch
+                      </h1>
+                      <p class="text-gray-400">Tất cả giao dịch mua gói của bạn</p>
+                    </div>
+                    <button
+                      @click="fetchTransactions"
+                      :disabled="loadingTransactions"
+                      class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-lg font-medium transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Làm mới danh sách"
+                    >
+                      <svg
+                        class="w-5 h-5"
+                        :class="{ 'animate-spin': loadingTransactions }"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                      </svg>
+                      <span>Làm mới</span>
+                    </button>
+                  </div>
 
                   <!-- Loading -->
                   <div v-if="loadingTransactions" class="flex justify-center items-center py-12">
@@ -3375,6 +3401,10 @@ onMounted(() => {
       // Refresh subscription data every 30 seconds
       refreshInterval = setInterval(() => {
         fetchSubscription();
+        // Also refresh transactions if on that tab
+        if (activeSection.value === 'transactions') {
+          fetchTransactions();
+        }
       }, 30000);
     } else {
       // Nếu không có user (đã đăng xuất), chuyển về Homepage
@@ -3392,7 +3422,8 @@ onUnmounted(() => {
 
 // Watch activeSection to fetch transactions when needed
 watch(activeSection, (newSection) => {
-  if (newSection === 'transactions' && transactions.value.length === 0) {
+  if (newSection === 'transactions') {
+    // Always fetch when switching to transactions tab (to get latest data)
     fetchTransactions();
   }
 });
