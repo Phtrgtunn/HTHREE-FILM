@@ -1,11 +1,11 @@
 <?php
 header('Content-Type: application/json');
 
-$host = getenv('MYSQL_HOST') ?: 'localhost';
-$port = getenv('MYSQL_PORT') ?: 3306;
-$database = getenv('MYSQL_DATABASE') ?: 'railway';
-$username = getenv('MYSQL_USER') ?: 'root';
-$password = getenv('MYSQL_PASSWORD') ?: '';
+$host = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: 'localhost';
+$port = getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: 3306;
+$database = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: 'railway';
+$username = 'root';
+$password = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: '';
 
 try {
     $conn = new mysqli($host, $username, $password, $database, $port);

@@ -15,11 +15,11 @@ if ($secret !== 'import-hthree-2024') {
 }
 
 // Railway MySQL connection
-$host = getenv('MYSQL_HOST') ?: 'localhost';
-$port = getenv('MYSQL_PORT') ?: 3306;
-$database = getenv('MYSQL_DATABASE') ?: 'railway';
-$username = getenv('MYSQL_USER') ?: 'root';
-$password = getenv('MYSQL_PASSWORD') ?: '';
+$host = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: 'localhost';
+$port = getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: 3306;
+$database = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: 'railway';
+$username = 'root';
+$password = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: '';
 
 $log = [];
 $log[] = "Connecting to Railway MySQL...";

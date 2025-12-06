@@ -12,10 +12,10 @@ class Database {
     
     public function __construct() {
         // Railway environment variables (production)
-        $this->host = getenv('MYSQL_HOST') ?: 'localhost';
-        $this->db_name = getenv('MYSQL_DATABASE') ?: 'hthree_film';
-        $this->username = getenv('MYSQL_USER') ?: 'root';
-        $this->password = getenv('MYSQL_PASSWORD') ?: 'mysql';
+        $this->host = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: 'localhost';
+        $this->db_name = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: 'hthree_film';
+        $this->username = 'root';
+        $this->password = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: 'mysql';
     }
     
     /**
@@ -49,11 +49,11 @@ class Database {
  */
 function getDBConnection() {
     // Railway environment variables (production)
-    $host = getenv('MYSQL_HOST') ?: 'localhost';
-    $db_name = getenv('MYSQL_DATABASE') ?: 'hthree_film';
-    $username = getenv('MYSQL_USER') ?: 'root';
-    $password = getenv('MYSQL_PASSWORD') ?: 'mysql';
-    $port = getenv('MYSQL_PORT') ?: 3306;
+    $host = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: 'localhost';
+    $db_name = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: 'hthree_film';
+    $username = 'root';
+    $password = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: 'mysql';
+    $port = getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: 3306;
     
     $conn = new mysqli($host, $username, $password, $db_name, $port);
     
