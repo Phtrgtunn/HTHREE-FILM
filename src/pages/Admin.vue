@@ -1091,7 +1091,7 @@ const formatMoney = (amount) => {
 const fetchStatistics = async (retries = 2) => {
   try {
     const response = await axios.get(`${API_URL}/admin/statistics.php`, {
-      timeout: 5000 // 5 seconds timeout
+      timeout: 30000 // 30 seconds timeout
     });
     if (response.data.success) {
       const data = response.data.data;
@@ -1142,7 +1142,7 @@ const fetchOrders = async () => {
     params.append('limit', '50');
     
     const response = await axios.get(`${API_URL}/admin/orders.php?${params.toString()}`, {
-      timeout: 5000
+      timeout: 30000
     });
     if (response.data.success) {
       recentOrders.value = response.data.data;
@@ -1238,7 +1238,7 @@ const refreshData = () => {
 const fetchUsers = async () => {
   try {
     const response = await axios.get(`${API_URL}/admin/users.php?limit=100`, {
-      timeout: 5000
+      timeout: 30000
     });
     if (response.data.success) {
       users.value = response.data.data;
@@ -1254,7 +1254,7 @@ const fetchUsers = async () => {
 const fetchPlans = async () => {
   try {
     const response = await axios.get(`${API_URL}/admin/plans.php`, {
-      timeout: 5000
+      timeout: 30000
     });
     if (response.data.success) {
       plans.value = response.data.data;
@@ -1270,7 +1270,7 @@ const fetchPlans = async () => {
 const fetchCoupons = async () => {
   try {
     const response = await axios.get(`${API_URL}/admin/coupons.php`, {
-      timeout: 5000
+      timeout: 30000
     });
     if (response.data.success) {
       coupons.value = response.data.data;
