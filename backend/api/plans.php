@@ -137,26 +137,40 @@ function createPlan() {
         }
     }
     
+    // Nếu không có display_order, tự động lấy số lớn nhất + 1
+    if (!isset($data['display_order']) || $data['display_order'] === 0) {
+        $result = $conn->query("SELECT MAX(display_order) as max_order FROM subscription_plans");
+        $row = $result->fetch_assoc();
+        $data['display_order'] = ($row['max_order'] ?? 0) + 1;
+    }
+    
     $stmt = $conn->prepare("
         INSERT INTO subscription_plans 
-        (name, slug, description, price, duration_days, quality, max_devices, has_ads, can_download, early_access, display_order, is_active)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (name, slug, description, promotion_badge, promotion_text, price, duration_days, quality, max_devices, has_ads, can_download, early_access, display_order, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     
+    // Convert empty strings to null for optional fields
+    $promotion_badge = !empty($data['promotion_badge']) ? $data['promotion_badge'] : null;
+    $promotion_text = !empty($data['promotion_text']) ? $data['promotion_text'] : null;
+    $description = !empty($data['description']) ? $data['description'] : null;
+    
     $stmt->bind_param(
-        "sssdisiiiii",
+        "ssssdisiiiiii",
         $data['name'],
         $data['slug'],
-        $data['description'] ?? null,
+        $description,
+        $promotion_badge,
+        $promotion_text,
         $data['price'],
         $data['duration_days'],
         $data['quality'],
         $data['max_devices'] ?? 1,
-        $data['has_ads'] ?? false,
-        $data['can_download'] ?? false,
-        $data['early_access'] ?? false,
-        $data['display_order'] ?? 0,
-        $data['is_active'] ?? true
+        $data['has_ads'] ?? 0,
+        $data['can_download'] ?? 0,
+        $data['early_access'] ?? 0,
+        $data['display_order'],
+        $data['is_active'] ?? 1
     );
     
     if ($stmt->execute()) {
@@ -187,8 +201,9 @@ function updatePlan() {
     $values = [];
     
     $allowed_fields = [
-        'name' => 's', 'slug' => 's', 'description' => 's', 'price' => 'd',
-        'duration_days' => 'i', 'quality' => 's', 'max_devices' => 'i',
+        'name' => 's', 'slug' => 's', 'description' => 's', 
+        'promotion_badge' => 's', 'promotion_text' => 's',
+        'price' => 'd', 'duration_days' => 'i', 'quality' => 's', 'max_devices' => 'i',
         'has_ads' => 'i', 'can_download' => 'i', 'early_access' => 'i',
         'display_order' => 'i', 'is_active' => 'i'
     ];
@@ -197,7 +212,12 @@ function updatePlan() {
         if (isset($data[$field])) {
             $updates[] = "$field = ?";
             $types .= $type;
-            $values[] = $data[$field];
+            // Convert empty strings to null for text fields
+            if (in_array($field, ['description', 'promotion_badge', 'promotion_text']) && $data[$field] === '') {
+                $values[] = null;
+            } else {
+                $values[] = $data[$field];
+            }
         }
     }
     

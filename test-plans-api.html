@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Plans API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .plan {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #e50914;
+        }
+        .plan.christmas {
+            border-left-color: #00ff00;
+            background: #1a3a1a;
+        }
+        button {
+            background: #e50914;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #f40612;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        .success {
+            color: #00ff00;
+        }
+        .error {
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎄 Test Plans API - Kiểm Tra Gói Giáng Sinh</h1>
+    
+    <div>
+        <button onclick="testAPI1()">Test API 1: localhost/HTHREE_film</button>
+        <button onclick="testAPI2()">Test API 2: localhost/hthree-film</button>
+        <button onclick="testAPI3()">Test API 3: localhost:8080</button>
+    </div>
+    
+    <div id="result"></div>
+
+    <script>
+        const resultDiv = document.getElementById('result');
+
+        async function testAPI1() {
+            await testAPI('http://localhost/HTHREE_film/backend/api/plans.php?active_only=true', 'API 1');
+        }
+
+        async function testAPI2() {
+            await testAPI('http://localhost/hthree-film/backend/api/plans.php?active_only=true', 'API 2');
+        }
+
+        async function testAPI3() {
+            await testAPI('http://localhost:8080/api/plans.php?active_only=true', 'API 3');
+        }
+
+        async function testAPI(url, name) {
+            resultDiv.innerHTML = `<p>⏳ Đang test ${name}...</p>`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    const plans = data.data;
+                    const christmasPlan = plans.find(p => p.slug === 'christmas');
+                    
+                    let html = `<h2 class="success">✅ ${name} - Thành công!</h2>`;
+                    html += `<p><strong>Tổng số gói:</strong> ${plans.length}</p>`;
+                    
+                    if (christmasPlan) {
+                        html += `<p class="success"><strong>🎄 Gói Giáng Sinh:</strong> Đã tìm thấy!</p>`;
+                    } else {
+                        html += `<p class="error"><strong>❌ Gói Giáng Sinh:</strong> Không tìm thấy!</p>`;
+                    }
+                    
+                    html += `<h3>Danh sách gói:</h3>`;
+                    plans.forEach(plan => {
+                        const isChristmas = plan.slug === 'christmas';
+                        html += `
+                            <div class="plan ${isChristmas ? 'christmas' : ''}">
+                                <strong>${plan.name}</strong> ${isChristmas ? '🎄' : ''}<br>
+                                Slug: ${plan.slug}<br>
+                                Giá: ${plan.price_formatted}<br>
+                                Thứ tự: ${plan.display_order}<br>
+                                Active: ${plan.is_active ? '✅' : '❌'}
+                            </div>
+                        `;
+                    });
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = `<p class="error">❌ ${name} - Lỗi: ${data.message || 'Unknown error'}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ ${name} - Lỗi kết nối: ${error.message}</p>`;
+            }
+        }
+
+        // Auto test API 1 on load
+        window.onload = () => {
+            testAPI1();
+        };
+    </script>
+</body>
+</html>

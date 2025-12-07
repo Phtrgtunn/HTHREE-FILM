@@ -43,7 +43,9 @@
           class="group relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 border-2 transition-all duration-300 animate-slide-up"
           :style="{ animationDelay: `${index * 0.1}s` }"
           :class="[
-            plan.slug === 'premium' 
+            plan.slug === 'christmas'
+              ? 'border-green-600/50 lg:scale-105 shadow-lg shadow-green-600/20'
+              : plan.slug === 'premium' 
               ? 'border-red-600/50 lg:scale-105 shadow-lg shadow-red-600/10' 
               : 'border-gray-700/50 hover:border-gray-600',
             hoveredPlan === plan.slug ? 'scale-102 shadow-2xl' : ''
@@ -68,6 +70,13 @@
           <div v-if="currentUserPlan === plan.slug" class="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
             <span class="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase shadow-lg">
               ✓ Đang sử dụng
+            </span>
+          </div>
+          
+          <!-- Promotion Badge (Dynamic from Admin) -->
+          <div v-else-if="plan.promotion_badge" class="absolute -top-3 left-1/2 -translate-x-1/2">
+            <span class="bg-gradient-to-r from-green-600 to-red-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase shadow-lg animate-pulse">
+              {{ plan.promotion_badge }}
             </span>
           </div>
           
@@ -127,7 +136,10 @@
               <span v-if="plan.slug !== 'free'" class="text-gray-400">/tháng</span>
             </div>
             
-            <p v-if="plan.price > 0" class="text-gray-400 text-sm mt-2">
+            <p v-if="plan.promotion_text" class="text-green-400 font-bold text-sm mt-2">
+              🎁 {{ plan.promotion_text }}
+            </p>
+            <p v-else-if="plan.price > 0" class="text-gray-400 text-sm mt-2">
               Hoặc {{ formatPrice(calculatePrice(plan.price, 12, 15)) }}/năm (tiết kiệm 15%)
             </p>
           </div>
@@ -194,7 +206,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { getPlans } from '@/services/ecommerceApi';
 import { useAuthStore } from '@/stores/authStore';
@@ -238,7 +250,19 @@ const breadcrumbItems = [
   { label: t('pricing.title'), to: '/pricing' }
 ];
 
+// Sắp xếp gói: Free, Basic, Christmas (giữa), Premium, VIP
+const sortedPlans = computed(() => {
+  const order = ['free', 'basic', 'christmas', 'premium', 'vip'];
+  return [...plans.value].sort((a, b) => {
+    const indexA = order.indexOf(a.slug);
+    const indexB = order.indexOf(b.slug);
+    return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+  });
+});
+
 onMounted(async () => {
+  // Force clear any cached data
+  plans.value = [];
   await fetchPlans();
   await fetchCurrentUserPlan();
 });
@@ -274,14 +298,18 @@ const fetchPlans = async () => {
   loading.value = true;
   try {
     const response = await getPlans(true);
+    console.log('📦 Fetched plans:', response);
     if (response.success) {
       plans.value = response.data;
+      console.log('✅ Plans loaded:', plans.value.length, 'plans');
+      console.log('🎄 Christmas plan:', plans.value.find(p => p.slug === 'christmas'));
       // Initialize selected durations (default to 1 month)
       plans.value.forEach(plan => {
         selectedDurations.value[plan.id] = 1;
       });
     }
   } catch (err) {
+    console.error('❌ Error fetching plans:', err);
     const { handleError } = await import('@/composables/useErrorHandler');
     const errorHandler = handleError();
     errorHandler.handleError(err, {
@@ -375,7 +403,8 @@ const getIcon = (slug) => {
     free: '🎬',
     basic: '⭐',
     premium: '🔥',
-    vip: '👑'
+    vip: '👑',
+    christmas: '🎄'
   };
   return icons[slug] || '🎬';
 };
@@ -385,7 +414,8 @@ const getGlowClass = (slug) => {
     free: 'bg-gradient-to-r from-gray-600 to-gray-400',
     basic: 'bg-gradient-to-r from-blue-600 to-cyan-500',
     premium: 'bg-gradient-to-r from-red-600 to-yellow-500',
-    vip: 'bg-gradient-to-r from-purple-600 to-pink-500'
+    vip: 'bg-gradient-to-r from-purple-600 to-pink-500',
+    christmas: 'bg-gradient-to-r from-green-600 via-red-500 to-green-600'
   };
   return classes[slug] || classes.free;
 };
@@ -395,7 +425,8 @@ const getIconBgClass = (slug) => {
     free: 'bg-gradient-to-br from-gray-700 to-gray-600',
     basic: 'bg-gradient-to-br from-blue-600 to-cyan-500',
     premium: 'bg-gradient-to-br from-red-600 to-yellow-500',
-    vip: 'bg-gradient-to-br from-purple-600 to-pink-500'
+    vip: 'bg-gradient-to-br from-purple-600 to-pink-500',
+    christmas: 'bg-gradient-to-br from-green-600 to-red-600'
   };
   return classes[slug] || classes.free;
 };
@@ -405,7 +436,8 @@ const getQualityClass = (slug) => {
     free: 'bg-gray-700 text-gray-300',
     basic: 'bg-blue-600/20 text-blue-400 border border-blue-500/50',
     premium: 'bg-red-600/20 text-red-400 border border-red-500/50',
-    vip: 'bg-purple-600/20 text-purple-400 border border-purple-500/50'
+    vip: 'bg-purple-600/20 text-purple-400 border border-purple-500/50',
+    christmas: 'bg-green-600/20 text-green-400 border border-green-500/50'
   };
   return classes[slug] || classes.free;
 };
@@ -415,7 +447,8 @@ const getButtonClass = (slug) => {
     free: 'bg-gray-700 text-white',
     basic: 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/50',
     premium: 'bg-gradient-to-r from-red-600 to-yellow-500 text-white shadow-lg shadow-red-500/50',
-    vip: 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg shadow-purple-500/50'
+    vip: 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg shadow-purple-500/50',
+    christmas: 'bg-gradient-to-r from-green-600 to-red-600 text-white shadow-lg shadow-green-500/50'
   };
   return classes[slug] || classes.free;
 };

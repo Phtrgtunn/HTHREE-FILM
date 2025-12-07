@@ -19,6 +19,204 @@
       @confirm="confirmData.onConfirm"
     />
 
+    <!-- Plan Modal -->
+    <div
+      v-if="showPlanModal"
+      class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      @click.self="showPlanModal = false"
+    >
+      <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700 shadow-2xl">
+        <div class="sticky top-0 bg-gradient-to-r from-red-600 to-yellow-500 p-6 flex items-center justify-between">
+          <h3 class="text-2xl font-black text-white">{{ editingPlan ? 'Chỉnh sửa gói' : 'Tạo gói mới' }}</h3>
+          <button @click="showPlanModal = false" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        
+        <form @submit.prevent="savePlan" class="p-6 space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Tên gói *</label>
+              <input v-model="planForm.name" type="text" required class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Slug *</label>
+              <input v-model="planForm.slug" type="text" required class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" />
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-gray-400 text-sm mb-2">Mô tả</label>
+            <textarea v-model="planForm.description" rows="2" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none"></textarea>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Badge Ưu Đãi (VD: 🎄 Giáng Sinh)</label>
+              <input v-model="planForm.promotion_badge" type="text" placeholder="Để trống = không có ưu đãi" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Text Ưu Đãi (VD: Giảm 30%)</label>
+              <input v-model="planForm.promotion_text" type="text" placeholder="Mô tả chi tiết" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" />
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Giá (VNĐ) *</label>
+              <input v-model.number="planForm.price" type="number" required class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Thời hạn (ngày) *</label>
+              <input v-model.number="planForm.duration_days" type="number" required class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" />
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Chất lượng</label>
+              <select v-model="planForm.quality" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none">
+                <option>SD</option>
+                <option>HD</option>
+                <option>Full HD</option>
+                <option>4K</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Số thiết bị</label>
+              <input v-model.number="planForm.max_devices" type="number" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Thứ tự hiển thị</label>
+              <input v-model.number="planForm.display_order" type="number" min="0" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" placeholder="Tự động" />
+              <p class="text-gray-500 text-xs mt-1">Để trống = xuất hiện cuối cùng</p>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-4 gap-4">
+            <label class="flex items-center gap-2 text-white cursor-pointer">
+              <input v-model="planForm.has_ads" type="checkbox" class="w-5 h-5" />
+              <span class="text-sm">Có quảng cáo</span>
+            </label>
+            <label class="flex items-center gap-2 text-white cursor-pointer">
+              <input v-model="planForm.can_download" type="checkbox" class="w-5 h-5" />
+              <span class="text-sm">Tải xuống</span>
+            </label>
+            <label class="flex items-center gap-2 text-white cursor-pointer">
+              <input v-model="planForm.early_access" type="checkbox" class="w-5 h-5" />
+              <span class="text-sm">Xem sớm</span>
+            </label>
+            <label class="flex items-center gap-2 text-white cursor-pointer">
+              <input v-model="planForm.is_active" type="checkbox" class="w-5 h-5" />
+              <span class="text-sm">Kích hoạt</span>
+            </label>
+          </div>
+          
+          <div class="flex gap-4 pt-4">
+            <button type="button" @click="showPlanModal = false" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-xl transition-all">
+              Hủy
+            </button>
+            <button type="submit" class="flex-1 bg-gradient-to-r from-red-600 to-yellow-500 text-white font-bold py-3 px-6 rounded-xl hover:shadow-lg transition-all">
+              {{ editingPlan ? 'Cập nhật' : 'Tạo mới' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Coupon Modal -->
+    <div
+      v-if="showCouponModal"
+      class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      @click.self="showCouponModal = false"
+    >
+      <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700 shadow-2xl">
+        <div class="sticky top-0 bg-gradient-to-r from-red-600 to-yellow-500 p-6 flex items-center justify-between">
+          <h3 class="text-2xl font-black text-white">{{ editingCoupon ? 'Chỉnh sửa mã' : 'Tạo mã mới' }}</h3>
+          <button @click="showCouponModal = false" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        
+        <form @submit.prevent="saveCoupon" class="p-6 space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Mã giảm giá *</label>
+              <input v-model="couponForm.code" type="text" required class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none uppercase" />
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Loại giảm giá *</label>
+              <select v-model="couponForm.discount_type" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none">
+                <option value="percent">Phần trăm (%)</option>
+                <option value="fixed">Số tiền cố định (VNĐ)</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-gray-400 text-sm mb-2">Mô tả</label>
+            <textarea v-model="couponForm.description" rows="2" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none"></textarea>
+          </div>
+          
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Giá trị giảm *</label>
+              <input v-model.number="couponForm.discount_value" type="number" required class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Đơn tối thiểu</label>
+              <input v-model.number="couponForm.min_order_value" type="number" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Giảm tối đa</label>
+              <input v-model.number="couponForm.max_discount" type="number" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" />
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Giới hạn dùng</label>
+              <input v-model.number="couponForm.usage_limit" type="number" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" placeholder="Không giới hạn" />
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Giới hạn/người</label>
+              <input v-model.number="couponForm.user_limit" type="number" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" />
+            </div>
+            <div>
+              <label class="flex items-center gap-2 text-white cursor-pointer pt-7">
+                <input v-model="couponForm.is_active" type="checkbox" class="w-5 h-5" />
+                <span class="text-sm">Kích hoạt</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Ngày bắt đầu</label>
+              <input v-model="couponForm.start_date" type="datetime-local" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-2">Ngày hết hạn</label>
+              <input v-model="couponForm.end_date" type="datetime-local" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-red-600 focus:outline-none" />
+            </div>
+          </div>
+          
+          <div class="flex gap-4 pt-4">
+            <button type="button" @click="showCouponModal = false" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-xl transition-all">
+              Hủy
+            </button>
+            <button type="submit" class="flex-1 bg-gradient-to-r from-red-600 to-yellow-500 text-white font-bold py-3 px-6 rounded-xl hover:shadow-lg transition-all">
+              {{ editingCoupon ? 'Cập nhật' : 'Tạo mới' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Order Detail Modal -->
     <div
       v-if="showOrderDetail"
@@ -490,16 +688,67 @@
       <!-- Plans Tab -->
       <Transition name="slide-fade" mode="out-in">
         <div v-if="activeTab === 'plans'" key="plans" class="space-y-6">
+        <!-- Add Plan Button -->
+        <div class="flex justify-end">
+          <button
+            @click="openPlanModal()"
+            class="flex items-center gap-2 bg-gradient-to-r from-red-600 to-yellow-500 text-white font-bold px-6 py-3 rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Tạo gói mới
+          </button>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div v-for="plan in plans" :key="plan.id" class="bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-gray-600 transition-all">
-            <h3 class="text-2xl font-black text-white mb-2">{{ plan.name }}</h3>
+          <div v-for="plan in plans" :key="plan.id" class="bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-gray-600 transition-all group">
+            <div class="flex items-start justify-between mb-2">
+              <h3 class="text-2xl font-black text-white">{{ plan.name }}</h3>
+              <span :class="['px-2 py-1 rounded-lg text-xs font-bold', plan.is_active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400']">
+                {{ plan.is_active ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
             <p class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-yellow-500 mb-4">{{ plan.price_formatted }}</p>
-            <div class="space-y-2 text-sm">
+            <div class="space-y-2 text-sm mb-4">
               <p class="text-gray-400">Chất lượng: <span class="text-white font-bold">{{ plan.quality }}</span></p>
               <p class="text-gray-400">Thiết bị: <span class="text-white font-bold">{{ plan.max_devices }}</span></p>
               <p class="text-gray-400">Đã bán: <span class="text-white font-bold">{{ plan.times_sold }} lần</span></p>
               <p class="text-gray-400">Doanh thu: <span class="text-white font-bold">{{ plan.total_revenue_formatted }}</span></p>
               <p class="text-gray-400">Đang dùng: <span class="text-white font-bold">{{ plan.active_subscriptions }} người</span></p>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                @click="openPlanModal(plan)"
+                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-3 rounded-lg transition-all"
+                title="Chỉnh sửa"
+              >
+                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+              <button
+                @click="togglePlanStatus(plan)"
+                class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-bold py-2 px-3 rounded-lg transition-all"
+                :title="plan.is_active ? 'Tắt' : 'Bật'"
+              >
+                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                </svg>
+              </button>
+              <button
+                @click="deletePlan(plan)"
+                class="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-3 rounded-lg transition-all"
+                title="Xóa"
+                :disabled="plan.active_subscriptions > 0"
+                :class="{'opacity-50 cursor-not-allowed': plan.active_subscriptions > 0}"
+              >
+                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -510,6 +759,19 @@
       <!-- Coupons Tab -->
       <Transition name="slide-fade" mode="out-in">
         <div v-if="activeTab === 'coupons'" key="coupons" class="space-y-6">
+        <!-- Add Coupon Button -->
+        <div class="flex justify-end">
+          <button
+            @click="openCouponModal()"
+            class="flex items-center gap-2 bg-gradient-to-r from-red-600 to-yellow-500 text-white font-bold px-6 py-3 rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Tạo mã mới
+          </button>
+        </div>
+
         <div class="bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700/50 overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full">
@@ -522,6 +784,7 @@
                   <th class="text-left p-4 text-gray-400 font-medium text-sm">Giới hạn</th>
                   <th class="text-left p-4 text-gray-400 font-medium text-sm">Hết hạn</th>
                   <th class="text-left p-4 text-gray-400 font-medium text-sm">Trạng thái</th>
+                  <th class="text-left p-4 text-gray-400 font-medium text-sm">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -536,6 +799,37 @@
                     <span :class="['px-3 py-1 rounded-full text-xs font-bold', coupon.is_active && !coupon.is_expired ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400']">
                       {{ coupon.is_active && !coupon.is_expired ? 'Active' : 'Inactive' }}
                     </span>
+                  </td>
+                  <td class="p-4">
+                    <div class="flex items-center gap-2">
+                      <button
+                        @click="openCouponModal(coupon)"
+                        class="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all"
+                        title="Chỉnh sửa"
+                      >
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                      </button>
+                      <button
+                        @click="toggleCouponStatus(coupon)"
+                        class="p-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-all"
+                        :title="coupon.is_active ? 'Tắt' : 'Bật'"
+                      >
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                        </svg>
+                      </button>
+                      <button
+                        @click="deleteCoupon(coupon)"
+                        class="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-all"
+                        title="Xóa"
+                      >
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -571,6 +865,43 @@ const showConfirm = ref(false);
 const users = ref([]);
 const plans = ref([]);
 const coupons = ref([]);
+
+// Plan modal
+const showPlanModal = ref(false);
+const editingPlan = ref(null);
+const planForm = ref({
+  name: '',
+  slug: '',
+  description: '',
+  promotion_badge: '',
+  promotion_text: '',
+  price: 0,
+  duration_days: 30,
+  quality: 'HD',
+  max_devices: 1,
+  has_ads: false,
+  can_download: false,
+  early_access: false,
+  is_active: true,
+  display_order: 0
+});
+
+// Coupon modal
+const showCouponModal = ref(false);
+const editingCoupon = ref(null);
+const couponForm = ref({
+  code: '',
+  description: '',
+  discount_type: 'percent',
+  discount_value: 0,
+  min_order_value: 0,
+  max_discount: null,
+  usage_limit: null,
+  user_limit: 1,
+  start_date: '',
+  end_date: '',
+  is_active: true
+});
 
 const notification = ref({
   type: 'success',
@@ -949,6 +1280,296 @@ const fetchCoupons = async () => {
       console.error('Error fetching coupons:', error);
     }
   }
+};
+
+// Plan Management
+const openPlanModal = (plan = null) => {
+  if (plan) {
+    editingPlan.value = plan;
+    // Deep clone to avoid reference issues
+    planForm.value = {
+      id: plan.id,
+      name: plan.name,
+      slug: plan.slug,
+      description: plan.description || '',
+      promotion_badge: plan.promotion_badge || '',
+      promotion_text: plan.promotion_text || '',
+      price: parseFloat(plan.price),
+      duration_days: parseInt(plan.duration_days),
+      quality: plan.quality,
+      max_devices: parseInt(plan.max_devices),
+      has_ads: Boolean(plan.has_ads),
+      can_download: Boolean(plan.can_download),
+      early_access: Boolean(plan.early_access),
+      is_active: Boolean(plan.is_active),
+      display_order: parseInt(plan.display_order) || 0
+    };
+  } else {
+    editingPlan.value = null;
+    planForm.value = {
+      name: '',
+      slug: '',
+      description: '',
+      promotion_badge: '',
+      promotion_text: '',
+      price: 0,
+      duration_days: 30,
+      quality: 'HD',
+      max_devices: 1,
+      has_ads: false,
+      can_download: false,
+      early_access: false,
+      is_active: true,
+      display_order: 0
+    };
+  }
+  showPlanModal.value = true;
+};
+
+const savePlan = async () => {
+  try {
+    loading.value = true;
+    const method = editingPlan.value ? 'PUT' : 'POST';
+    
+    // Clean data: convert empty strings to null, ensure booleans are integers
+    const cleanData = {
+      ...planForm.value,
+      promotion_badge: planForm.value.promotion_badge || null,
+      promotion_text: planForm.value.promotion_text || null,
+      description: planForm.value.description || null,
+      has_ads: planForm.value.has_ads ? 1 : 0,
+      can_download: planForm.value.can_download ? 1 : 0,
+      early_access: planForm.value.early_access ? 1 : 0,
+      is_active: planForm.value.is_active ? 1 : 0
+    };
+    
+    console.log('🚀 Sending to API:', method, `${API_URL}/admin/plans.php`);
+    console.log('📦 Data:', cleanData);
+    
+    const response = await axios({
+      method,
+      url: `${API_URL}/admin/plans.php`,
+      data: cleanData
+    });
+    
+    console.log('✅ Response:', response.data);
+    
+    if (response.data.success) {
+      notification.value = {
+        type: 'success',
+        title: 'Thành công!',
+        message: editingPlan.value ? 'Cập nhật gói thành công' : 'Tạo gói mới thành công'
+      };
+      showNotification.value = true;
+      showPlanModal.value = false;
+      editingPlan.value = null; // Reset editing state
+      await fetchPlans(); // Refresh data
+    }
+  } catch (error) {
+    notification.value = {
+      type: 'error',
+      title: 'Lỗi!',
+      message: error.response?.data?.message || 'Có lỗi xảy ra'
+    };
+    showNotification.value = true;
+  } finally {
+    loading.value = false;
+  }
+};
+
+const togglePlanStatus = async (plan) => {
+  try {
+    const response = await axios.put(`${API_URL}/admin/plans.php`, {
+      id: plan.id,
+      is_active: !plan.is_active
+    });
+    
+    if (response.data.success) {
+      notification.value = {
+        type: 'success',
+        title: 'Thành công!',
+        message: `Đã ${!plan.is_active ? 'bật' : 'tắt'} gói ${plan.name}`
+      };
+      showNotification.value = true;
+      await fetchPlans();
+    }
+  } catch (error) {
+    notification.value = {
+      type: 'error',
+      title: 'Lỗi!',
+      message: 'Không thể thay đổi trạng thái'
+    };
+    showNotification.value = true;
+  }
+};
+
+const deletePlan = async (plan) => {
+  if (plan.active_subscriptions > 0) {
+    notification.value = {
+      type: 'error',
+      title: 'Không thể xóa!',
+      message: 'Gói này đang có người dùng. Không thể xóa.'
+    };
+    showNotification.value = true;
+    return;
+  }
+  
+  confirmData.value = {
+    title: 'Xác nhận xóa gói',
+    message: `Bạn có chắc muốn xóa gói "${plan.name}"? Hành động này không thể hoàn tác.`,
+    type: 'danger',
+    confirmText: 'Xóa',
+    cancelText: 'Hủy',
+    onConfirm: async () => {
+      try {
+        const response = await axios.delete(`${API_URL}/admin/plans.php?id=${plan.id}`);
+        if (response.data.success) {
+          notification.value = {
+            type: 'success',
+            title: 'Đã xóa!',
+            message: 'Xóa gói thành công'
+          };
+          showNotification.value = true;
+          await fetchPlans();
+        }
+      } catch (error) {
+        notification.value = {
+          type: 'error',
+          title: 'Lỗi!',
+          message: 'Không thể xóa gói'
+        };
+        showNotification.value = true;
+      }
+    }
+  };
+  showConfirm.value = true;
+};
+
+// Coupon Management
+const openCouponModal = (coupon = null) => {
+  if (coupon) {
+    editingCoupon.value = coupon;
+    couponForm.value = {
+      id: coupon.id,
+      code: coupon.code,
+      description: coupon.description || '',
+      discount_type: coupon.discount_type,
+      discount_value: coupon.discount_value,
+      min_order_value: coupon.min_order_value || 0,
+      max_discount: coupon.max_discount,
+      usage_limit: coupon.usage_limit,
+      user_limit: coupon.user_limit || 1,
+      start_date: coupon.start_date ? coupon.start_date.replace(' ', 'T').substring(0, 16) : '',
+      end_date: coupon.end_date ? coupon.end_date.replace(' ', 'T').substring(0, 16) : '',
+      is_active: Boolean(coupon.is_active)
+    };
+  } else {
+    editingCoupon.value = null;
+    couponForm.value = {
+      code: '',
+      description: '',
+      discount_type: 'percent',
+      discount_value: 0,
+      min_order_value: 0,
+      max_discount: null,
+      usage_limit: null,
+      user_limit: 1,
+      start_date: '',
+      end_date: '',
+      is_active: true
+    };
+  }
+  showCouponModal.value = true;
+};
+
+const saveCoupon = async () => {
+  try {
+    loading.value = true;
+    const method = editingCoupon.value ? 'PUT' : 'POST';
+    const response = await axios({
+      method,
+      url: `${API_URL}/admin/coupons.php`,
+      data: couponForm.value
+    });
+    
+    if (response.data.success) {
+      notification.value = {
+        type: 'success',
+        title: 'Thành công!',
+        message: editingCoupon.value ? 'Cập nhật mã thành công' : 'Tạo mã mới thành công'
+      };
+      showNotification.value = true;
+      showCouponModal.value = false;
+      await fetchCoupons();
+    }
+  } catch (error) {
+    notification.value = {
+      type: 'error',
+      title: 'Lỗi!',
+      message: error.response?.data?.message || 'Có lỗi xảy ra'
+    };
+    showNotification.value = true;
+  } finally {
+    loading.value = false;
+  }
+};
+
+const toggleCouponStatus = async (coupon) => {
+  try {
+    const response = await axios.put(`${API_URL}/admin/coupons.php`, {
+      id: coupon.id,
+      is_active: !coupon.is_active
+    });
+    
+    if (response.data.success) {
+      notification.value = {
+        type: 'success',
+        title: 'Thành công!',
+        message: `Đã ${!coupon.is_active ? 'bật' : 'tắt'} mã ${coupon.code}`
+      };
+      showNotification.value = true;
+      await fetchCoupons();
+    }
+  } catch (error) {
+    notification.value = {
+      type: 'error',
+      title: 'Lỗi!',
+      message: 'Không thể thay đổi trạng thái'
+    };
+    showNotification.value = true;
+  }
+};
+
+const deleteCoupon = async (coupon) => {
+  confirmData.value = {
+    title: 'Xác nhận xóa mã',
+    message: `Bạn có chắc muốn xóa mã "${coupon.code}"? Hành động này không thể hoàn tác.`,
+    type: 'danger',
+    confirmText: 'Xóa',
+    cancelText: 'Hủy',
+    onConfirm: async () => {
+      try {
+        const response = await axios.delete(`${API_URL}/admin/coupons.php?id=${coupon.id}`);
+        if (response.data.success) {
+          notification.value = {
+            type: 'success',
+            title: 'Đã xóa!',
+            message: 'Xóa mã thành công'
+          };
+          showNotification.value = true;
+          await fetchCoupons();
+        }
+      } catch (error) {
+        notification.value = {
+          type: 'error',
+          title: 'Lỗi!',
+          message: 'Không thể xóa mã'
+        };
+        showNotification.value = true;
+      }
+    }
+  };
+  showConfirm.value = true;
 };
 
 onMounted(() => {

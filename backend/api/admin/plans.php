@@ -85,14 +85,16 @@ function createPlan($conn) {
     }
     
     $sql = "INSERT INTO subscription_plans 
-            (name, slug, description, price, duration_days, quality, max_devices, has_ads, can_download, early_access, is_active, display_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            (name, slug, description, promotion_badge, promotion_text, price, duration_days, quality, max_devices, has_ads, can_download, early_access, is_active, display_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     $stmt = $conn->prepare($sql);
     $stmt->execute([
         $data['name'],
         $data['slug'],
-        $data['description'] ?? '',
+        $data['description'] ?? null,
+        $data['promotion_badge'] ?? null,
+        $data['promotion_text'] ?? null,
         $data['price'],
         $data['duration_days'],
         $data['quality'] ?? 'HD',
@@ -114,6 +116,9 @@ function createPlan($conn) {
 function updatePlan($conn) {
     $data = json_decode(file_get_contents('php://input'), true);
     
+    // Debug logging
+    error_log("UPDATE PLAN - Received data: " . json_encode($data));
+    
     if (!isset($data['id'])) {
         throw new Exception('Missing plan id');
     }
@@ -121,12 +126,17 @@ function updatePlan($conn) {
     $updates = [];
     $params = [];
     
-    $fields = ['name', 'slug', 'description', 'price', 'duration_days', 'quality', 'max_devices', 'has_ads', 'can_download', 'early_access', 'is_active', 'display_order'];
+    $fields = ['name', 'slug', 'description', 'promotion_badge', 'promotion_text', 'price', 'duration_days', 'quality', 'max_devices', 'has_ads', 'can_download', 'early_access', 'is_active', 'display_order'];
     
     foreach ($fields as $field) {
-        if (isset($data[$field])) {
+        if (array_key_exists($field, $data)) {  // Changed from isset to array_key_exists to handle null values
             $updates[] = "$field = ?";
-            $params[] = $data[$field];
+            // Convert empty strings to null for text fields
+            if (in_array($field, ['description', 'promotion_badge', 'promotion_text']) && ($data[$field] === '' || $data[$field] === null)) {
+                $params[] = null;
+            } else {
+                $params[] = $data[$field];
+            }
         }
     }
     
@@ -137,12 +147,20 @@ function updatePlan($conn) {
     $params[] = $data['id'];
     $sql = "UPDATE subscription_plans SET " . implode(', ', $updates) . " WHERE id = ?";
     
+    // Debug logging
+    error_log("UPDATE PLAN - SQL: " . $sql);
+    error_log("UPDATE PLAN - Params: " . json_encode($params));
+    
     $stmt = $conn->prepare($sql);
     $stmt->execute($params);
     
     echo json_encode([
         'success' => true,
-        'message' => 'Cập nhật gói dịch vụ thành công'
+        'message' => 'Cập nhật gói dịch vụ thành công',
+        'debug' => [
+            'sql' => $sql,
+            'params' => $params
+        ]
     ]);
 }
 
