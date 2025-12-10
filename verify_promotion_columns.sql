@@ -14,6 +14,6 @@ ORDER BY display_order;
 
 -- Test remove promotion badge
 -- UPDATE subscription_plans 
--- SET promotion_badge = NULL, 
+-- SET promotion_badge = NULL,    
 --     promotion_text = NULL
 -- WHERE id = 1;

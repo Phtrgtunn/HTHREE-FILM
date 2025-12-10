@@ -70,7 +70,7 @@
               </div>
               <div class="flex items-start gap-2">
                 <span class="text-blue-400 font-bold">⚡ Bước 5:</span>
-                <span>Gói sẽ tự động kích hoạt trong 10-30 giây</span>
+                <span>Gói sẽ tự động kích hoạt sau khi chuyển khoản thành công</span>
               </div>
             </div>
           </div>
@@ -177,8 +177,7 @@
                 </button>
               </div>
               <p class="text-yellow-300 text-xs mt-2">
-                ⚠️ Vui lòng nhập chính xác nội dung để hệ thống tự động kích
-                hoạt gói
+                ⚠️ Vui lòng nhập chính xác nội dung để hệ thống tự động kích hoạt gói
               </p>
             </div>
           </div>
@@ -301,9 +300,10 @@
           </li>
           <li class="flex gap-2">
             <span class="text-yellow-400 font-bold">5.</span>
-            <span>Gói sẽ tự động kích hoạt sau 5-30 giây</span>
+            <span>Gói sẽ tự động kích hoạt sau khi chuyển khoản thành công</span>
           </li>
         </ol>
+
       </div>
     </div>
 
@@ -360,6 +360,8 @@ const showGuide = ref(false); // Dropdown state
 let checkInterval = null;
 let countdownInterval = null;
 
+
+
 const API_URL =
   import.meta.env.VITE_API_BASE_URL ||
   "http://localhost/HTHREE_film/HTHREE_film/backend/api";
@@ -402,17 +404,20 @@ const generateQR = async () => {
   }
 };
 
+
+
 const startPaymentCheck = () => {
   checkingPayment.value = true;
 
   checkInterval = setInterval(async () => {
     try {
-      const response = await fetch(
+      // 1. Kiểm tra trạng thái đơn hàng trong database
+      const statusResponse = await fetch(
         `${API_URL}/payment/check_payment_status.php?order_id=${props.orderId}`
       );
-      const data = await response.json();
+      const statusData = await statusResponse.json();
 
-      if (data.success && data.data.paid) {
+      if (statusData.success && statusData.data.paid) {
         paymentSuccess.value = true;
         checkingPayment.value = false;
         stopPaymentCheck();
@@ -423,17 +428,53 @@ const startPaymentCheck = () => {
         setTimeout(() => {
           emit("success");
         }, 2000);
+        return;
       }
 
-      if (data.success && data.data.expired) {
+      if (statusData.success && statusData.data.expired) {
         stopPaymentCheck();
         stopCountdown();
         emit("expired");
+        return;
       }
+
+      // 2. Kiểm tra giao dịch thực tế từ Casso (nếu có QR data)
+      if (qrData.value && qrData.value.order_code) {
+        try {
+          const cassoResponse = await fetch(`${API_URL}/payment/check_casso_transactions.php`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              order_code: qrData.value.order_code,
+              amount: qrData.value.amount,
+            }),
+          });
+
+          const cassoData = await cassoResponse.json();
+
+          if (cassoData.success) {
+            // Tìm thấy giao dịch thực tế và đã approve
+            paymentSuccess.value = true;
+            checkingPayment.value = false;
+            stopPaymentCheck();
+            stopCountdown();
+
+            toast.success("🎉 Phát hiện thanh toán thành công!");
+
+            setTimeout(() => {
+              emit("success");
+            }, 2000);
+          }
+        } catch (cassoErr) {
+          console.log("Casso check failed (normal):", cassoErr.message);
+          // Không hiển thị lỗi cho user, tiếp tục polling
+        }
+      }
+
     } catch (err) {
       console.error("Error checking payment:", err);
     }
-  }, 3000); // Check every 3 seconds
+  }, 5000); // Check every 5 seconds
 };
 
 const stopPaymentCheck = () => {
@@ -493,38 +534,7 @@ const handleQRError = (e) => {
   error.value = "Không thể tải mã QR";
 };
 
-const manualConfirm = async () => {
-  try {
-    // Update order status manually (for localhost testing)
-    const response = await fetch(`${API_URL}/admin/approve_order.php`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        order_id: props.orderId,
-        transaction_id: "MANUAL_TEST_" + Date.now(),
-      }),
-    });
 
-    const data = await response.json();
-
-    if (data.success) {
-      paymentSuccess.value = true;
-      checkingPayment.value = false;
-      stopPaymentCheck();
-      stopCountdown();
-
-      toast.success("🎉 Thanh toán thành công!");
-
-      setTimeout(() => {
-        emit("success");
-      }, 2000);
-    } else {
-      throw new Error(data.message);
-    }
-  } catch (err) {
-    toast.error("Không thể xác nhận thanh toán: " + err.message);
-  }
-};
 </script>
 
 <style scoped>

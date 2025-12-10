@@ -10,8 +10,8 @@ define('BANK_ACCOUNT_NO', '0825591211'); // Số tài khoản
 define('BANK_ACCOUNT_NAME', 'PHAM TRUNG TUAN'); // Tên chủ tài khoản (VIẾT HOA, KHÔNG DẤU)
 
 // Casso API Configuration
-define('CASSO_API_KEY', 'YOUR_CASSO_API_KEY'); // Lấy từ https://casso.vn/tai-khoan/api
-define('CASSO_WEBHOOK_SECRET', 'YOUR_WEBHOOK_SECRET'); // Secret để verify webhook
+define('CASSO_API_KEY', 'AK_CS.b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8'); // Lấy từ https://casso.vn/tai-khoan/api
+define('CASSO_WEBHOOK_SECRET', 'hthree_webhook_secret_2024'); // Secret để verify webhook
 
 // Order Configuration
 define('ORDER_PREFIX', 'HTHREE');      // Prefix cho mã đơn hàng
