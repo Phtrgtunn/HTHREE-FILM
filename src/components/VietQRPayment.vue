@@ -476,8 +476,8 @@ const startPaymentCheck = () => {
         return;
       }
 
-      // 2. Kiểm tra giao dịch giả lập (nếu có QR data)
-      if (qrData.value && qrData.value.order_code) {
+      // 2. Kiểm tra giao dịch giả lập (chỉ trên localhost)
+      if (isLocalhost && qrData.value && qrData.value.order_code) {
         try {
           const bankResponse = await fetch(`${API_URL}/payment/simulate_bank_transfer.php`, {
             method: "POST",
