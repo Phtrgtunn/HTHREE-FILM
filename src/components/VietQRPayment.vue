@@ -382,8 +382,12 @@ const testingManual = ref(false);
 let checkInterval = null;
 let countdownInterval = null;
 
-// Check if localhost
-const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+// Check if localhost (strict check - only allow simulation on actual localhost)
+const isLocalhost = (
+  window.location.hostname === 'localhost' || 
+  window.location.hostname === '127.0.0.1' ||
+  window.location.hostname === '::1'
+) && window.loc
 
 
 
