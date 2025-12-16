@@ -29,21 +29,38 @@
           leave-from-class="opacity-100 scale-100 translate-y-0"
           leave-to-class="opacity-0 scale-95 translate-y-4"
         >
-          <div v-if="showDeleteAccountModal" class="relative w-full max-w-md bg-gray-900 rounded-xl shadow-2xl overflow-hidden border border-red-500/30">
+          <div
+            v-if="showDeleteAccountModal"
+            class="relative w-full max-w-md bg-gray-900 rounded-xl shadow-2xl overflow-hidden border border-red-500/30"
+          >
             <!-- Header -->
             <div class="bg-gradient-to-r from-red-500 to-red-600 px-5 py-4">
               <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                <svg
+                  class="w-5 h-5 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd"
+                  />
                 </svg>
-                <h3 class="text-lg font-bold text-white">Xác nhận xóa tài khoản</h3>
+                <h3 class="text-lg font-bold text-white">
+                  Xác nhận xóa tài khoản
+                </h3>
               </div>
             </div>
 
             <!-- Content -->
             <div class="p-5 space-y-4">
-              <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-                <p class="text-red-400 font-semibold mb-2 text-sm">⚠️ Cảnh báo:</p>
+              <div
+                class="bg-red-500/10 border border-red-500/30 rounded-lg p-3"
+              >
+                <p class="text-red-400 font-semibold mb-2 text-sm">
+                  ⚠️ Cảnh báo:
+                </p>
                 <ul class="text-red-200 text-xs space-y-1.5">
                   <li class="flex items-start gap-2">
                     <span class="text-red-400 mt-0.5">•</span>
@@ -59,7 +76,9 @@
                   </li>
                   <li class="flex items-start gap-2">
                     <span class="text-red-400 mt-0.5">•</span>
-                    <span><strong>Hành động này KHÔNG THỂ HOÀN TÁC</strong></span>
+                    <span
+                      ><strong>Hành động này KHÔNG THỂ HOÀN TÁC</strong></span
+                    >
                   </li>
                 </ul>
               </div>
@@ -81,8 +100,18 @@
                 @click="confirmDeleteAccount"
                 class="flex-1 px-4 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold transition-colors flex items-center justify-center gap-2 text-sm"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
                 </svg>
                 Xóa tài khoản
               </button>
@@ -99,14 +128,26 @@
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
         @click.self="showCancelModal = false"
       >
-        <div class="relative w-full max-w-md bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-red-500/30">
+        <div
+          class="relative w-full max-w-md bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-red-500/30"
+        >
           <!-- Header -->
           <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
             <div class="flex items-center gap-3">
-              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              <svg
+                class="w-6 h-6 text-white"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clip-rule="evenodd"
+                />
               </svg>
-              <h3 class="text-xl font-bold text-white">Xác nhận dừng gia hạn</h3>
+              <h3 class="text-xl font-bold text-white">
+                Xác nhận dừng gia hạn
+              </h3>
             </div>
           </div>
 
@@ -121,7 +162,12 @@
                 </li>
                 <li class="flex items-start gap-2">
                   <span class="text-red-400 mt-0.5">•</span>
-                  <span>Bạn vẫn có thể sử dụng gói đến hết ngày <strong>{{ subscriptionToCancel?.end_date_formatted }}</strong></span>
+                  <span
+                    >Bạn vẫn có thể sử dụng gói đến hết ngày
+                    <strong>{{
+                      subscriptionToCancel?.end_date_formatted
+                    }}</strong></span
+                  >
                 </li>
                 <li class="flex items-start gap-2">
                   <span class="text-red-400 mt-0.5">•</span>
@@ -133,8 +179,12 @@
             <div class="bg-gray-800 rounded-lg p-4">
               <p class="text-gray-300 text-sm mb-2">Thông tin gói:</p>
               <div class="flex items-center justify-between">
-                <span class="text-white font-bold">{{ subscriptionToCancel?.plan_name }}</span>
-                <span class="text-yellow-400 font-bold">{{ subscriptionToCancel?.quality }}</span>
+                <span class="text-white font-bold">{{
+                  subscriptionToCancel?.plan_name
+                }}</span>
+                <span class="text-yellow-400 font-bold">{{
+                  subscriptionToCancel?.quality
+                }}</span>
               </div>
               <p class="text-gray-400 text-xs mt-2">
                 {{ getRealtimeProgress(subscriptionToCancel).timeRemaining }}
@@ -166,7 +216,12 @@
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
               <svg
                 v-else
@@ -174,10 +229,23 @@
                 fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
-              <span>{{ cancellingSubscription ? 'Đang hủy...' : 'Đồng ý hủy' }}</span>
+              <span>{{
+                cancellingSubscription ? "Đang hủy..." : "Đồng ý hủy"
+              }}</span>
             </button>
           </div>
         </div>
@@ -427,7 +495,8 @@
                           <span class="font-semibold">{{
                             activeSubscription.end_date_formatted
                           }}</span>
-                          và không tự động gia hạn. Bạn vẫn có thể sử dụng đến hết thời gian đã trả.
+                          và không tự động gia hạn. Bạn vẫn có thể sử dụng đến
+                          hết thời gian đã trả.
                         </p>
                         <button
                           @click="router.push('/pricing')"
@@ -474,7 +543,11 @@
                           <span class="font-semibold">{{
                             activeSubscription.end_date_formatted
                           }}</span>
-                          (còn {{ getRealtimeProgress(activeSubscription).timeRemaining }}).
+                          (còn
+                          {{
+                            getRealtimeProgress(activeSubscription)
+                              .timeRemaining
+                          }}).
                         </p>
                         <button
                           @click="router.push('/pricing')"
@@ -543,7 +616,7 @@
                           'text-green-400':
                             activeSubscription.status === 'active' &&
                             getRealtimeProgress(activeSubscription).status ===
-                            'active',
+                              'active',
                           'text-orange-400':
                             activeSubscription.status === 'cancelled',
                           'text-yellow-400':
@@ -646,7 +719,9 @@
                       >
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                           <div>
-                            <p class="text-white/60 text-xs mb-1 flex items-center gap-1">
+                            <p
+                              class="text-white/60 text-xs mb-1 flex items-center gap-1"
+                            >
                               <span>📅</span>
                               <span>Ngày bắt đầu</span>
                             </p>
@@ -655,19 +730,25 @@
                             </p>
                           </div>
                           <div>
-                            <p class="text-white/60 text-xs mb-1 flex items-center gap-1">
+                            <p
+                              class="text-white/60 text-xs mb-1 flex items-center gap-1"
+                            >
                               <span>⏱️</span>
                               <span>Thời gian</span>
                             </p>
                             <p class="text-white font-bold">
-                              {{ activeSubscription.used_days }}/{{
-                                activeSubscription.total_days
+                              {{
+                                activeSubscription.used_minutes_display || 0
+                              }}/{{
+                                activeSubscription.total_minutes_display || 3
                               }}
-                              ngày
+                              phút
                             </p>
                           </div>
                           <div>
-                            <p class="text-white/60 text-xs mb-1 flex items-center gap-1">
+                            <p
+                              class="text-white/60 text-xs mb-1 flex items-center gap-1"
+                            >
                               <span>📆</span>
                               <span>Ngày hết hạn</span>
                             </p>
@@ -676,7 +757,9 @@
                             </p>
                           </div>
                           <div class="lg:text-right">
-                            <p class="text-white/60 text-xs mb-1 flex items-center gap-1 lg:justify-end">
+                            <p
+                              class="text-white/60 text-xs mb-1 flex items-center gap-1 lg:justify-end"
+                            >
                               <span>💰</span>
                               <span>Giá đã trả</span>
                             </p>
@@ -692,7 +775,7 @@
                             class="w-full bg-white/10 rounded-full h-3 overflow-hidden"
                           >
                             <div
-                              class="h-full rounded-full transition-all duration-1000 relative"
+                              class="h-full rounded-full transition-all duration-500 ease-out relative"
                               :class="{
                                 'bg-gradient-to-r from-green-400 to-green-500':
                                   getRealtimeProgress(activeSubscription)
@@ -710,6 +793,7 @@
                                 width:
                                   getRealtimeProgress(activeSubscription)
                                     .progress + '%',
+                                transition: 'width 0.5s ease-out',
                               }"
                             >
                               <div
@@ -720,7 +804,10 @@
                           <p
                             class="text-center text-white font-bold text-sm mt-2"
                           >
-                            {{ getRealtimeProgress(activeSubscription).timeRemaining }}
+                            {{
+                              getRealtimeProgress(activeSubscription)
+                                .timeRemaining
+                            }}
                           </p>
                         </div>
                       </div>
@@ -747,7 +834,7 @@
                           </svg>
                           <span>Gia hạn</span>
                         </button>
-                        
+
                         <!-- Nâng cấp gói -->
                         <button
                           @click="handleUpgrade"
@@ -768,7 +855,7 @@
                           </svg>
                           <span>Nâng cấp</span>
                         </button>
-                        
+
                         <!-- Dừng gia hạn -->
                         <button
                           @click="showCancelConfirmModal(activeSubscription)"
@@ -917,7 +1004,7 @@
                                     Thời hạn
                                   </p>
                                   <p class="text-white font-semibold">
-                                    {{ sub.total_days }} ngày
+                                    {{ sub.total_minutes_display || 3 }} phút
                                   </p>
                                 </div>
                               </div>
@@ -1000,6 +1087,7 @@
                     <p class="text-gray-400 mb-4">
                       Đăng ký gói để trải nghiệm đầy đủ tính năng
                     </p>
+
                     <button
                       @click="router.push('/pricing')"
                       class="bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-bold px-6 py-3 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all"
@@ -1010,7 +1098,9 @@
 
                   <!-- Quick Links -->
                   <div class="space-y-3">
-                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                    <h3
+                      class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4"
+                    >
                       Liên kết nhanh
                     </h3>
 
@@ -1033,7 +1123,9 @@
                             d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                           />
                         </svg>
-                        <span class="text-white font-medium">Cập nhật mật khẩu</span>
+                        <span class="text-white font-medium"
+                          >Cập nhật mật khẩu</span
+                        >
                       </div>
                       <svg
                         class="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors"
@@ -1054,7 +1146,9 @@
                   <!-- Giao dịch gần đây -->
                   <div class="mt-8">
                     <div class="flex items-center justify-between mb-4">
-                      <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                      <h3
+                        class="text-sm font-semibold text-gray-400 uppercase tracking-wider"
+                      >
                         Giao dịch gần đây
                       </h3>
                       <button
@@ -1067,17 +1161,48 @@
                     </div>
 
                     <!-- Loading -->
-                    <div v-if="loadingTransactions" class="flex justify-center py-8">
-                      <svg class="animate-spin h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <div
+                      v-if="loadingTransactions"
+                      class="flex justify-center py-8"
+                    >
+                      <svg
+                        class="animate-spin h-6 w-6 text-yellow-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          class="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          stroke-width="4"
+                        ></circle>
+                        <path
+                          class="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                     </div>
 
                     <!-- No transactions -->
-                    <div v-else-if="!transactions || transactions.length === 0" class="text-center py-8 bg-[#1a1a1a] border border-gray-800 rounded-lg">
-                      <svg class="w-12 h-12 text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    <div
+                      v-else-if="!transactions || transactions.length === 0"
+                      class="text-center py-8 bg-[#1a1a1a] border border-gray-800 rounded-lg"
+                    >
+                      <svg
+                        class="w-12 h-12 text-gray-600 mx-auto mb-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                        />
                       </svg>
                       <p class="text-gray-400 text-sm">Chưa có giao dịch nào</p>
                     </div>
@@ -1091,29 +1216,52 @@
                       >
                         <div class="flex items-center justify-between">
                           <div class="flex items-center gap-3 flex-1 min-w-0">
-                            <div class="w-8 h-8 rounded bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
-                              <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            <div
+                              class="w-8 h-8 rounded bg-yellow-500/20 flex items-center justify-center flex-shrink-0"
+                            >
+                              <svg
+                                class="w-4 h-4 text-yellow-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M5 13l4 4L19 7"
+                                />
                               </svg>
                             </div>
                             <div class="flex-1 min-w-0">
                               <div class="flex items-center gap-2 mb-0.5">
-                                <p class="text-white text-sm font-medium truncate">{{ transaction.plan_name }}</p>
+                                <p
+                                  class="text-white text-sm font-medium truncate"
+                                >
+                                  {{ transaction.plan_name }}
+                                </p>
                                 <span
                                   class="px-1.5 py-0.5 rounded text-xs font-semibold flex-shrink-0"
                                   :class="{
-                                    'bg-green-500/20 text-green-400': transaction.status === 'completed',
-                                    'bg-yellow-500/20 text-yellow-400': transaction.status === 'pending',
-                                    'bg-red-500/20 text-red-400': transaction.status === 'cancelled'
+                                    'bg-green-500/20 text-green-400':
+                                      transaction.status === 'completed',
+                                    'bg-yellow-500/20 text-yellow-400':
+                                      transaction.status === 'pending',
+                                    'bg-red-500/20 text-red-400':
+                                      transaction.status === 'cancelled',
                                   }"
                                 >
                                   {{ getStatusText(transaction.status) }}
                                 </span>
                               </div>
-                              <p class="text-gray-400 text-xs">{{ transaction.created_at_formatted }}</p>
+                              <p class="text-gray-400 text-xs">
+                                {{ transaction.created_at_formatted }}
+                              </p>
                             </div>
                           </div>
-                          <p class="text-yellow-400 font-semibold text-sm ml-3 flex-shrink-0">
+                          <p
+                            class="text-yellow-400 font-semibold text-sm ml-3 flex-shrink-0"
+                          >
                             {{ formatPrice(transaction.total_price) }}đ
                           </p>
                         </div>
@@ -1127,28 +1275,60 @@
                   <h1 class="text-4xl font-bold text-white mb-2 tracking-tight">
                     Bảo mật
                   </h1>
-                  <p class="text-gray-300 mb-8">Quản lý thông tin bảo mật của bạn</p>
+                  <p class="text-gray-300 mb-8">
+                    Quản lý thông tin bảo mật của bạn
+                  </p>
 
                   <!-- Thông tin đăng nhập -->
                   <!-- Thông tin đăng nhập -->
-                  <div class="bg-[#1a1a1a] border border-gray-800 rounded-lg p-5 mb-6">
-                    <h3 class="text-base font-semibold text-white mb-4 flex items-center gap-2">
-                      <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
+                  <div
+                    class="bg-[#1a1a1a] border border-gray-800 rounded-lg p-5 mb-6"
+                  >
+                    <h3
+                      class="text-base font-semibold text-white mb-4 flex items-center gap-2"
+                    >
+                      <svg
+                        class="w-5 h-5 text-yellow-400"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
+                          clip-rule="evenodd"
+                        />
                       </svg>
                       Thông tin đăng nhập
                     </h3>
 
                     <!-- Thông báo nếu đăng nhập bằng Google -->
-                    <div v-if="isGoogleUser" class="mb-4 bg-blue-500/10 rounded-lg p-3 border border-blue-500/30">
+                    <div
+                      v-if="isGoogleUser"
+                      class="mb-4 bg-blue-500/10 rounded-lg p-3 border border-blue-500/30"
+                    >
                       <div class="flex items-center gap-3">
                         <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
-                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                          <path
+                            fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                          />
+                          <path
+                            fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          />
+                          <path
+                            fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                          />
+                          <path
+                            fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                          />
                         </svg>
-                        <p class="text-blue-300 text-sm">Đăng nhập bằng Google - Mật khẩu được quản lý bởi Google</p>
+                        <p class="text-blue-300 text-sm">
+                          Đăng nhập bằng Google - Mật khẩu được quản lý bởi
+                          Google
+                        </p>
                       </div>
                     </div>
 
@@ -1160,35 +1340,83 @@
                         class="w-full flex items-center justify-between p-3 bg-[#2a2a2a] hover:bg-[#3a3a3a] rounded-lg transition-all group border border-gray-700 hover:border-yellow-400"
                       >
                         <div class="flex items-center gap-3">
-                          <div class="w-9 h-9 rounded-lg bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
-                            <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          <div
+                            class="w-9 h-9 rounded-lg bg-yellow-500/20 flex items-center justify-center flex-shrink-0"
+                          >
+                            <svg
+                              class="w-4 h-4 text-yellow-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                              />
                             </svg>
                           </div>
                           <div class="text-left">
-                            <p class="text-white font-medium text-sm">Mật khẩu</p>
+                            <p class="text-white font-medium text-sm">
+                              Mật khẩu
+                            </p>
                             <p class="text-gray-400 text-xs">••••••••</p>
                           </div>
                         </div>
-                        <svg class="w-4 h-4 text-gray-500 group-hover:text-yellow-400 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        <svg
+                          class="w-4 h-4 text-gray-500 group-hover:text-yellow-400 transition-colors flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                          />
                         </svg>
                       </button>
 
                       <!-- Email -->
-                      <div class="w-full p-3 bg-[#2a2a2a] rounded-lg border border-gray-700">
+                      <div
+                        class="w-full p-3 bg-[#2a2a2a] rounded-lg border border-gray-700"
+                      >
                         <div class="flex items-center gap-3">
-                          <div class="w-9 h-9 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                            <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          <div
+                            class="w-9 h-9 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0"
+                          >
+                            <svg
+                              class="w-4 h-4 text-green-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                              />
                             </svg>
                           </div>
                           <div class="flex-1 min-w-0">
                             <p class="text-white font-medium text-sm">Email</p>
-                            <p class="text-gray-400 text-xs truncate">{{ user.email }}</p>
+                            <p class="text-gray-400 text-xs truncate">
+                              {{ user.email }}
+                            </p>
                           </div>
-                          <svg class="w-3 h-3 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                          <svg
+                            class="w-3 h-3 text-green-500 flex-shrink-0"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clip-rule="evenodd"
+                            />
                           </svg>
                         </div>
                       </div>
@@ -1199,40 +1427,100 @@
                         class="w-full flex items-center justify-between p-3 bg-[#2a2a2a] hover:bg-[#3a3a3a] rounded-lg transition-all group border border-gray-700 hover:border-yellow-400"
                       >
                         <div class="flex items-center gap-3">
-                          <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" :class="savedPhoneNumber ? 'bg-green-500/20' : 'bg-gray-700'">
-                            <svg class="w-4 h-4" :class="savedPhoneNumber ? 'text-green-400' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          <div
+                            class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                            :class="
+                              savedPhoneNumber
+                                ? 'bg-green-500/20'
+                                : 'bg-gray-700'
+                            "
+                          >
+                            <svg
+                              class="w-4 h-4"
+                              :class="
+                                savedPhoneNumber
+                                  ? 'text-green-400'
+                                  : 'text-gray-400'
+                              "
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                              />
                             </svg>
                           </div>
                           <div class="text-left">
-                            <p class="text-white font-medium text-sm">Số điện thoại</p>
-                            <p class="text-gray-400 text-xs">{{ savedPhoneNumber || 'Chưa có' }}</p>
+                            <p class="text-white font-medium text-sm">
+                              Số điện thoại
+                            </p>
+                            <p class="text-gray-400 text-xs">
+                              {{ savedPhoneNumber || "Chưa có" }}
+                            </p>
                           </div>
                         </div>
-                        <svg class="w-4 h-4 text-gray-500 group-hover:text-yellow-400 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        <svg
+                          class="w-4 h-4 text-gray-500 group-hover:text-yellow-400 transition-colors flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                          />
                         </svg>
                       </button>
                     </div>
                   </div>
 
                   <!-- Xóa tài khoản -->
-                  <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-5">
+                  <div
+                    class="bg-red-500/10 border border-red-500/30 rounded-lg p-5"
+                  >
                     <div class="flex items-center gap-3 mb-3">
-                      <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      <svg
+                        class="w-5 h-5 text-red-400"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                          clip-rule="evenodd"
+                        />
                       </svg>
                       <div>
-                        <h3 class="text-red-400 font-semibold">Xóa tài khoản</h3>
-                        <p class="text-red-200 text-xs">Hành động này không thể hoàn tác</p>
+                        <h3 class="text-red-400 font-semibold">
+                          Xóa tài khoản
+                        </h3>
+                        <p class="text-red-200 text-xs">
+                          Hành động này không thể hoàn tác
+                        </p>
                       </div>
                     </div>
                     <button
                       @click="showDeleteAccountModal = true"
                       class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
                     >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
                       </svg>
                       Xóa tài khoản vĩnh viễn
                     </button>
@@ -1244,11 +1532,28 @@
                   <!-- Header -->
                   <div class="flex items-center justify-between mb-6">
                     <div>
-                      <h1 class="text-4xl font-bold text-white mb-2 tracking-tight">
+                      <h1
+                        class="text-4xl font-bold text-white mb-2 tracking-tight"
+                      >
                         Lịch sử giao dịch
                       </h1>
-                      <p class="text-gray-300" v-if="transactions && transactions.length > 0">
-                        {{ transactions.length }} giao dịch • Tổng: <span class="text-yellow-400 font-semibold">{{ formatPrice(transactions.filter(t => t.status === 'completed').reduce((sum, t) => sum + parseFloat(t.total_price), 0)) }}đ</span>
+                      <p
+                        class="text-gray-300"
+                        v-if="transactions && transactions.length > 0"
+                      >
+                        {{ transactions.length }} giao dịch • Tổng:
+                        <span class="text-yellow-400 font-semibold"
+                          >{{
+                            formatPrice(
+                              transactions
+                                .filter((t) => t.status === "completed")
+                                .reduce(
+                                  (sum, t) => sum + parseFloat(t.total_price),
+                                  0
+                                )
+                            )
+                          }}đ</span
+                        >
                       </p>
                       <p class="text-gray-300" v-else>Các gói bạn đã mua</p>
                     </div>
@@ -1277,20 +1582,55 @@
                   </div>
 
                   <!-- Loading -->
-                  <div v-if="loadingTransactions" class="flex justify-center items-center py-12">
-                    <svg class="animate-spin h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <div
+                    v-if="loadingTransactions"
+                    class="flex justify-center items-center py-12"
+                  >
+                    <svg
+                      class="animate-spin h-8 w-8 text-yellow-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      ></circle>
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                   </div>
 
                   <!-- No transactions -->
-                  <div v-else-if="!transactions || transactions.length === 0" class="text-center py-12 bg-[#1a1a1a] border border-gray-800 rounded-lg">
-                    <svg class="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                  <div
+                    v-else-if="!transactions || transactions.length === 0"
+                    class="text-center py-12 bg-[#1a1a1a] border border-gray-800 rounded-lg"
+                  >
+                    <svg
+                      class="w-16 h-16 text-gray-600 mx-auto mb-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      />
                     </svg>
-                    <h3 class="text-white font-bold mb-2">Chưa có giao dịch nào</h3>
-                    <p class="text-gray-400 text-sm mb-6">Lịch sử mua gói sẽ hiển thị ở đây</p>
+                    <h3 class="text-white font-bold mb-2">
+                      Chưa có giao dịch nào
+                    </h3>
+                    <p class="text-gray-400 text-sm mb-6">
+                      Lịch sử mua gói sẽ hiển thị ở đây
+                    </p>
                     <button
                       @click="router.push('/pricing')"
                       class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-3 rounded-lg transition-colors"
@@ -1310,55 +1650,93 @@
                         <!-- Left: Icon + Info -->
                         <div class="flex items-center gap-3 flex-1">
                           <!-- Icon with status color -->
-                          <div 
+                          <div
                             class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
                             :class="{
-                              'bg-green-500/20': transaction.status === 'completed',
-                              'bg-yellow-500/20': transaction.status === 'pending',
-                              'bg-red-500/20': transaction.status === 'cancelled'
+                              'bg-green-500/20':
+                                transaction.status === 'completed',
+                              'bg-yellow-500/20':
+                                transaction.status === 'pending',
+                              'bg-red-500/20':
+                                transaction.status === 'cancelled',
                             }"
                           >
-                            <svg 
-                              class="w-5 h-5" 
+                            <svg
+                              class="w-5 h-5"
                               :class="{
-                                'text-green-400': transaction.status === 'completed',
-                                'text-yellow-400': transaction.status === 'pending',
-                                'text-red-400': transaction.status === 'cancelled'
+                                'text-green-400':
+                                  transaction.status === 'completed',
+                                'text-yellow-400':
+                                  transaction.status === 'pending',
+                                'text-red-400':
+                                  transaction.status === 'cancelled',
                               }"
-                              fill="none" 
-                              stroke="currentColor" 
+                              fill="none"
+                              stroke="currentColor"
                               viewBox="0 0 24 24"
                             >
-                              <path v-if="transaction.status === 'completed'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                              <path v-else-if="transaction.status === 'pending'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                              <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                              <path
+                                v-if="transaction.status === 'completed'"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                              />
+                              <path
+                                v-else-if="transaction.status === 'pending'"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                              <path
+                                v-else
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                              />
                             </svg>
                           </div>
-                          
+
                           <!-- Info -->
                           <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1">
-                              <h3 class="text-white font-semibold">{{ transaction.plan_name }}</h3>
-                              <span class="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded text-xs font-semibold">
+                              <h3 class="text-white font-semibold">
+                                {{ transaction.plan_name }}
+                              </h3>
+                              <span
+                                class="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded text-xs font-semibold"
+                              >
                                 {{ transaction.quality }}
                               </span>
                               <span
                                 class="px-2 py-0.5 rounded text-xs font-semibold"
                                 :class="{
-                                  'bg-green-500/20 text-green-400': transaction.status === 'completed',
-                                  'bg-yellow-500/20 text-yellow-400': transaction.status === 'pending',
-                                  'bg-red-500/20 text-red-400': transaction.status === 'cancelled'
+                                  'bg-green-500/20 text-green-400':
+                                    transaction.status === 'completed',
+                                  'bg-yellow-500/20 text-yellow-400':
+                                    transaction.status === 'pending',
+                                  'bg-red-500/20 text-red-400':
+                                    transaction.status === 'cancelled',
                                 }"
                               >
                                 {{ getStatusText(transaction.status) }}
                               </span>
                             </div>
-                            <div class="flex items-center gap-3 text-xs text-gray-400">
-                              <span>{{ transaction.created_at_formatted }}</span>
+                            <div
+                              class="flex items-center gap-3 text-xs text-gray-400"
+                            >
+                              <span>{{
+                                transaction.created_at_formatted
+                              }}</span>
                               <span>•</span>
                               <span>{{ transaction.duration }} ngày</span>
                               <span>•</span>
-                              <span>{{ transaction.payment_method_name || 'Chuyển khoản' }}</span>
+                              <span>{{
+                                transaction.payment_method_name ||
+                                "Chuyển khoản"
+                              }}</span>
                             </div>
                           </div>
                         </div>
@@ -2448,17 +2826,20 @@ const menuItems = [
 
 const subscriptions = ref([]);
 const loadingSubscription = ref(false);
+const realtimeTimer = ref(0); // Để force re-render progress bar
 
 // Computed: Active subscription (highest priority)
 const activeSubscription = computed(() => {
   // Lấy gói active HOẶC cancelled nhưng chưa hết hạn (như Netflix)
   const active = subscriptions.value.filter((sub) => {
-    const isActiveOrCancelled = sub.status === "active" || sub.status === "cancelled";
+    const isActiveOrCancelled =
+      sub.status === "active" || sub.status === "cancelled";
     // Sử dụng thời gian từ server thay vì local time
-    const notExpired = sub.minutes_remaining > 0 || sub.subscription_status === 'active';
+    const notExpired =
+      sub.minutes_remaining > 0 || sub.subscription_status === "active";
     return isActiveOrCancelled && notExpired;
   });
-  
+
   if (active.length === 0) return null;
 
   // Sort by priority: vip > premium > basic > free
@@ -2474,30 +2855,61 @@ const pendingSubscriptions = computed(() => {
 });
 const currentTime = ref(new Date());
 
+// Removed demo functions - using real payment system only
+
 // Fetch user subscriptions (multiple)
 const fetchSubscription = async () => {
   const storedUser = localStorage.getItem("user");
-  if (!storedUser) return;
+  if (!storedUser) {
+    console.log("❌ No user in localStorage");
+    return;
+  }
 
   try {
     const userData = JSON.parse(storedUser);
-    const userId = userData.id;
+    console.log("👤 User data:", userData);
 
+    // Dùng trực tiếp user ID từ localStorage (user ID 109)
+    const userId = 109; // Hard-code user ID 109 cho đơn giản
+
+    console.log("🆔 Using User ID:", userId);
     loadingSubscription.value = true;
-    const API_URL =
-      import.meta.env.VITE_API_BASE_URL ||
-      "http://localhost/HTHREE_film/HTHREE_film/backend/api";
-    const response = await fetch(
-      `${API_URL}/user_subscription.php?user_id=${userId}`
-    );
-    const data = await response.json();
 
-    if (data.success && data.data) {
-      subscriptions.value = Array.isArray(data.data) ? data.data : [data.data];
-      console.log("📦 Subscriptions:", subscriptions.value);
+    const API_URL = "http://localhost/HTHREE_film/backend/api";
+    const apiUrl = `${API_URL}/user_subscription.php?user_id=${userId}`;
+    console.log("🌐 Calling API:", apiUrl);
+
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      console.error(
+        "❌ API Response not OK:",
+        response.status,
+        response.statusText
+      );
+      throw new Error(`API Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("📡 API Response:", data);
+
+    if (data.success) {
+      if (data.data && data.data.length > 0) {
+        subscriptions.value = Array.isArray(data.data)
+          ? data.data
+          : [data.data];
+        console.log("📦 Subscriptions found:", subscriptions.value.length);
+        console.log("📦 Subscription details:", subscriptions.value);
+      } else {
+        subscriptions.value = [];
+        console.log("📭 No subscriptions found for user:", userId);
+      }
+    } else {
+      console.error("❌ API Error:", data.message);
+      subscriptions.value = [];
     }
   } catch (error) {
-    console.error("Failed to fetch subscription:", error);
+    console.error("❌ Failed to fetch subscription:", error);
   } finally {
     loadingSubscription.value = false;
   }
@@ -2527,27 +2939,77 @@ const getPlanDescription = (slug) => {
 
 // Format price
 const formatPrice = (price) => {
-  return new Intl.NumberFormat('vi-VN').format(price);
+  return new Intl.NumberFormat("vi-VN").format(price);
 };
 
-// Calculate real-time progress and days remaining
+// Calculate real-time progress with smooth animation
 const getRealtimeProgress = (sub) => {
-  // Sử dụng dữ liệu từ server thay vì tính toán local
-  const minutesRemaining = Math.max(0, sub.minutes_remaining || 0);
-  const secondsRemaining = Math.max(0, sub.seconds_remaining || 0);
-  
-  // Tính progress dựa trên thời gian còn lại từ server
-  const totalMinutes = sub.total_minutes || 1;
-  const usedMinutes = totalMinutes - minutesRemaining;
-  const progress = totalMinutes > 0 ? Math.min(100, Math.max(0, (usedMinutes / totalMinutes) * 100)) : 0;
+  if (!sub || !sub.start_date || !sub.end_date) {
+    return {
+      progress: 0,
+      minutesRemaining: 0,
+      secondsRemaining: 0,
+      timeRemaining: "Đã hết hạn",
+      status: "expired",
+    };
+  }
+
+  // Force reactivity by accessing currentTime.value
+  const now = currentTime.value;
+  const startTime = new Date(sub.start_date);
+  const endTime = new Date(sub.end_date);
+
+  const totalDuration = endTime.getTime() - startTime.getTime(); // milliseconds
+  const elapsed = now.getTime() - startTime.getTime(); // milliseconds
+  const remaining = endTime.getTime() - now.getTime(); // milliseconds
+
+  // Tính progress theo %
+  const progress =
+    totalDuration > 0
+      ? Math.min(100, Math.max(0, (elapsed / totalDuration) * 100))
+      : 0;
+
+  // Tính thời gian còn lại
+  const minutesRemaining = Math.max(0, Math.ceil(remaining / (1000 * 60)));
+  const secondsRemaining = Math.max(0, Math.ceil(remaining / 1000));
+
+  let timeRemaining;
+  if (remaining <= 0) {
+    timeRemaining = "Đã hết hạn";
+  } else if (minutesRemaining > 0) {
+    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+    timeRemaining = `${minutesRemaining}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
+  } else {
+    timeRemaining = `${secondsRemaining} giây`;
+  }
+
+  // Xác định status
+  let status;
+  if (remaining <= 0) {
+    status = "expired";
+  } else if (minutesRemaining <= 1) {
+    status = "expiring_soon";
+  } else {
+    status = "active";
+  }
+
+  // Debug logging for progress tracking
+  if (sub.plan_name) {
+    console.log(
+      `📊 Progress for ${sub.plan_name}: ${progress.toFixed(
+        1
+      )}% - ${timeRemaining} remaining`
+    );
+  }
 
   return {
-    progress: progress.toFixed(2),
-    daysRemaining: Math.ceil(minutesRemaining / (24 * 60)),
+    progress: parseFloat(progress.toFixed(2)),
     minutesRemaining,
     secondsRemaining,
-    timeRemaining: sub.time_remaining_formatted || (minutesRemaining > 0 ? `${minutesRemaining} phút` : 'Đã hết hạn'),
-    status: sub.subscription_status || (minutesRemaining <= 0 ? "expired" : minutesRemaining <= 2 ? "expiring_soon" : "active"),
+    timeRemaining,
+    status,
   };
 };
 
@@ -2555,16 +3017,16 @@ const getRealtimeProgress = (sub) => {
 const renewCurrentPlan = (sub) => {
   // Navigate to pricing page with plan pre-selected
   router.push({
-    path: '/pricing',
-    query: { plan: sub.plan_slug }
+    path: "/pricing",
+    query: { plan: sub.plan_slug },
   });
   toast.success(`Đang chuyển đến trang mua gói ${sub.plan_name}...`);
 };
 
 // Handle upgrade
 const handleUpgrade = () => {
-  router.push('/pricing');
-  toast.info('💎 Khám phá các gói cao cấp hơn!');
+  router.push("/pricing");
+  toast.info("💎 Khám phá các gói cao cấp hơn!");
 };
 
 // Show cancel confirmation modal
@@ -2583,8 +3045,8 @@ const showDeleteAccountModal = ref(false);
 
 const confirmDeleteAccount = async () => {
   // TODO: Implement delete account API call
-  console.log('Delete account confirmed');
-  toast.info('Chức năng xóa tài khoản đang được phát triển');
+  console.log("Delete account confirmed");
+  toast.info("Chức năng xóa tài khoản đang được phát triển");
   showDeleteAccountModal.value = false;
 };
 
@@ -2595,9 +3057,7 @@ const confirmCancelSubscription = async () => {
   cancellingSubscription.value = true;
 
   try {
-    const API_URL =
-      import.meta.env.VITE_API_BASE_URL ||
-      "http://localhost/HTHREE_film/backend/api";
+    const API_URL = "http://localhost/HTHREE_film/backend/api";
     const response = await fetch(`${API_URL}/cancel_subscription.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -2607,7 +3067,9 @@ const confirmCancelSubscription = async () => {
     const data = await response.json();
 
     if (data.success) {
-      toast.success("Gói đã được hủy thành công! Bạn vẫn có thể sử dụng đến hết hạn.");
+      toast.success(
+        "Gói đã được hủy thành công! Bạn vẫn có thể sử dụng đến hết hạn."
+      );
       showCancelModal.value = false;
       // Refresh subscriptions
       await fetchSubscription();
@@ -2635,9 +3097,7 @@ const fetchTransactions = async () => {
     const userId = userData.id;
 
     loadingTransactions.value = true;
-    const API_URL =
-      import.meta.env.VITE_API_BASE_URL ||
-      "http://localhost/HTHREE_film/backend/api";
+    const API_URL = "http://localhost/HTHREE_film/backend/api";
     const response = await fetch(
       `${API_URL}/user_transactions.php?user_id=${userId}`
     );
@@ -2656,9 +3116,9 @@ const fetchTransactions = async () => {
 
 const getStatusText = (status) => {
   const statusMap = {
-    completed: 'Thành công',
-    pending: 'Đang xử lý',
-    cancelled: 'Đã hủy'
+    completed: "Thành công",
+    pending: "Đang xử lý",
+    cancelled: "Đã hủy",
   };
   return statusMap[status] || status;
 };
@@ -2668,54 +3128,83 @@ const viewTransactionDetail = (transaction) => {
   // TODO: Open transaction detail modal
 };
 
-// Update current time every second for real-time progress
-let timeInterval = null;
-let refreshInterval = null;
+// Reactive timer for smooth progress bar animation
+let progressTimer = null;
+let dataRefreshTimer = null;
 
 onMounted(() => {
+  console.log("🚀 onMounted: Starting fetchSubscription");
+
+  // Initial data fetch
+  fetchSubscription();
+  fetchTransactions();
+  loading.value = false;
+
+  // Kiểm tra user trong localStorage trước
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    try {
+      const userData = JSON.parse(storedUser);
+      console.log("👤 Found user in localStorage:", userData);
+
+      user.value = {
+        uid: userData.uid || userData.id,
+        email: userData.email,
+        displayName: userData.displayName || userData.full_name,
+      };
+    } catch (e) {
+      console.log("❌ Error parsing user:", e);
+    }
+  }
+
+  // Firebase auth fallback
   onAuthStateChanged(auth, (currentUser) => {
-    user.value = currentUser;
-    if (currentUser) {
+    if (currentUser && !user.value) {
+      user.value = currentUser;
       profileForm.displayName = currentUser.displayName || "";
-      // Kiểm tra xem user có đăng nhập bằng Google không
       isGoogleUser.value = currentUser.providerData.some(
         (provider) => provider.providerId === "google.com"
       );
-
-      // Fetch subscription and transactions
-      fetchSubscription();
-      fetchTransactions();
-
-      // Update time every second for real-time progress
-      timeInterval = setInterval(() => {
-        currentTime.value = new Date();
-      }, 1000);
-
-      // Refresh subscription data every 30 seconds
-      refreshInterval = setInterval(() => {
-        fetchSubscription();
-        // Also refresh transactions if on that tab
-        if (activeSection.value === 'transactions') {
-          fetchTransactions();
-        }
-      }, 30000);
-    } else {
-      // Nếu không có user (đã đăng xuất), chuyển về Homepage
+    } else if (!currentUser && !storedUser) {
       router.push("/home");
     }
     loading.value = false;
   });
+
+  // Start reactive timers for smooth progress animation
+  startProgressTimer();
 });
+
+// Start progress timer for smooth animation
+const startProgressTimer = () => {
+  // Update progress bar every second for smooth animation
+  progressTimer = setInterval(() => {
+    currentTime.value = new Date();
+    console.log("⏱️ Progress timer tick:", new Date().toLocaleTimeString());
+  }, 1000);
+
+  // Refresh subscription data every 10 seconds to get latest from server
+  dataRefreshTimer = setInterval(() => {
+    console.log("🔄 Auto-refreshing subscription data");
+    fetchSubscription();
+  }, 10000);
+};
 
 // Cleanup intervals on unmount
 onUnmounted(() => {
-  if (timeInterval) clearInterval(timeInterval);
-  if (refreshInterval) clearInterval(refreshInterval);
+  if (progressTimer) {
+    clearInterval(progressTimer);
+    console.log("🧹 Cleaned up progress timer");
+  }
+  if (dataRefreshTimer) {
+    clearInterval(dataRefreshTimer);
+    console.log("🧹 Cleaned up data refresh timer");
+  }
 });
 
 // Watch activeSection to fetch transactions when needed
 watch(activeSection, (newSection) => {
-  if (newSection === 'transactions') {
+  if (newSection === "transactions") {
     // Always fetch when switching to transactions tab (to get latest data)
     fetchTransactions();
   }
@@ -2984,6 +3473,26 @@ const verifyAndChangePassword = async () => {
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* Smooth progress bar animation */
+.progress-bar {
+  transition: width 0.5s ease-out !important;
+}
+
+/* Pulse animation for active progress */
+.progress-pulse {
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
   }
 }
 </style>

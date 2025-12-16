@@ -39,9 +39,26 @@ try {
     
     $subscription = $result->fetch_assoc();
     
-    // Kiểm tra subscription đã bị hủy chưa
+    // Kiểm tra subscription đã bị hủy chưa - nếu đã hủy thì kích hoạt lại
     if ($subscription['status'] === 'cancelled') {
-        throw new Exception('Subscription already cancelled');
+        // Kích hoạt lại subscription
+        $stmt = $conn->prepare("
+            UPDATE user_subscriptions 
+            SET status = 'active',
+                updated_at = NOW()
+            WHERE id = ?
+        ");
+        $stmt->bind_param("i", $subscription_id);
+        
+        if ($stmt->execute()) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Subscription reactivated successfully'
+            ]);
+        } else {
+            throw new Exception('Failed to reactivate subscription');
+        }
+        return;
     }
     
     // Hủy subscription

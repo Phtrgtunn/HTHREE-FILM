@@ -138,7 +138,10 @@ try {
         
         logWebhook("Order marked as COMPLETED: {$orderCode}");
         
-        // 2. Kích hoạt subscription tự động
+        // 2. Đảm bảo user mapping tồn tại (cho user thật)
+        ensureUserMapping($conn, $order);
+        
+        // 3. Kích hoạt subscription tự động
         $activated = activateSubscriptionAuto(
             $conn,
             $order['id'],
@@ -300,6 +303,42 @@ function sendActivationEmail($email, $order) {
 function verifySignature($payload, $signature, $secret) {
     $expectedSignature = hash_hmac('sha256', $payload, $secret);
     return hash_equals($expectedSignature, $signature);
+}
+
+/**
+ * Đảm bảo user mapping tồn tại cho user thật
+ */
+function ensureUserMapping($conn, $order) {
+    try {
+        // Kiểm tra xem có firebase_uid trong customer_email không (format: email|firebase_uid)
+        $customerInfo = explode('|', $order['customer_email']);
+        if (count($customerInfo) >= 2) {
+            $email = $customerInfo[0];
+            $firebaseUid = $customerInfo[1];
+            
+            // Kiểm tra user mapping đã tồn tại chưa
+            $stmt = $conn->prepare("SELECT id FROM firebase_users WHERE firebase_uid = ?");
+            $stmt->execute([$firebaseUid]);
+            $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$existingUser) {
+                // Tạo user mapping mới
+                $stmt = $conn->prepare("
+                    INSERT INTO firebase_users (firebase_uid, email, display_name, created_at)
+                    VALUES (?, ?, ?, NOW())
+                ");
+                $stmt->execute([
+                    $firebaseUid,
+                    $email,
+                    $order['customer_name'] ?: 'User'
+                ]);
+                
+                logWebhook("Created user mapping for Firebase UID: {$firebaseUid}");
+            }
+        }
+    } catch (Exception $e) {
+        logWebhook("Error ensuring user mapping: " . $e->getMessage());
+    }
 }
 
 /**

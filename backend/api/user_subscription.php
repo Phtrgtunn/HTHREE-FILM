@@ -41,17 +41,22 @@ try {
             sp.max_devices,
             sp.has_ads,
             sp.can_download,
-            TIMESTAMPDIFF(MINUTE, DATE_ADD(NOW(), INTERVAL 7 HOUR), us.end_date) as minutes_remaining,
-            TIMESTAMPDIFF(SECOND, DATE_ADD(NOW(), INTERVAL 7 HOUR), us.end_date) as seconds_remaining,
+            TIMESTAMPDIFF(MINUTE, NOW(), us.end_date) as minutes_remaining,
+            TIMESTAMPDIFF(SECOND, NOW(), us.end_date) as seconds_remaining,
+            TIMESTAMPDIFF(MINUTE, us.start_date, us.end_date) as total_minutes,
+            TIMESTAMPDIFF(MINUTE, us.start_date, NOW()) as minutes_used,
             CASE 
-                WHEN us.end_date < DATE_ADD(NOW(), INTERVAL 7 HOUR) THEN 'expired'
-                WHEN TIMESTAMPDIFF(MINUTE, DATE_ADD(NOW(), INTERVAL 7 HOUR), us.end_date) <= 2 THEN 'expiring_soon'
+                WHEN us.end_date < NOW() THEN 'expired'
+                WHEN TIMESTAMPDIFF(MINUTE, NOW(), us.end_date) <= 1 THEN 'expiring_soon'
                 ELSE 'active'
             END as subscription_status
         FROM user_subscriptions us
         JOIN subscription_plans sp ON us.plan_id = sp.id
         WHERE us.user_id = ? 
-        AND us.status = 'active'
+        AND (
+            (us.status = 'active' AND us.end_date > NOW()) OR
+            (us.status = 'cancelled' AND us.end_date > NOW())
+        )
         ORDER BY 
             CASE 
                 WHEN us.end_date < NOW() THEN 2
@@ -77,39 +82,36 @@ try {
         $subscription['start_date_formatted'] = date('d/m/Y', strtotime($subscription['start_date']));
         $subscription['end_date_formatted'] = date('d/m/Y', strtotime($subscription['end_date']));
         
-        // Calculate progress (minutes used / total minutes) - Cho demo
-        $start = new DateTime($subscription['start_date']);
-        $end = new DateTime($subscription['end_date']);
-        $now = new DateTime();
+        // Calculate progress based on fixed demo duration
+        $planDuration = match($subscription['plan_slug']) {
+            'basic' => 3,     // 3 phút
+            'premium' => 5,   // 5 phút  
+            'vip' => 10,      // 10 phút
+            default => 3
+        };
         
-        $total_minutes = $start->diff($end)->days * 24 * 60 + $start->diff($end)->h * 60 + $start->diff($end)->i;
-        $used_minutes = $start->diff($now)->days * 24 * 60 + $start->diff($now)->h * 60 + $start->diff($now)->i;
+        $totalMinutes = $planDuration;
+        $minutesRemaining = max(0, $subscription['minutes_remaining']);
+        $minutesUsed = max(0, $totalMinutes - $minutesRemaining);
         
-        // Nếu thời gian quá ngắn, tính theo giây
-        if ($total_minutes < 60) {
-            $total_seconds = $start->diff($end)->s + $start->diff($end)->i * 60;
-            $used_seconds = $start->diff($now)->s + $start->diff($now)->i * 60;
-            $progress = $total_seconds > 0 ? min(100, ($used_seconds / $total_seconds) * 100) : 0;
-        } else {
-            $progress = $total_minutes > 0 ? min(100, ($used_minutes / $total_minutes) * 100) : 0;
-        }
+        $progress = $totalMinutes > 0 ? min(100, ($minutesUsed / $totalMinutes) * 100) : 0;
         
         $subscription['progress'] = round($progress, 2);
-        $subscription['total_minutes'] = $total_minutes;
-        $subscription['used_minutes'] = $used_minutes;
+        $subscription['total_minutes_display'] = $totalMinutes;
+        $subscription['used_minutes_display'] = $minutesUsed;
         
-        // Format thời gian còn lại cho demo
-        if ($subscription['minutes_remaining'] > 0) {
-            $subscription['time_remaining_formatted'] = $subscription['minutes_remaining'] . ' phút';
+        // Format thời gian còn lại theo phút/giây
+        if ($minutesRemaining > 0) {
+            $subscription['time_remaining_formatted'] = $minutesRemaining . ' phút';
         } else if ($subscription['seconds_remaining'] > 0) {
             $subscription['time_remaining_formatted'] = $subscription['seconds_remaining'] . ' giây';
         } else {
             $subscription['time_remaining_formatted'] = 'Đã hết hạn';
         }
         
-        // Auto-cancel expired subscriptions (sử dụng múi giờ UTC+7)
+        // Auto-cancel expired subscriptions
         if ($subscription['subscription_status'] === 'expired' && $subscription['status'] === 'active') {
-            $update_stmt = $conn->prepare("UPDATE user_subscriptions SET status = 'expired' WHERE id = ? AND end_date < DATE_ADD(NOW(), INTERVAL 7 HOUR)");
+            $update_stmt = $conn->prepare("UPDATE user_subscriptions SET status = 'expired' WHERE id = ? AND end_date < NOW()");
             $update_stmt->bind_param("i", $subscription['id']);
             $update_stmt->execute();
             $subscription['status'] = 'expired';

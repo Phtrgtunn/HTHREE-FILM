@@ -331,7 +331,8 @@ const paymentMethods = [
   {
     value: "vietqr",
     label: "VietQR - Chuyển khoản ngân hàng",
-    description: "Quét mã QR, tự động kích hoạt ngay khi chuyển khoản thành công",
+    description:
+      "Quét mã QR, tự động kích hoạt ngay khi chuyển khoản thành công",
   },
   {
     value: "bank_transfer",
@@ -397,44 +398,33 @@ const handleSubmit = async () => {
       total_price: totalPrice.value, // Gửi giá đã tính discount
     };
 
-    // Gọi API tạo đơn hàng
-    const response = await createOrder(orderData);
+    // Gọi API demo để tạo gói ngắn
+    const API_URL = "http://localhost/HTHREE_film/backend/api";
+    const response = await fetch(`${API_URL}/demo/buy_plan_demo.php`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        plan_slug: props.plan.slug,
+      }),
+    });
 
-    if (response.success) {
-      createdOrderId.value = response.data.id;
+    const result = await response.json();
 
-      // Nếu chọn VietQR → Hiển thị QR code
-      if (form.value.paymentMethod === "vietqr") {
-        showVietQR.value = true;
-        toast.success(
-          "Đơn hàng đã được tạo! Vui lòng quét mã QR để thanh toán"
-        );
-      } else {
-        // Các phương thức khác (VNPay, MoMo...)
-        toast.success("Đặt hàng thành công! Đang kích hoạt gói...");
+    if (result.success) {
+      createdOrderId.value = result.data.order_id;
 
-        // Auto-approve order for testing
-        try {
-          const API_URL =
-            import.meta.env.VITE_API_BASE_URL ||
-            "http://localhost/HTHREE_film/HTHREE_film/backend/api";
-          await fetch(`${API_URL}/admin/approve_order.php`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ order_id: response.data.id }),
-          });
-          console.log("✅ Order auto-approved");
-        } catch (error) {
-          console.error("Failed to auto-approve:", error);
-        }
+      // Gói demo đã được tạo thành công
+      toast.success(
+        `Gói ${props.plan.name} đã được kích hoạt! (${result.data.duration_minutes} phút)`
+      );
 
-        emit("success", response.data);
-
-        setTimeout(() => {
-          emit("close");
-          router.push("/account");
-        }, 1500);
-      }
+      // Đóng modal và chuyển đến Account
+      setTimeout(() => {
+        emit("success");
+        router.push("/account");
+      }, 1500);
+    } else {
+      toast.error(result.message || "Không thể tạo gói");
     }
   } catch (error) {
     toast.error(error.response?.data?.message || "Không thể tạo đơn hàng");

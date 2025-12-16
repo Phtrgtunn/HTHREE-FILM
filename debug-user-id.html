@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug User ID</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: white; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .section { background: #2a2a2a; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        button { background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .info { color: #74c0fc; }
+        pre { background: #000; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug User ID</h1>
+        
+        <div class="section">
+            <h3>Thông tin User hiện tại</h3>
+            <button onclick="checkUser()">Kiểm tra User</button>
+            <div id="userResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>Tạo subscription cho User hiện tại</h3>
+            <button onclick="createSubscriptionForCurrentUser()">Tạo subscription</button>
+            <div id="createResult"></div>
+        </div>
+    </div>
+
+    <script>
+        function checkUser() {
+            // Kiểm tra localStorage
+            const storedUser = localStorage.getItem('user');
+            
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                document.getElementById('userResult').innerHTML = `
+                    <div class="info">✅ Tìm thấy user trong localStorage:</div>
+                    <pre>${JSON.stringify(userData, null, 2)}</pre>
+                `;
+            } else {
+                document.getElementById('userResult').innerHTML = `
+                    <div style="color: #ff6b6b;">❌ Không tìm thấy user trong localStorage</div>
+                    <p>Bạn cần đăng nhập trước!</p>
+                `;
+            }
+        }
+
+        async function createSubscriptionForCurrentUser() {
+            const storedUser = localStorage.getItem('user');
+            
+            if (!storedUser) {
+                document.getElementById('createResult').innerHTML = `
+                    <div style="color: #ff6b6b;">❌ Vui lòng đăng nhập trước!</div>
+                `;
+                return;
+            }
+
+            const userData = JSON.parse(storedUser);
+            const userId = userData.id;
+
+            try {
+                const response = await fetch('http://localhost/HTHREE_film/backend/api/demo/buy_plan_demo.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        plan_slug: 'basic'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('createResult').innerHTML = `
+                        <div class="info">✅ Tạo subscription thành công cho User ID: ${userId}</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p><strong>Bây giờ refresh trang Account để xem kết quả!</strong></p>
+                    `;
+                } else {
+                    document.getElementById('createResult').innerHTML = `
+                        <div style="color: #ff6b6b;">❌ Lỗi: ${data.message}</div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('createResult').innerHTML = `
+                    <div style="color: #ff6b6b;">❌ Lỗi kết nối: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Tạo user giả cho test
+        function createFakeUser() {
+            const fakeUser = {
+                id: 1,
+                email: 'test@demo.com',
+                displayName: 'Demo User',
+                uid: 'demo123'
+            };
+            localStorage.setItem('user', JSON.stringify(fakeUser));
+            checkUser();
+        }
+
+        // Auto check user khi load trang
+        window.onload = function() {
+            checkUser();
+            
+            // Nếu không có user, tự động tạo user giả
+            const storedUser = localStorage.getItem('user');
+            if (!storedUser) {
+                document.getElementById('userResult').innerHTML += `
+                    <br><button onclick="createFakeUser()" style="background: #ff9800;">Tạo User giả để test</button>
+                `;
+            }
+        };
+    </script>
+</body>
+</html>

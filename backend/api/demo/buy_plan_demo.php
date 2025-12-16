@@ -22,12 +22,10 @@ $conn = $db->getConnection();
 try {
     $input = json_decode(file_get_contents('php://input'), true);
     
-    $userId = $input['user_id'] ?? null;
     $planSlug = $input['plan_slug'] ?? 'basic';
     
-    if (!$userId) {
-        throw new Exception('User ID is required');
-    }
+    // Dùng user ID 109 cố định cho đơn giản
+    $userId = 109;
     
     // Lấy thông tin plan
     $stmt = $conn->prepare("SELECT * FROM subscription_plans WHERE slug = ?");
@@ -38,39 +36,41 @@ try {
         throw new Exception('Plan not found');
     }
     
-    // Tính thời gian demo
+    // Thời gian demo cho giảng viên (5 phút để dễ quan sát)
     $durationMinutes = match($planSlug) {
-        'basic' => 3,
-        'premium' => 5, 
-        'vip' => 10,
-        default => 3
+        'basic' => 5,     // 5 phút
+        'premium' => 7,   // 7 phút  
+        'vip' => 10,      // 10 phút
+        default => 5
     };
     
     // Bắt đầu transaction
     $conn->beginTransaction();
     
-    // 1. XÓA TẤT CẢ subscription cũ
+    // 1. XÓA TẤT CẢ subscription cũ của user 109
     $stmt = $conn->prepare("DELETE FROM user_subscriptions WHERE user_id = ?");
     $stmt->execute([$userId]);
     
-    // 2. TẠO subscription mới - Sử dụng múi giờ UTC+7 nhất quán
-    $startTime = new DateTime();
-    $startTime->add(new DateInterval('PT7H')); // Cộng 7 tiếng cho múi giờ database UTC+7
-    $endTime = clone $startTime;
-    $endTime->add(new DateInterval("PT{$durationMinutes}M"));
+    // 2. XÓA TẤT CẢ orders cũ của user 109 (để clean)
+    $stmt = $conn->prepare("DELETE FROM orders WHERE user_id = ?");
+    $stmt->execute([$userId]);
     
-    $currentTime = $startTime->format('Y-m-d H:i:s');
-    
+    // 2. TẠO subscription mới - Sử dụng phút cho demo
     $stmt = $conn->prepare("
         INSERT INTO user_subscriptions 
         (user_id, plan_id, start_date, end_date, status, created_at, updated_at)
-        VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 HOUR), ?, 'active', DATE_ADD(NOW(), INTERVAL 7 HOUR), DATE_ADD(NOW(), INTERVAL 7 HOUR))
+        VALUES (?, ?, 
+                NOW(), 
+                DATE_ADD(NOW(), INTERVAL ? MINUTE), 
+                'active', 
+                NOW(), 
+                NOW())
     ");
     
     $stmt->execute([
         $userId,
         $plan['id'],
-        $endTime->format('Y-m-d H:i:s')
+        $durationMinutes
     ]);
     
     $subscriptionId = $conn->lastInsertId();
@@ -78,12 +78,19 @@ try {
     // 3. Tạo order demo (đơn giản)
     $stmt = $conn->prepare("
         INSERT INTO orders 
-        (user_id, order_code, total, payment_status, status, payment_method, created_at)
-        VALUES (?, ?, ?, 'paid', 'completed', 'demo', NOW())
+        (user_id, order_code, customer_name, customer_email, subtotal, total, payment_status, status, payment_method, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, 'paid', 'completed', 'vietqr', NOW())
     ");
     
     $orderCode = 'DEMO_' . time() . '_' . $userId;
-    $stmt->execute([$userId, $orderCode, $plan['price']]);
+    $stmt->execute([
+        $userId, 
+        $orderCode, 
+        'Demo User', 
+        'demo@test.com', 
+        $plan['price'], // subtotal
+        $plan['price']  // total
+    ]);
     $orderId = $conn->lastInsertId();
     
     // Commit transaction
@@ -92,8 +99,8 @@ try {
     // 4. VERIFY subscription được tạo thành công
     $stmt = $conn->prepare("
         SELECT us.*, sp.name as plan_name,
-               TIMESTAMPDIFF(SECOND, NOW(), us.end_date) as seconds_remaining,
-               TIMESTAMPDIFF(MINUTE, NOW(), us.end_date) as minutes_remaining
+               TIMESTAMPDIFF(MINUTE, NOW(), us.end_date) as minutes_remaining,
+               TIMESTAMPDIFF(SECOND, NOW(), us.end_date) as seconds_remaining
         FROM user_subscriptions us
         JOIN subscription_plans sp ON us.plan_id = sp.id
         WHERE us.id = ?
@@ -119,10 +126,9 @@ try {
             'start_time' => $subscription['start_date'],
             'end_time' => $subscription['end_date'],
             'duration_minutes' => $durationMinutes,
-            'seconds_remaining' => $subscription['seconds_remaining'],
             'minutes_remaining' => $subscription['minutes_remaining'],
-            'database_time' => date('Y-m-d H:i:s'),
-            'timezone_info' => 'UTC+7 applied'
+            'seconds_remaining' => $subscription['seconds_remaining'],
+            'database_time' => date('Y-m-d H:i:s')
         ]
     ]);
     

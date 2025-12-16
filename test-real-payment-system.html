@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Real Payment System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .error {
+            color: #ff6b6b;
+        }
+        .success {
+            color: #51cf66;
+        }
+        .info {
+            color: #74c0fc;
+        }
+        pre {
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background: #333;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎬 HTHREE Film - Test Real Payment System</h1>
+    
+    <div class="section">
+        <h2>1. 👤 User Authentication Test</h2>
+        <p>Test user mapping system (Firebase UID ↔ MySQL ID)</p>
+        
+        <div>
+            <input type="text" id="firebaseUid" placeholder="Firebase UID" value="test_user_123">
+            <input type="email" id="userEmail" placeholder="Email" value="test@example.com">
+            <input type="text" id="displayName" placeholder="Display Name" value="Test User">
+            <button onclick="testUserMapping()">Test User Mapping</button>
+        </div>
+        
+        <div id="userResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. 📦 Subscription Display Test</h2>
+        <p>Test subscription display with real days (not minutes)</p>
+        
+        <div>
+            <input type="number" id="testUserId" placeholder="MySQL User ID" value="1">
+            <button onclick="testSubscriptionDisplay()">Get Subscription</button>
+        </div>
+        
+        <div id="subscriptionResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. 💳 VietQR Payment Test</h2>
+        <p>Test real VietQR payment flow</p>
+        
+        <div>
+            <select id="planSlug">
+                <option value="basic">Basic Plan (30 days)</option>
+                <option value="premium">Premium Plan (30 days)</option>
+                <option value="vip">VIP Plan (30 days)</option>
+            </select>
+            <button onclick="testVietQRPayment()">Create VietQR Payment</button>
+        </div>
+        
+        <div id="paymentResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. 🔄 Webhook Test</h2>
+        <p>Test Casso webhook integration</p>
+        
+        <div>
+            <input type="text" id="orderCode" placeholder="Order Code" value="">
+            <input type="number" id="amount" placeholder="Amount" value="99000">
+            <button onclick="testWebhook()">Test Webhook</button>
+        </div>
+        
+        <div id="webhookResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>📊 System Status</h2>
+        <div id="systemStatus">
+            <p class="info">Ready to test...</p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost/HTHREE_film/backend/api';
+        
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            element.innerHTML += `<p class="${className}">${message}</p>`;
+        }
+
+        function clearLog(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        async function testUserMapping() {
+            clearLog('userResult');
+            
+            const firebaseUid = document.getElementById('firebaseUid').value;
+            const email = document.getElementById('userEmail').value;
+            const displayName = document.getElementById('displayName').value;
+            
+            try {
+                log('userResult', '🔄 Testing user mapping...', 'info');
+                
+                const response = await fetch(`${API_URL}/auth/get_or_create_user.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        firebase_uid: firebaseUid,
+                        email: email,
+                        display_name: displayName
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('userResult', `✅ User mapping successful!`, 'success');
+                    log('userResult', `MySQL User ID: ${data.user_id}`, 'success');
+                    log('userResult', `Exists: ${data.exists ? 'Yes' : 'No (Created new)'}`, 'info');
+                    
+                    // Auto-fill user ID for subscription test
+                    document.getElementById('testUserId').value = data.user_id;
+                } else {
+                    log('userResult', `❌ Error: ${data.message}`, 'error');
+                }
+                
+                log('userResult', `<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+                
+            } catch (error) {
+                log('userResult', `❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSubscriptionDisplay() {
+            clearLog('subscriptionResult');
+            
+            const userId = document.getElementById('testUserId').value;
+            
+            try {
+                log('subscriptionResult', '🔄 Getting subscription data...', 'info');
+                
+                const response = await fetch(`${API_URL}/user_subscription.php?user_id=${userId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.data && data.data.length > 0) {
+                        log('subscriptionResult', `✅ Found ${data.count} subscription(s)`, 'success');
+                        
+                        data.data.forEach((sub, index) => {
+                            log('subscriptionResult', `📦 Subscription ${index + 1}:`, 'info');
+                            log('subscriptionResult', `- Plan: ${sub.plan_name} (${sub.plan_slug})`, 'info');
+                            log('subscriptionResult', `- Status: ${sub.status} (${sub.subscription_status})`, 'info');
+                            log('subscriptionResult', `- Days: ${sub.days_used || 0}/${sub.total_days || 30}`, 'success');
+                            log('subscriptionResult', `- Time remaining: ${sub.time_remaining_formatted}`, 'info');
+                            log('subscriptionResult', `- Progress: ${sub.progress}%`, 'info');
+                        });
+                    } else {
+                        log('subscriptionResult', '📭 No subscriptions found', 'info');
+                    }
+                } else {
+                    log('subscriptionResult', `❌ Error: ${data.message}`, 'error');
+                }
+                
+                log('subscriptionResult', `<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+                
+            } catch (error) {
+                log('subscriptionResult', `❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testVietQRPayment() {
+            clearLog('paymentResult');
+            
+            const planSlug = document.getElementById('planSlug').value;
+            
+            try {
+                log('paymentResult', '🔄 Creating VietQR payment...', 'info');
+                
+                // First create an order (simplified)
+                const orderResponse = await fetch(`${API_URL}/demo/buy_plan_demo.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: document.getElementById('testUserId').value || 1,
+                        plan_slug: planSlug
+                    })
+                });
+                
+                const orderData = await orderResponse.json();
+                
+                if (orderData.success) {
+                    log('paymentResult', `✅ Order created successfully!`, 'success');
+                    log('paymentResult', `Order ID: ${orderData.data.order_id}`, 'success');
+                    log('paymentResult', `Order Code: ${orderData.data.order_code}`, 'success');
+                    log('paymentResult', `Plan: ${orderData.data.plan_name}`, 'info');
+                    log('paymentResult', `Duration: ${orderData.data.duration_days} days`, 'info');
+                    log('paymentResult', `Price: ${orderData.data.price}đ`, 'info');
+                    
+                    // Auto-fill order code for webhook test
+                    document.getElementById('orderCode').value = orderData.data.order_code;
+                    document.getElementById('amount').value = orderData.data.price;
+                } else {
+                    log('paymentResult', `❌ Error: ${orderData.message}`, 'error');
+                }
+                
+                log('paymentResult', `<pre>${JSON.stringify(orderData, null, 2)}</pre>`, 'info');
+                
+            } catch (error) {
+                log('paymentResult', `❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testWebhook() {
+            clearLog('webhookResult');
+            
+            const orderCode = document.getElementById('orderCode').value;
+            const amount = document.getElementById('amount').value;
+            
+            if (!orderCode) {
+                log('webhookResult', '❌ Please create an order first', 'error');
+                return;
+            }
+            
+            try {
+                log('webhookResult', '🔄 Testing webhook...', 'info');
+                
+                // Simulate Casso webhook data
+                const webhookData = {
+                    data: [{
+                        id: 'TXN_' + Date.now(),
+                        amount: parseInt(amount),
+                        description: `HTHREE ${orderCode}`,
+                        when: new Date().toISOString()
+                    }]
+                };
+                
+                const response = await fetch(`${API_URL}/payment/casso_webhook.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(webhookData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('webhookResult', `✅ Webhook processed successfully!`, 'success');
+                    log('webhookResult', `Processed: ${data.processed} transaction(s)`, 'success');
+                    
+                    // Test subscription again to see if it was activated
+                    setTimeout(() => {
+                        log('webhookResult', '🔄 Checking subscription status...', 'info');
+                        testSubscriptionDisplay();
+                    }, 1000);
+                } else {
+                    log('webhookResult', `❌ Error: ${data.message}`, 'error');
+                }
+                
+                log('webhookResult', `<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+                
+            } catch (error) {
+                log('webhookResult', `❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            log('systemStatus', '🚀 System loaded. Ready for testing!', 'success');
+            log('systemStatus', '💡 Tip: Start with User Mapping test first', 'info');
+        };
+    </script>
+</body>
+</html>
