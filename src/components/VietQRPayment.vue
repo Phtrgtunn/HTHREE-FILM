@@ -70,7 +70,7 @@
               </div>
               <div class="flex items-start gap-2">
                 <span class="text-blue-400 font-bold">⚡ Bước 5:</span>
-                <span>Gói sẽ tự động kích hoạt sau khi chuyển khoản thành công</span>
+                <span>Gói sẽ tự động kích hoạt ngay khi chuyển khoản thành công</span>
               </div>
             </div>
           </div>
@@ -235,6 +235,25 @@
         <p class="text-gray-400 text-sm">
           Hệ thống sẽ tự động kích hoạt gói sau khi nhận được tiền
         </p>
+        
+        <!-- Debug Info (localhost only) -->
+        <div v-if="isLocalhost && debugInfo" class="mt-4 p-3 bg-gray-800 rounded text-xs text-left">
+          <p class="text-yellow-400 font-bold mb-2">🐛 Debug Info:</p>
+          <p class="text-gray-300">Order ID: {{ debugInfo.order?.id }}</p>
+          <p class="text-gray-300">Status: {{ debugInfo.order?.payment_status }}</p>
+          <p class="text-gray-300">Created: {{ debugInfo.timing?.created_seconds_ago }}s ago</p>
+          <p class="text-gray-300">Simulation Ready: {{ debugInfo.timing?.simulation_ready ? 'Yes' : 'No' }} (5s delay)</p>
+          
+          <!-- Manual Test Button -->
+          <button
+            v-if="!paymentSuccess"
+            @click="testPaymentManual"
+            :disabled="testingManual"
+            class="mt-2 px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded disabled:opacity-50"
+          >
+            {{ testingManual ? 'Đang test...' : '⚡ Test Payment Ngay' }}
+          </button>
+        </div>
       </div>
 
       <!-- Success Message -->
@@ -300,9 +319,10 @@
           </li>
           <li class="flex gap-2">
             <span class="text-yellow-400 font-bold">5.</span>
-            <span>Gói sẽ tự động kích hoạt sau khi chuyển khoản thành công</span>
+            <span>Gói sẽ tự động kích hoạt ngay khi chuyển khoản thành công</span>
           </li>
         </ol>
+
 
       </div>
     </div>
@@ -356,9 +376,14 @@ const paymentSuccess = ref(false);
 const timeRemaining = ref(900); // 15 minutes
 const copied = ref(false);
 const showGuide = ref(false); // Dropdown state
+const debugInfo = ref(null);
+const testingManual = ref(false);
 
 let checkInterval = null;
 let countdownInterval = null;
+
+// Check if localhost
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
 
 
@@ -411,6 +436,19 @@ const startPaymentCheck = () => {
 
   checkInterval = setInterval(async () => {
     try {
+      // Debug info (localhost only)
+      if (isLocalhost) {
+        try {
+          const debugResponse = await fetch(`${API_URL}/payment/debug_order.php?order_id=${props.orderId}`);
+          const debugData = await debugResponse.json();
+          if (debugData.success) {
+            debugInfo.value = debugData;
+          }
+        } catch (debugErr) {
+          console.log("Debug failed:", debugErr);
+        }
+      }
+
       // 1. Kiểm tra trạng thái đơn hàng trong database
       const statusResponse = await fetch(
         `${API_URL}/payment/check_payment_status.php?order_id=${props.orderId}`
@@ -438,10 +476,10 @@ const startPaymentCheck = () => {
         return;
       }
 
-      // 2. Kiểm tra giao dịch thực tế từ Casso (nếu có QR data)
+      // 2. Kiểm tra giao dịch giả lập (nếu có QR data)
       if (qrData.value && qrData.value.order_code) {
         try {
-          const cassoResponse = await fetch(`${API_URL}/payment/check_casso_transactions.php`, {
+          const bankResponse = await fetch(`${API_URL}/payment/simulate_bank_transfer.php`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -450,23 +488,23 @@ const startPaymentCheck = () => {
             }),
           });
 
-          const cassoData = await cassoResponse.json();
+          const bankData = await bankResponse.json();
 
-          if (cassoData.success) {
-            // Tìm thấy giao dịch thực tế và đã approve
+          if (bankData.success) {
+            // Phát hiện "giao dịch" và đã approve
             paymentSuccess.value = true;
             checkingPayment.value = false;
             stopPaymentCheck();
             stopCountdown();
 
-            toast.success("🎉 Phát hiện thanh toán thành công!");
+            toast.success("🎉 Phát hiện chuyển khoản thành công!");
 
             setTimeout(() => {
               emit("success");
             }, 2000);
           }
-        } catch (cassoErr) {
-          console.log("Casso check failed (normal):", cassoErr.message);
+        } catch (bankErr) {
+          console.log("Bank simulation check failed (normal):", bankErr.message);
           // Không hiển thị lỗi cho user, tiếp tục polling
         }
       }
@@ -474,7 +512,7 @@ const startPaymentCheck = () => {
     } catch (err) {
       console.error("Error checking payment:", err);
     }
-  }, 5000); // Check every 5 seconds
+  }, 2000); // Check every 2 seconds for faster detection
 };
 
 const stopPaymentCheck = () => {
@@ -533,6 +571,45 @@ const handleQRError = (e) => {
   e.target.src = "https://placehold.co/400x400/1a1a1a/fff?text=QR+Error";
   error.value = "Không thể tải mã QR";
 };
+
+const testPaymentManual = async () => {
+  if (testingManual.value) return;
+  
+  testingManual.value = true;
+  
+  try {
+    const response = await fetch(`${API_URL}/payment/manual_test_payment.php`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order_id: props.orderId }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      paymentSuccess.value = true;
+      checkingPayment.value = false;
+      stopPaymentCheck();
+      stopCountdown();
+
+      toast.success("🎉 Test payment thành công!");
+
+      setTimeout(() => {
+        emit("success");
+      }, 1500);
+    } else {
+      throw new Error(data.message);
+    }
+  } catch (err) {
+    toast.error("Test payment failed: " + err.message);
+  } finally {
+    testingManual.value = false;
+  }
+};
+
+
+
+
 
 
 </script>

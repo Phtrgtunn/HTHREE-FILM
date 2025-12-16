@@ -331,7 +331,7 @@ const paymentMethods = [
   {
     value: "vietqr",
     label: "VietQR - Chuyển khoản ngân hàng",
-    description: "Quét mã QR, tự động kích hoạt khi chuyển khoản thành công",
+    description: "Quét mã QR, tự động kích hoạt ngay khi chuyển khoản thành công",
   },
   {
     value: "bank_transfer",
