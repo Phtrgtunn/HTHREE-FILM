@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix Subscription</title>
+</head>
+<body>
+    <h1>Fix Subscription cho User</h1>
+    <button onclick="fixSubscription()">Tự động Fix Subscription</button>
+    <div id="result"></div>
+
+    <script>
+        async function fixSubscription() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Đang kiểm tra đơn hàng...';
+            
+            try {
+                // 1. Lấy đơn hàng mới nhất
+                const ordersResponse = await fetch('http://localhost/HTHREE_film/backend/api/admin/orders.php?limit=5');
+                const ordersData = await ordersResponse.json();
+                
+                if (!ordersData.success || !ordersData.data.length) {
+                    throw new Error('Không tìm thấy đơn hàng nào');
+                }
+                
+                const latestOrder = ordersData.data[0]; // Đơn hàng mới nhất
+                
+                resultDiv.innerHTML = `
+                    <h3>Đơn hàng mới nhất:</h3>
+                    <p><strong>ID:</strong> ${latestOrder.id}</p>
+                    <p><strong>User ID:</strong> ${latestOrder.user_id}</p>
+                    <p><strong>Customer:</strong> ${latestOrder.customer_name}</p>
+                    <p><strong>Email:</strong> ${latestOrder.customer_email}</p>
+                    <p><strong>Status:</strong> ${latestOrder.payment_status}</p>
+                    <br>
+                    <p>Đang tạo subscription...</p>
+                `;
+                
+                // 2. Tạo subscription trực tiếp trong database
+                const createSubResponse = await fetch('http://localhost/HTHREE_film/backend/api/admin/orders.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'approve',
+                        order_id: latestOrder.id
+                    })
+                });
+                
+                const createSubData = await createSubResponse.json();
+                
+                resultDiv.innerHTML += `
+                    <h3>Kết quả tạo subscription:</h3>
+                    <p><strong>Success:</strong> ${createSubData.success}</p>
+                    <p><strong>Message:</strong> ${createSubData.message}</p>
+                `;
+                
+                // 3. Kiểm tra subscription đã được tạo
+                setTimeout(async () => {
+                    const checkResponse = await fetch(`http://localhost/HTHREE_film/backend/api/user_subscription.php?user_id=${latestOrder.user_id}`);
+                    const checkData = await checkResponse.json();
+                    
+                    resultDiv.innerHTML += `
+                        <h3>Kiểm tra Subscription cho User ${latestOrder.user_id}:</h3>
+                        <p><strong>Count:</strong> ${checkData.count}</p>
+                        <pre>${JSON.stringify(checkData, null, 2)}</pre>
+                        
+                        <h3>Hướng dẫn:</h3>
+                        <p>Nếu có subscription, vào Account page và đảm bảo userId = ${latestOrder.user_id}</p>
+                    `;
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p style="color: red;">Lỗi: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

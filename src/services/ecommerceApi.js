@@ -6,7 +6,16 @@
 import axios from 'axios';
 import { apiCache } from '@/utils/apiCache';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost/HTHREE_film/backend/api';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost/HTHREE_film/backend/api';
+
+// Debug log
+console.log('🔧 EcommerceApi - API_BASE_URL:', API_BASE_URL);
+console.log('🔧 Environment variables:', {
+  VITE_BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
+  VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+  MODE: import.meta.env.MODE,
+  PROD: import.meta.env.PROD
+});
 
 // ============================================
 // SUBSCRIPTION PLANS API
@@ -134,10 +143,29 @@ export const clearCart = async (userId) => {
  */
 export const createOrder = async (orderData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/orders.php`, orderData);
-    return response.data;
+    console.log('🚀 Creating order with data:', orderData);
+    console.log('🌐 API URL:', `${API_BASE_URL}/orders.php`);
+    
+    const response = await fetch(`${API_BASE_URL}/orders.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderData)
+    });
+    
+    console.log('📡 Response status:', response.status);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('✅ Order created successfully:', data);
+    
+    return data;
   } catch (error) {
-    console.error('Error creating order:', error);
+    console.error('❌ Error creating order:', error);
     throw error;
   }
 };

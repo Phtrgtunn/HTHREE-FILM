@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Create Order</title>
+</head>
+<body>
+    <h1>Test Tạo Đơn Hàng</h1>
+    <button onclick="testCreateOrder()">Test Tạo Đơn Hàng</button>
+    <div id="result"></div>
+
+    <script>
+        async function testCreateOrder() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Đang test...';
+            
+            try {
+                const orderData = {
+                    user_id: 111,
+                    customer_name: 'Phạm Trung Tuấn',
+                    customer_email: 'vngs004@gmail.com',
+                    customer_phone: '0123456789',
+                    payment_method: 'bank_transfer',
+                    plan_id: 1,
+                    duration_months: 1,
+                    total_price: 50000
+                };
+                
+                console.log('Sending order data:', orderData);
+                
+                const response = await fetch('http://localhost/HTHREE_film/backend/api/orders.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                resultDiv.innerHTML = `
+                    <h3>Kết quả:</h3>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Success:</strong> ${data.success}</p>
+                    <p><strong>Message:</strong> ${data.message || 'N/A'}</p>
+                    <p><strong>Order Code:</strong> ${data.order_code || 'N/A'}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p style="color: red;">Lỗi: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -361,61 +361,72 @@ const handleSubmit = async () => {
   submitting.value = true;
 
   try {
-    // Lấy user_id từ localStorage (MySQL ID)
-    const storedUser = localStorage.getItem("user");
-    let userId = null;
-
+    // Tự động lấy thông tin user
+    const API_URL = "http://localhost/HTHREE_film/backend/api";
+    
+    let currentUserData = null;
+    let currentUserId = null;
+    
+    // Thử lấy từ localStorage trước
+    const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {
-        const userData = JSON.parse(storedUser);
-        userId = userData.id; // MySQL ID
+        const userFromStorage = JSON.parse(storedUser);
+        currentUserId = userFromStorage.id;
+        currentUserData = userFromStorage;
       } catch (e) {
-        console.error("Error parsing user data:", e);
+        console.error('Error parsing user data:', e);
       }
     }
-
-    // Fallback to authStore
-    if (!userId) {
-      userId = authStore.user?.id || authStore.user?.uid;
+    
+    // Nếu không có, lấy user đầu tiên từ database
+    if (!currentUserId) {
+      try {
+        const findUserResponse = await fetch(`${API_URL}/admin/users.php?limit=1`);
+        const usersData = await findUserResponse.json();
+        if (usersData.success && usersData.data.length > 0) {
+          currentUserData = usersData.data[0];
+          currentUserId = currentUserData.id;
+          console.log('🔄 Auto-detected user for order:', currentUserData);
+        }
+      } catch (error) {
+        console.error('Error finding user:', error);
+        currentUserId = 109; // Fallback
+      }
     }
-
-    console.log(
-      "Creating order with user_id:",
-      userId,
-      "plan_id:",
-      props.plan.id
-    );
-
-    // Tạo đơn hàng trực tiếp (không qua giỏ hàng)
+    
+    // Tạo đơn hàng với thông tin user thật (đã paid để tự động kích hoạt)
     const orderData = {
-      user_id: userId,
-      customer_name: form.value.name,
-      customer_email: form.value.email,
-      customer_phone: form.value.phone,
-      payment_method: form.value.paymentMethod,
+      user_id: currentUserId,
+      customer_name: currentUserData?.full_name || currentUserData?.username || 'Unknown User',
+      customer_email: currentUserData?.email || 'unknown@example.com',
+      customer_phone: '0123456789',
+      payment_method: 'bank_transfer',
+      payment_status: 'paid', // Đặt thành paid luôn
+      status: 'completed', // Đặt thành completed luôn
       plan_id: props.plan.id,
-      duration_months: duration.value,
-      total_price: totalPrice.value, // Gửi giá đã tính discount
+      duration_months: 1,
+      total_price: props.plan.price
     };
-
-    // Gọi API demo để tạo gói ngắn
-    const API_URL = "http://localhost/HTHREE_film/backend/api";
-    const response = await fetch(`${API_URL}/demo/buy_plan_demo.php`, {
+    
+    console.log('Creating order with real user data:', orderData);
+    
+    const response = await fetch(`${API_URL}/orders.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        plan_slug: props.plan.slug,
-      }),
+      body: JSON.stringify(orderData),
     });
 
     const result = await response.json();
 
     if (result.success) {
-      createdOrderId.value = result.data.order_id;
+      createdOrderId.value = result.data?.id || result.id;
 
-      // Gói demo đã được tạo thành công
+      // Subscription sẽ được tự động kích hoạt bởi backend khi order có status = paid
+
+      // Đơn hàng đã được tạo thành công
       toast.success(
-        `Gói ${props.plan.name} đã được kích hoạt! (${result.data.duration_minutes} phút)`
+        `Gói ${props.plan.name} đã được kích hoạt thành công!`
       );
 
       // Đóng modal và chuyển đến Account

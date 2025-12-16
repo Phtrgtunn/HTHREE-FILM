@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tạo Subscription Trực Tiếp</title>
+</head>
+<body>
+    <h1>Tạo Subscription Trực Tiếp vào Database</h1>
+    <button onclick="createDirectSubscription()">Tạo Subscription cho User 111</button>
+    <div id="result"></div>
+
+    <script>
+        async function createDirectSubscription() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Đang tạo subscription trực tiếp...';
+            
+            try {
+                // Tạo subscription bằng cách gọi API demo (sẽ tạo subscription)
+                const response = await fetch('http://localhost/HTHREE_film/backend/api/demo/buy_plan_demo.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        plan_slug: 'basic'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h3>Kết quả:</h3>
+                    <p><strong>Success:</strong> ${data.success}</p>
+                    <p><strong>Message:</strong> ${data.message || 'N/A'}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                // Kiểm tra lại subscription
+                setTimeout(async () => {
+                    const checkResponse = await fetch('http://localhost/HTHREE_film/backend/api/user_subscription.php?user_id=111');
+                    const checkData = await checkResponse.json();
+                    
+                    resultDiv.innerHTML += `
+                        <h3>Kiểm tra lại Subscription:</h3>
+                        <p><strong>Count:</strong> ${checkData.count}</p>
+                        <pre>${JSON.stringify(checkData, null, 2)}</pre>
+                        
+                        ${checkData.count > 0 ? 
+                            '<p style="color: green;"><strong>✅ THÀNH CÔNG! Bây giờ vào Account page sẽ thấy gói!</strong></p>' : 
+                            '<p style="color: red;"><strong>❌ Vẫn chưa có subscription</strong></p>'
+                        }
+                    `;
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p style="color: red;">Lỗi: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

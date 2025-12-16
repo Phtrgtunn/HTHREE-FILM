@@ -3,13 +3,13 @@
 
 // Tự động detect base URL dựa trên environment
 const getBackendUrl = () => {
-  // Trong production (build), dùng URL production
+  // Trong production (build), dùng Railway URL
   if (import.meta.env.PROD) {
-    return import.meta.env.VITE_BACKEND_URL || 'https://your-production-domain.com/backend/api';
+    return import.meta.env.VITE_BACKEND_URL || 'https://hthree-film-production.up.railway.app/api';
   }
   
   // Trong development, dùng localhost
-  return import.meta.env.VITE_BACKEND_URL || 'http://localhost/HTHREE_film/backend/api';
+  return import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost/HTHREE_film/backend/api';
 };
 
 export const API_CONFIG = {

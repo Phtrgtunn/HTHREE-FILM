@@ -224,8 +224,8 @@ function createOrder() {
     $conn->begin_transaction();
     
     try {
-        // Tạo mã đơn hàng
-        $order_code = 'ORD' . date('Ymd') . str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+        // Tạo mã đơn hàng unique (format: ORD20251217123)
+        $order_code = 'ORD' . date('Ymd') . substr(time(), -3) . str_pad(rand(0, 99), 2, '0', STR_PAD_LEFT);
         
         // Tính tổng tiền từ giỏ hàng
         $stmt = $conn->prepare("
@@ -392,8 +392,8 @@ function createDirectOrder($data) {
         $total = $subtotal - $discount;
     }
     
-    // Tạo mã đơn hàng
-    $order_code = 'ORD' . date('Ymd') . str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
+    // Tạo mã đơn hàng unique (format: ORD20251217123)
+    $order_code = 'ORD' . date('Ymd') . substr(time(), -3) . str_pad(rand(1, 99), 2, '0', STR_PAD_LEFT);
     
     // Tạo đơn hàng
     $customer_phone = isset($data['customer_phone']) ? $data['customer_phone'] : null;
@@ -445,6 +445,24 @@ function createDirectOrder($data) {
     
     if (!$stmt->execute()) {
         throw new Exception('Failed to create order item: ' . $stmt->error);
+    }
+    
+    // Nếu order được tạo với status paid, tự động tạo subscription
+    if (isset($data['payment_status']) && $data['payment_status'] === 'paid') {
+        $duration_days = $duration_months * 30; // Chuyển tháng thành ngày
+        
+        $stmt = $conn->prepare("
+            INSERT INTO user_subscriptions (user_id, plan_id, start_date, end_date, status, order_id, created_at, updated_at)
+            VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? DAY), 'active', ?, NOW(), NOW())
+        ");
+        
+        $stmt->bind_param("iiii", $user_id, $plan_id, $duration_days, $order_id);
+        
+        if (!$stmt->execute()) {
+            error_log("Failed to create subscription: " . $stmt->error);
+        } else {
+            error_log("Subscription created successfully for order $order_id");
+        }
     }
     
     // Trả về thông tin đơn hàng

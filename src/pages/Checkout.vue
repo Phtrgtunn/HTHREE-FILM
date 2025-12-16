@@ -466,6 +466,7 @@ import { useFormValidation } from '@/composables/useFormValidation';
 import { useFormAutoSave } from '@/composables/useFormAutoSave';
 import { useNetworkStatus } from '@/composables/useNetworkStatus';
 import paymentService from '@/services/paymentService';
+import { API_CONFIG } from '@/config/api';
 import axios from 'axios';
 import LoadingSkeleton from '@/components/LoadingSkeleton.vue';
 import ErrorBoundary from '@/components/ErrorBoundary.vue';
@@ -738,6 +739,26 @@ const handleSubmit = async () => {
       userId = authStore.user?.id || authStore.user?.uid;
     }
     
+    // Find user by email if authentication fails
+    if (!userId && form.customer_email) {
+      try {
+        console.log('🔍 Finding user by email:', form.customer_email);
+        const findUserResponse = await fetch(`${API_CONFIG.BACKEND_URL}/find_user.php?email=${encodeURIComponent(form.customer_email)}`);
+        const findUserData = await findUserResponse.json();
+        
+        if (findUserData.success && findUserData.user) {
+          userId = findUserData.user.id;
+          console.log('✅ Found user:', findUserData.user);
+        } else {
+          console.warn('⚠️ User not found by email, will create guest order');
+          userId = null; // Will be handled by backend
+        }
+      } catch (error) {
+        console.error('❌ Error finding user:', error);
+        userId = null;
+      }
+    }
+    
     console.log('Creating order from cart with user_id:', userId);
     
     // Add minimum delay for UX
@@ -804,7 +825,7 @@ const handleSubmit = async () => {
         toast.success('Đặt hàng thành công!');
         // Kích hoạt gói ngay cho COD
         try {
-          await axios.post(`${import.meta.env.VITE_API_BASE_URL}/payment/activate_subscription.php`, {
+          await axios.post(`${API_CONFIG.BACKEND_URL}/payment/activate_subscription.php`, {
             order_code: orderCode
           });
         } catch (error) {

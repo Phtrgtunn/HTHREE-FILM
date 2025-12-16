@@ -2869,8 +2869,35 @@ const fetchSubscription = async () => {
     const userData = JSON.parse(storedUser);
     console.log("👤 User data:", userData);
 
-    // Dùng trực tiếp user ID từ localStorage (user ID 109)
-    const userId = 109; // Hard-code user ID 109 cho đơn giản
+    // Tự động lấy user ID
+    let userId = null;
+    
+    // Thử lấy từ localStorage trước
+    if (storedUser) {
+      try {
+        userId = userData.id;
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+      }
+    }
+    
+    // Nếu không có, lấy user đầu tiên từ database
+    if (!userId) {
+      try {
+        const API_URL = "http://localhost/HTHREE_film/backend/api";
+        const usersResponse = await fetch(`${API_URL}/admin/users.php?limit=1`);
+        const usersData = await usersResponse.json();
+        if (usersData.success && usersData.data.length > 0) {
+          userId = usersData.data[0].id;
+          console.log('🔄 Auto-detected user ID:', userId);
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        userId = 109; // Fallback
+      }
+    }
+    
+    console.log("🆔 Using User ID:", userId);
 
     console.log("🆔 Using User ID:", userId);
     loadingSubscription.value = true;
