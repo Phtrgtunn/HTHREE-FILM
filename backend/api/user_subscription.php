@@ -41,10 +41,11 @@ try {
             sp.max_devices,
             sp.has_ads,
             sp.can_download,
-            DATEDIFF(us.end_date, NOW()) as days_remaining,
+            TIMESTAMPDIFF(MINUTE, NOW(), us.end_date) as minutes_remaining,
+            TIMESTAMPDIFF(SECOND, NOW(), us.end_date) as seconds_remaining,
             CASE 
                 WHEN us.end_date < NOW() THEN 'expired'
-                WHEN DATEDIFF(us.end_date, NOW()) <= 7 THEN 'expiring_soon'
+                WHEN TIMESTAMPDIFF(MINUTE, NOW(), us.end_date) <= 2 THEN 'expiring_soon'
                 ELSE 'active'
             END as subscription_status
         FROM user_subscriptions us
@@ -76,18 +77,35 @@ try {
         $subscription['start_date_formatted'] = date('d/m/Y', strtotime($subscription['start_date']));
         $subscription['end_date_formatted'] = date('d/m/Y', strtotime($subscription['end_date']));
         
-        // Calculate progress (days used / total days)
+        // Calculate progress (minutes used / total minutes) - Cho demo
         $start = new DateTime($subscription['start_date']);
         $end = new DateTime($subscription['end_date']);
         $now = new DateTime();
         
-        $total_days = $start->diff($end)->days;
-        $used_days = $start->diff($now)->days;
-        $progress = $total_days > 0 ? min(100, ($used_days / $total_days) * 100) : 0;
+        $total_minutes = $start->diff($end)->days * 24 * 60 + $start->diff($end)->h * 60 + $start->diff($end)->i;
+        $used_minutes = $start->diff($now)->days * 24 * 60 + $start->diff($now)->h * 60 + $start->diff($now)->i;
+        
+        // Nếu thời gian quá ngắn, tính theo giây
+        if ($total_minutes < 60) {
+            $total_seconds = $start->diff($end)->s + $start->diff($end)->i * 60;
+            $used_seconds = $start->diff($now)->s + $start->diff($now)->i * 60;
+            $progress = $total_seconds > 0 ? min(100, ($used_seconds / $total_seconds) * 100) : 0;
+        } else {
+            $progress = $total_minutes > 0 ? min(100, ($used_minutes / $total_minutes) * 100) : 0;
+        }
         
         $subscription['progress'] = round($progress, 2);
-        $subscription['total_days'] = $total_days;
-        $subscription['used_days'] = $used_days;
+        $subscription['total_minutes'] = $total_minutes;
+        $subscription['used_minutes'] = $used_minutes;
+        
+        // Format thời gian còn lại cho demo
+        if ($subscription['minutes_remaining'] > 0) {
+            $subscription['time_remaining_formatted'] = $subscription['minutes_remaining'] . ' phút';
+        } else if ($subscription['seconds_remaining'] > 0) {
+            $subscription['time_remaining_formatted'] = $subscription['seconds_remaining'] . ' giây';
+        } else {
+            $subscription['time_remaining_formatted'] = 'Đã hết hạn';
+        }
         
         // Auto-cancel expired subscriptions
         if ($subscription['subscription_status'] === 'expired' && $subscription['status'] === 'active') {

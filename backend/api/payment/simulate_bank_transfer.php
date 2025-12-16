@@ -125,8 +125,9 @@ function approveOrderSimulation($conn, $order) {
         $orderItem = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($orderItem) {
-            $totalDays = $orderItem['duration_days'] * $orderItem['duration_months'];
-            $endDate = date('Y-m-d H:i:s', strtotime("+{$totalDays} days"));
+            // Sửa múi giờ: Cộng 7 tiếng cho múi giờ database UTC+7
+            $durationMinutes = round($orderItem['duration_days'] * $orderItem['duration_months'] * 24 * 60);
+            $endDate = date('Y-m-d H:i:s', strtotime("+7 hours +{$durationMinutes} minutes"));
             
             $stmt = $conn->prepare("
                 INSERT INTO user_subscriptions 

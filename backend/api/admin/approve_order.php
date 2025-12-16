@@ -65,9 +65,9 @@ try {
         throw new Exception('Order details not found');
     }
     
-    // 3. Kích hoạt subscription
-    $totalDays = $order['duration_days'] * $order['duration_months'];
-    $endDate = date('Y-m-d H:i:s', strtotime("+{$totalDays} days"));
+    // 3. Kích hoạt subscription - Sửa múi giờ UTC+7
+    $durationMinutes = round($order['duration_days'] * $order['duration_months'] * 24 * 60);
+    $endDate = date('Y-m-d H:i:s', strtotime("+7 hours +{$durationMinutes} minutes"));
     
     $stmt = $conn->prepare("
         INSERT INTO user_subscriptions 

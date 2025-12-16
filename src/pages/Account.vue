@@ -137,7 +137,7 @@
                 <span class="text-yellow-400 font-bold">{{ subscriptionToCancel?.quality }}</span>
               </div>
               <p class="text-gray-400 text-xs mt-2">
-                Còn lại {{ getRealtimeProgress(subscriptionToCancel).daysRemaining }} ngày
+                {{ getRealtimeProgress(subscriptionToCancel).timeRemaining }}
               </p>
             </div>
 
@@ -394,10 +394,56 @@
                     </button>
                   </div>
 
+                  <!-- Cancelled Subscription Notice -->
+                  <div
+                    v-if="
+                      activeSubscription &&
+                      activeSubscription.status === 'cancelled'
+                    "
+                    class="mb-4 bg-orange-500/10 border border-orange-500/30 rounded-xl p-4"
+                  >
+                    <div class="flex items-start gap-3">
+                      <svg
+                        class="w-6 h-6 text-orange-400 flex-shrink-0 mt-0.5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      <div class="flex-1">
+                        <h4 class="text-orange-400 font-bold mb-1">
+                          🔄 Đã dừng gia hạn tự động
+                        </h4>
+                        <p class="text-orange-200 text-sm">
+                          Gói
+                          <span class="font-semibold">{{
+                            activeSubscription.plan_name
+                          }}</span>
+                          sẽ hết hạn vào
+                          <span class="font-semibold">{{
+                            activeSubscription.end_date_formatted
+                          }}</span>
+                          và không tự động gia hạn. Bạn vẫn có thể sử dụng đến hết thời gian đã trả.
+                        </p>
+                        <button
+                          @click="router.push('/pricing')"
+                          class="mt-3 bg-orange-400 hover:bg-orange-500 text-black font-bold px-4 py-2 rounded-lg text-sm transition-all"
+                        >
+                          Kích hoạt lại
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
                   <!-- Expiring Soon Warning -->
                   <div
                     v-if="
                       activeSubscription &&
+                      activeSubscription.status === 'active' &&
                       getRealtimeProgress(activeSubscription).status ===
                         'expiring_soon'
                     "
@@ -428,12 +474,7 @@
                           <span class="font-semibold">{{
                             activeSubscription.end_date_formatted
                           }}</span>
-                          (còn
-                          {{
-                            getRealtimeProgress(activeSubscription)
-                              .daysRemaining
-                          }}
-                          ngày).
+                          (còn {{ getRealtimeProgress(activeSubscription).timeRemaining }}).
                         </p>
                         <button
                           @click="router.push('/pricing')"
@@ -500,8 +541,11 @@
                         class="w-5 h-5"
                         :class="{
                           'text-green-400':
+                            activeSubscription.status === 'active' &&
                             getRealtimeProgress(activeSubscription).status ===
                             'active',
+                          'text-orange-400':
+                            activeSubscription.status === 'cancelled',
                           'text-yellow-400':
                             getRealtimeProgress(activeSubscription).status ===
                             'expiring_soon',
@@ -534,8 +578,10 @@
                         }"
                       >
                         {{
-                          getRealtimeProgress(activeSubscription).status ===
-                          "active"
+                          activeSubscription.status === "cancelled"
+                            ? "Đã dừng gia hạn"
+                            : getRealtimeProgress(activeSubscription).status ===
+                              "active"
                             ? "Hoạt động tốt"
                             : getRealtimeProgress(activeSubscription).status ===
                               "expiring_soon"
@@ -674,15 +720,7 @@
                           <p
                             class="text-center text-white font-bold text-sm mt-2"
                           >
-                            {{
-                              getRealtimeProgress(activeSubscription)
-                                .daysRemaining > 0
-                                ? `Còn lại ${
-                                    getRealtimeProgress(activeSubscription)
-                                      .daysRemaining
-                                  } ngày`
-                                : "Đã hết hạn"
-                            }}
+                            {{ getRealtimeProgress(activeSubscription).timeRemaining }}
                           </p>
                         </div>
                       </div>
@@ -2413,7 +2451,13 @@ const loadingSubscription = ref(false);
 
 // Computed: Active subscription (highest priority)
 const activeSubscription = computed(() => {
-  const active = subscriptions.value.filter((sub) => sub.status === "active");
+  // Lấy gói active HOẶC cancelled nhưng chưa hết hạn (như Netflix)
+  const active = subscriptions.value.filter((sub) => {
+    const isActiveOrCancelled = sub.status === "active" || sub.status === "cancelled";
+    const notExpired = new Date(sub.end_date) > new Date();
+    return isActiveOrCancelled && notExpired;
+  });
+  
   if (active.length === 0) return null;
 
   // Sort by priority: vip > premium > basic > free
@@ -2497,18 +2541,18 @@ const getRealtimeProgress = (sub) => {
     totalMs > 0 ? Math.min(100, Math.max(0, (usedMs / totalMs) * 100)) : 0;
 
   const remainingMs = end - now;
-  const daysRemaining = Math.max(
-    0,
-    Math.ceil(remainingMs / (1000 * 60 * 60 * 24))
-  );
+  const minutesRemaining = Math.max(0, Math.ceil(remainingMs / (1000 * 60)));
+  const daysRemaining = Math.max(0, Math.ceil(remainingMs / (1000 * 60 * 60 * 24)));
 
   return {
     progress: progress.toFixed(2),
     daysRemaining,
+    minutesRemaining,
+    timeRemaining: minutesRemaining > 0 ? `${minutesRemaining} phút` : 'Đã hết hạn',
     status:
-      daysRemaining <= 0
+      minutesRemaining <= 0
         ? "expired"
-        : daysRemaining <= 7
+        : minutesRemaining <= 2
         ? "expiring_soon"
         : "active",
   };
