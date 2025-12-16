@@ -403,11 +403,14 @@ function createDirectOrder($data) {
             order_code, user_id, customer_name, customer_email, customer_phone,
             subtotal, discount, total, payment_method, status, payment_status,
             created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'pending', NOW(), NOW())
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
     ");
     
+    $order_status = $data['status'] ?? 'completed';
+    $payment_status = $data['payment_status'] ?? 'paid';
+    
     $stmt->bind_param(
-        "sisssddss",
+        "sisssddssss",
         $order_code,
         $user_id,
         $data['customer_name'],
@@ -416,7 +419,9 @@ function createDirectOrder($data) {
         $subtotal,
         $discount,
         $total,
-        $data['payment_method']
+        $data['payment_method'],
+        $order_status,
+        $payment_status
     );
     
     if (!$stmt->execute()) {
@@ -449,14 +454,21 @@ function createDirectOrder($data) {
     
     // Nếu order được tạo với status paid, tự động tạo subscription
     if (isset($data['payment_status']) && $data['payment_status'] === 'paid') {
-        $duration_days = $duration_months * 30; // Chuyển tháng thành ngày
+        // Tính thời gian theo duration_months từ frontend
+        $duration_map = [
+            1 => 3,   // 1 tháng = 3 phút
+            3 => 5,   // 3 tháng = 5 phút  
+            6 => 10,  // 6 tháng = 10 phút
+            12 => 15  // 12 tháng = 15 phút
+        ];
+        $duration_minutes = $duration_map[$duration_months] ?? 3;
         
         $stmt = $conn->prepare("
             INSERT INTO user_subscriptions (user_id, plan_id, start_date, end_date, status, order_id, created_at, updated_at)
-            VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? DAY), 'active', ?, NOW(), NOW())
+            VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? MINUTE), 'active', ?, NOW(), NOW())
         ");
         
-        $stmt->bind_param("iiii", $user_id, $plan_id, $duration_days, $order_id);
+        $stmt->bind_param("iiii", $user_id, $plan_id, $duration_minutes, $order_id);
         
         if (!$stmt->execute()) {
             error_log("Failed to create subscription: " . $stmt->error);

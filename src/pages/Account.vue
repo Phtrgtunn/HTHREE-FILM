@@ -2719,6 +2719,7 @@ import {
 import { useToast } from "@/composables/useToast";
 import { useRouter } from "vue-router";
 import EditProfileModal from "@/components/EditProfileModal.vue";
+import { API_CONFIG } from "@/config/api.js";
 
 const auth = getAuth();
 const toast = useToast();
@@ -2884,7 +2885,7 @@ const fetchSubscription = async () => {
     // Nếu không có, lấy user đầu tiên từ database
     if (!userId) {
       try {
-        const API_URL = "http://localhost/HTHREE_film/backend/api";
+        const API_URL = API_CONFIG.BACKEND_URL;
         const usersResponse = await fetch(`${API_URL}/admin/users.php?limit=1`);
         const usersData = await usersResponse.json();
         if (usersData.success && usersData.data.length > 0) {
@@ -2902,7 +2903,7 @@ const fetchSubscription = async () => {
     console.log("🆔 Using User ID:", userId);
     loadingSubscription.value = true;
 
-    const API_URL = "http://localhost/HTHREE_film/backend/api";
+    const API_URL = API_CONFIG.BACKEND_URL;
     const apiUrl = `${API_URL}/user_subscription.php?user_id=${userId}`;
     console.log("🌐 Calling API:", apiUrl);
 

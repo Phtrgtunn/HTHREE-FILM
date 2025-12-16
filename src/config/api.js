@@ -3,6 +3,9 @@
 
 // Tự động detect base URL dựa trên environment
 const getBackendUrl = () => {
+  // Force localhost vì có dữ liệu đầy đủ
+  return 'http://localhost/HTHREE_film/backend/api';
+  
   // Trong production (build), dùng Railway URL
   if (import.meta.env.PROD) {
     return import.meta.env.VITE_BACKEND_URL || 'https://hthree-film-production.up.railway.app/api';

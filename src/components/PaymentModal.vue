@@ -216,7 +216,7 @@
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                <span>Đang xử lý...</span>
+                <span>Thành công!</span>
               </template>
               <template v-else>
                 <svg
@@ -265,6 +265,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { createOrder } from "@/services/ecommerceApi";
 import { useToast } from "@/composables/useToast";
 import VietQRPayment from "@/components/VietQRPayment.vue";
+import { API_CONFIG } from "@/config/api.js";
 
 const toast = useToast();
 const router = useRouter();
@@ -284,12 +285,12 @@ const submitting = ref(false);
 const createdOrderId = ref(null);
 const showVietQR = ref(false);
 
-// Duration options with discounts
+// Duration options with discounts (thời gian ngắn để test)
 const durationOptions = [
-  { months: 1, label: "1 tháng", discount: 0 },
-  { months: 3, label: "3 tháng", discount: 5 },
-  { months: 6, label: "6 tháng", discount: 10 },
-  { months: 12, label: "12 tháng", discount: 15 },
+  { months: 1, label: "3 phút", discount: 0 },
+  { months: 3, label: "5 phút", discount: 5 },
+  { months: 6, label: "10 phút", discount: 10 },
+  { months: 12, label: "15 phút", discount: 15 },
 ];
 
 // Lấy thông tin user từ localStorage (đã lưu ở Account page)
@@ -359,10 +360,10 @@ const calculatePrice = (basePrice, months, discount) => {
 
 const handleSubmit = async () => {
   submitting.value = true;
-
+  
   try {
     // Tự động lấy thông tin user
-    const API_URL = "http://localhost/HTHREE_film/backend/api";
+    const API_URL = API_CONFIG.BACKEND_URL;
     
     let currentUserData = null;
     let currentUserId = null;
@@ -405,8 +406,8 @@ const handleSubmit = async () => {
       payment_status: 'paid', // Đặt thành paid luôn
       status: 'completed', // Đặt thành completed luôn
       plan_id: props.plan.id,
-      duration_months: 1,
-      total_price: props.plan.price
+      duration_months: duration.value, // Sử dụng duration từ form
+      total_price: totalPrice.value // Sử dụng giá đã tính discount
     };
     
     console.log('Creating order with real user data:', orderData);
@@ -422,18 +423,18 @@ const handleSubmit = async () => {
     if (result.success) {
       createdOrderId.value = result.data?.id || result.id;
 
-      // Subscription sẽ được tự động kích hoạt bởi backend khi order có status = paid
+      // Subscription đã được tự động kích hoạt bởi backend
 
-      // Đơn hàng đã được tạo thành công
+      // Thông báo thành công ngay lập tức
       toast.success(
-        `Gói ${props.plan.name} đã được kích hoạt thành công!`
+        `🎉 Thanh toán thành công! Gói ${props.plan.name} đã được kích hoạt!`
       );
 
-      // Đóng modal và chuyển đến Account
+      // Đóng modal và chuyển đến Account ngay
       setTimeout(() => {
         emit("success");
         router.push("/account");
-      }, 1500);
+      }, 1000);
     } else {
       toast.error(result.message || "Không thể tạo gói");
     }
