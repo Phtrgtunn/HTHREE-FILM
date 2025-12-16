@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Data to Railway</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .result {
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Import Data to Railway MySQL</h1>
+        <p>Click the button below to import demo data to Railway database:</p>
+        
+        <button id="importBtn" onclick="importData()">
+            📥 Import Demo Data
+        </button>
+        
+        <div id="result" class="result" style="display: none;"></div>
+        
+        <h3>📋 What will be imported:</h3>
+        <ul>
+            <li>✅ 2 Users (admin + demo user)</li>
+            <li>✅ 3 Subscription Plans (Basic, Premium, VIP)</li>
+            <li>✅ 3 Payment Methods</li>
+            <li>✅ 3 Coupons</li>
+            <li>✅ 2 Sample Orders</li>
+            <li>✅ 1 Active Subscription (5 minutes)</li>
+        </ul>
+        
+        <p><strong>After import:</strong> Check admin panel at <a href="https://hthree-film.vercel.app/admin" target="_blank">https://hthree-film.vercel.app/admin</a></p>
+    </div>
+
+    <script>
+        async function importData() {
+            const btn = document.getElementById('importBtn');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Importing...';
+            result.style.display = 'block';
+            result.textContent = 'Starting import process...\n';
+            
+            try {
+                const response = await fetch('https://hthree-film-production.up.railway.app/api/admin/import_data.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    result.textContent = '✅ Import completed successfully!\n\n';
+                    result.textContent += data.results.join('\n');
+                    result.textContent += '\n\n🎉 Check your admin panel now!';
+                } else {
+                    result.className = 'result error';
+                    result.textContent = '❌ Import failed:\n' + data.error;
+                }
+                
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = '❌ Network error:\n' + error.message;
+                result.textContent += '\n\n💡 Make sure Railway backend is running';
+            }
+            
+            btn.disabled = false;
+            btn.textContent = '📥 Import Demo Data';
+        }
+    </script>
+</body>
+</html>

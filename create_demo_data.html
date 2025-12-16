@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Demo Data for Railway</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            display: inline-block;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .result {
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: #333;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Create Demo Data for Railway</h1>
+        <p>This will create demo data using existing APIs:</p>
+        
+        <div class="step">
+            <h3>Step 1: Create Plans</h3>
+            <button onclick="createPlans()">📦 Create Subscription Plans</button>
+        </div>
+        
+        <div class="step">
+            <h3>Step 2: Create Coupons</h3>
+            <button onclick="createCoupons()">🎫 Create Coupons</button>
+        </div>
+        
+        <div class="step">
+            <h3>Step 3: Create Demo Order</h3>
+            <button onclick="createDemoOrder()">🛒 Create Demo Order</button>
+        </div>
+        
+        <div class="step">
+            <h3>Step 4: Check Admin Panel</h3>
+            <a href="https://hthree-film.vercel.app/admin" target="_blank">
+                <button style="background: #2196F3;">🔍 Open Admin Panel</button>
+            </a>
+        </div>
+        
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://hthree-film-production.up.railway.app/api';
+        
+        function log(message, type = 'info') {
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            
+            result.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            result.scrollTop = result.scrollHeight;
+            
+            if (type === 'success') result.className = 'result success';
+            if (type === 'error') result.className = 'result error';
+        }
+        
+        async function createPlans() {
+            log('Creating subscription plans...');
+            
+            const plans = [
+                {
+                    name: 'Gói Cơ Bản',
+                    slug: 'basic',
+                    price: 99000,
+                    duration_days: 30,
+                    quality: 'HD',
+                    features: 'Xem phim HD không quảng cáo trên 1 thiết bị',
+                    is_active: 1,
+                    promotion_badge: 0,
+                    promotion_text: ''
+                },
+                {
+                    name: 'Gói Cao Cấp',
+                    slug: 'premium',
+                    price: 199000,
+                    duration_days: 30,
+                    quality: 'Full HD',
+                    features: 'Xem phim Full HD trên 2 thiết bị, tải về được',
+                    is_active: 1,
+                    promotion_badge: 1,
+                    promotion_text: 'Phổ biến nhất'
+                },
+                {
+                    name: 'Gói VIP',
+                    slug: 'vip',
+                    price: 299000,
+                    duration_days: 30,
+                    quality: '4K',
+                    features: 'Xem phim 4K trên 4 thiết bị, xem trước phim mới',
+                    is_active: 1,
+                    promotion_badge: 1,
+                    promotion_text: 'Tốt nhất'
+                }
+            ];
+            
+            for (const plan of plans) {
+                try {
+                    const response = await fetch(`${API_BASE}/admin/plans.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(plan)
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        log(`Created plan: ${plan.name}`, 'success');
+                    } else {
+                        log(`Failed to create plan ${plan.name}: ${data.message}`, 'error');
+                    }
+                } catch (error) {
+                    log(`Error creating plan ${plan.name}: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        async function createCoupons() {
+            log('Creating coupons...');
+            
+            const coupons = [
+                {
+                    code: 'WELCOME10',
+                    name: 'Giảm 10% cho khách hàng mới',
+                    discount_type: 'percentage',
+                    discount_value: 10,
+                    min_order_value: 50000,
+                    max_uses: 100,
+                    is_active: 1,
+                    expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' ')
+                },
+                {
+                    code: 'SAVE50K',
+                    name: 'Giảm 50K cho đơn từ 200K',
+                    discount_type: 'fixed',
+                    discount_value: 50000,
+                    min_order_value: 200000,
+                    max_uses: 50,
+                    is_active: 1,
+                    expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' ')
+                },
+                {
+                    code: 'CHRISTMAS25',
+                    name: 'Giảm 25% dịp Giáng Sinh',
+                    discount_type: 'percentage',
+                    discount_value: 25,
+                    min_order_value: 100000,
+                    max_uses: 200,
+                    is_active: 1,
+                    expires_at: '2025-01-31 23:59:59'
+                }
+            ];
+            
+            for (const coupon of coupons) {
+                try {
+                    const response = await fetch(`${API_BASE}/admin/coupons.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(coupon)
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        log(`Created coupon: ${coupon.code}`, 'success');
+                    } else {
+                        log(`Failed to create coupon ${coupon.code}: ${data.message}`, 'error');
+                    }
+                } catch (error) {
+                    log(`Error creating coupon ${coupon.code}: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        async function createDemoOrder() {
+            log('Creating demo order...');
+            
+            try {
+                // This would need to be implemented in your backend
+                // For now, just show a message
+                log('Demo order creation would need backend implementation', 'warning');
+                log('You can create orders manually through the payment system', 'info');
+            } catch (error) {
+                log(`Error creating demo order: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

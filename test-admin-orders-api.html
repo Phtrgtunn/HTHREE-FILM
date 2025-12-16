@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Orders API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .result { margin-top: 10px; padding: 10px; background: #f5f5f5; white-space: pre-wrap; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>Test Admin Orders API</h1>
+    
+    <div class="test-section">
+        <h3>1. Test GET Orders</h3>
+        <button onclick="testGetOrders()">Get Orders</button>
+        <div id="getResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Test PUT Update Order</h3>
+        <input type="number" id="orderId" placeholder="Order ID" value="1">
+        <select id="paymentStatus">
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="failed">Failed</option>
+        </select>
+        <button onclick="testUpdateOrder()">Update Order</button>
+        <div id="updateResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. Test POST Approve Order</h3>
+        <input type="number" id="approveOrderId" placeholder="Order ID" value="1">
+        <button onclick="testApproveOrder()">Approve Order</button>
+        <div id="approveResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://hthree-film-production.up.railway.app/api';
+        
+        async function testGetOrders() {
+            const resultDiv = document.getElementById('getResult');
+            try {
+                resultDiv.textContent = 'Loading...';
+                
+                const response = await fetch(`${API_BASE}/admin/orders.php`);
+                const data = await response.json();
+                
+                resultDiv.className = 'result ' + (data.success ? 'success' : 'error');
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function testUpdateOrder() {
+            const resultDiv = document.getElementById('updateResult');
+            const orderId = document.getElementById('orderId').value;
+            const paymentStatus = document.getElementById('paymentStatus').value;
+            
+            try {
+                resultDiv.textContent = 'Loading...';
+                
+                const response = await fetch(`${API_BASE}/admin/orders.php`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: parseInt(orderId),
+                        payment_status: paymentStatus
+                    })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.className = 'result ' + (data.success ? 'success' : 'error');
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function testApproveOrder() {
+            const resultDiv = document.getElementById('approveResult');
+            const orderId = document.getElementById('approveOrderId').value;
+            
+            try {
+                resultDiv.textContent = 'Loading...';
+                
+                const formData = new FormData();
+                formData.append('action', 'approve');
+                formData.append('order_id', orderId);
+                
+                const response = await fetch(`${API_BASE}/admin/orders.php`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.className = 'result ' + (data.success ? 'success' : 'error');
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
