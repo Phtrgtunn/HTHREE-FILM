@@ -2454,7 +2454,8 @@ const activeSubscription = computed(() => {
   // Lấy gói active HOẶC cancelled nhưng chưa hết hạn (như Netflix)
   const active = subscriptions.value.filter((sub) => {
     const isActiveOrCancelled = sub.status === "active" || sub.status === "cancelled";
-    const notExpired = new Date(sub.end_date) > new Date();
+    // Sử dụng thời gian từ server thay vì local time
+    const notExpired = sub.minutes_remaining > 0 || sub.subscription_status === 'active';
     return isActiveOrCancelled && notExpired;
   });
   
@@ -2531,30 +2532,22 @@ const formatPrice = (price) => {
 
 // Calculate real-time progress and days remaining
 const getRealtimeProgress = (sub) => {
-  const start = new Date(sub.start_date);
-  const end = new Date(sub.end_date);
-  const now = currentTime.value;
-
-  const totalMs = end - start;
-  const usedMs = now - start;
-  const progress =
-    totalMs > 0 ? Math.min(100, Math.max(0, (usedMs / totalMs) * 100)) : 0;
-
-  const remainingMs = end - now;
-  const minutesRemaining = Math.max(0, Math.ceil(remainingMs / (1000 * 60)));
-  const daysRemaining = Math.max(0, Math.ceil(remainingMs / (1000 * 60 * 60 * 24)));
+  // Sử dụng dữ liệu từ server thay vì tính toán local
+  const minutesRemaining = Math.max(0, sub.minutes_remaining || 0);
+  const secondsRemaining = Math.max(0, sub.seconds_remaining || 0);
+  
+  // Tính progress dựa trên thời gian còn lại từ server
+  const totalMinutes = sub.total_minutes || 1;
+  const usedMinutes = totalMinutes - minutesRemaining;
+  const progress = totalMinutes > 0 ? Math.min(100, Math.max(0, (usedMinutes / totalMinutes) * 100)) : 0;
 
   return {
     progress: progress.toFixed(2),
-    daysRemaining,
+    daysRemaining: Math.ceil(minutesRemaining / (24 * 60)),
     minutesRemaining,
-    timeRemaining: minutesRemaining > 0 ? `${minutesRemaining} phút` : 'Đã hết hạn',
-    status:
-      minutesRemaining <= 0
-        ? "expired"
-        : minutesRemaining <= 2
-        ? "expiring_soon"
-        : "active",
+    secondsRemaining,
+    timeRemaining: sub.time_remaining_formatted || (minutesRemaining > 0 ? `${minutesRemaining} phút` : 'Đã hết hạn'),
+    status: sub.subscription_status || (minutesRemaining <= 0 ? "expired" : minutesRemaining <= 2 ? "expiring_soon" : "active"),
   };
 };
 

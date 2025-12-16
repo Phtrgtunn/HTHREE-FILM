@@ -41,11 +41,11 @@ try {
             sp.max_devices,
             sp.has_ads,
             sp.can_download,
-            TIMESTAMPDIFF(MINUTE, NOW(), us.end_date) as minutes_remaining,
-            TIMESTAMPDIFF(SECOND, NOW(), us.end_date) as seconds_remaining,
+            TIMESTAMPDIFF(MINUTE, DATE_ADD(NOW(), INTERVAL 7 HOUR), us.end_date) as minutes_remaining,
+            TIMESTAMPDIFF(SECOND, DATE_ADD(NOW(), INTERVAL 7 HOUR), us.end_date) as seconds_remaining,
             CASE 
-                WHEN us.end_date < NOW() THEN 'expired'
-                WHEN TIMESTAMPDIFF(MINUTE, NOW(), us.end_date) <= 2 THEN 'expiring_soon'
+                WHEN us.end_date < DATE_ADD(NOW(), INTERVAL 7 HOUR) THEN 'expired'
+                WHEN TIMESTAMPDIFF(MINUTE, DATE_ADD(NOW(), INTERVAL 7 HOUR), us.end_date) <= 2 THEN 'expiring_soon'
                 ELSE 'active'
             END as subscription_status
         FROM user_subscriptions us
@@ -107,9 +107,9 @@ try {
             $subscription['time_remaining_formatted'] = 'Đã hết hạn';
         }
         
-        // Auto-cancel expired subscriptions
+        // Auto-cancel expired subscriptions (sử dụng múi giờ UTC+7)
         if ($subscription['subscription_status'] === 'expired' && $subscription['status'] === 'active') {
-            $update_stmt = $conn->prepare("UPDATE user_subscriptions SET status = 'expired' WHERE id = ?");
+            $update_stmt = $conn->prepare("UPDATE user_subscriptions SET status = 'expired' WHERE id = ? AND end_date < DATE_ADD(NOW(), INTERVAL 7 HOUR)");
             $update_stmt->bind_param("i", $subscription['id']);
             $update_stmt->execute();
             $subscription['status'] = 'expired';

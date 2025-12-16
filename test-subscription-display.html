@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Subscription Display</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: white; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { background: #2a2a2a; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        button { background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #45a049; }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+        .info { color: #74c0fc; }
+        pre { background: #000; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Subscription Display</h1>
+        
+        <div class="section">
+            <h3>1. Mua gói demo</h3>
+            <input type="number" id="userId" placeholder="User ID" value="1">
+            <select id="planSlug">
+                <option value="basic">Basic (3 phút)</option>
+                <option value="premium">Premium (5 phút)</option>
+                <option value="vip">VIP (10 phút)</option>
+            </select>
+            <button onclick="buyDemoPlan()">Mua gói demo</button>
+            <div id="buyResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>2. Kiểm tra subscription</h3>
+            <button onclick="checkSubscription()">Kiểm tra subscription</button>
+            <div id="subscriptionResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>3. Debug múi giờ</h3>
+            <button onclick="debugTimezone()" style="background: #74c0fc;">Kiểm tra múi giờ</button>
+            <div id="timezoneResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>4. Reset subscription (xóa tất cả)</h3>
+            <button onclick="resetSubscription()" style="background: #ff6b6b;">Reset tất cả subscription</button>
+            <div id="resetResult"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost/HTHREE_film/backend/api';
+
+        async function buyDemoPlan() {
+            const userId = document.getElementById('userId').value;
+            const planSlug = document.getElementById('planSlug').value;
+            
+            if (!userId) {
+                document.getElementById('buyResult').innerHTML = '<div class="error">Vui lòng nhập User ID</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/demo/buy_plan_demo.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: parseInt(userId),
+                        plan_slug: planSlug
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('buyResult').innerHTML = `
+                        <div class="success">✅ Mua gói thành công!</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    document.getElementById('buyResult').innerHTML = `
+                        <div class="error">❌ Lỗi: ${data.message}</div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('buyResult').innerHTML = `
+                    <div class="error">❌ Lỗi kết nối: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function checkSubscription() {
+            const userId = document.getElementById('userId').value;
+            
+            if (!userId) {
+                document.getElementById('subscriptionResult').innerHTML = '<div class="error">Vui lòng nhập User ID</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/user_subscription.php?user_id=${userId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('subscriptionResult').innerHTML = `
+                        <div class="success">✅ Tìm thấy ${data.count} subscription(s)</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    document.getElementById('subscriptionResult').innerHTML = `
+                        <div class="error">❌ Lỗi: ${data.message}</div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('subscriptionResult').innerHTML = `
+                    <div class="error">❌ Lỗi kết nối: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function debugTimezone() {
+            try {
+                const response = await fetch(`${API_URL}/debug/timezone_test.php`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('timezoneResult').innerHTML = `
+                        <div class="success">✅ Debug múi giờ thành công!</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    document.getElementById('timezoneResult').innerHTML = `
+                        <div class="error">❌ Lỗi: ${data.message}</div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('timezoneResult').innerHTML = `
+                    <div class="error">❌ Lỗi kết nối: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function resetSubscription() {
+            const userId = document.getElementById('userId').value;
+            
+            if (!userId) {
+                document.getElementById('resetResult').innerHTML = '<div class="error">Vui lòng nhập User ID</div>';
+                return;
+            }
+
+            if (!confirm('Bạn có chắc muốn xóa TẤT CẢ subscription của user này?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/admin/reset_and_create_subscription.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: parseInt(userId),
+                        action: 'reset_only'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('resetResult').innerHTML = `
+                        <div class="success">✅ Đã reset subscription thành công!</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    document.getElementById('resetResult').innerHTML = `
+                        <div class="error">❌ Lỗi: ${data.message}</div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('resetResult').innerHTML = `
+                    <div class="error">❌ Lỗi kết nối: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Auto-refresh subscription every 5 seconds
+        setInterval(() => {
+            const userId = document.getElementById('userId').value;
+            if (userId && document.getElementById('subscriptionResult').innerHTML.includes('✅')) {
+                checkSubscription();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
