@@ -1,88 +1,91 @@
 <?php
-/**
- * Login API
- * Đăng nhập
- */
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: https://hthree-film.vercel.app');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
 
-require_once '../../config/config.php';
-require_once '../../config/cors.php';
-require_once '../../config/database.php';
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
+}
 
-handleCORS();
-
-// Start session
-session_start();
-
-try {
-    // Get POST data
-    $data = json_decode(file_get_contents("php://input"), true);
+// Direct database connection for Railway
+function getDBConnection() {
+    $host = getenv('MYSQLHOST') ?: 'localhost';
+    $dbname = getenv('MYSQLDATABASE') ?: 'railway';
+    $username = getenv('MYSQLUSER') ?: 'root';
+    $password = getenv('MYSQLPASSWORD') ?: '';
+    $port = getenv('MYSQLPORT') ?: 3306;
     
-    $username = $data['username'] ?? '';
-    $password = $data['password'] ?? '';
+    $conn = new mysqli($host, $username, $password, $dbname, $port);
     
-    // Validate
-    if (empty($username) || empty($password)) {
-        echo json_encode([
-            'status' => false,
-            'message' => 'Vui lòng điền đầy đủ thông tin'
-        ]);
-        exit;
+    if ($conn->connect_error) {
+        throw new Exception('Database connection failed: ' . $conn->connect_error);
     }
     
-    // Connect database
-    $database = new Database();
-    $db = $database->getConnection();
+    $conn->set_charset('utf8mb4');
+    return $conn;
+}
+
+try {
+    $input = json_decode(file_get_contents('php://input'), true);
     
-    // Get user
-    $stmt = $db->prepare("
-        SELECT id, username, email, password, full_name, avatar, created_at 
-        FROM users 
-        WHERE username = ? OR email = ?
-    ");
-    $stmt->execute([$username, $username]);
-    $user = $stmt->fetch();
+    $login = trim($input['login'] ?? ''); // username or email
+    $password = $input['password'] ?? '';
     
-    if (!$user) {
-        echo json_encode([
-            'status' => false,
-            'message' => 'Tên đăng nhập hoặc mật khẩu không đúng'
-        ]);
-        exit;
+    // Validation
+    if (empty($login) || empty($password)) {
+        throw new Exception('Vui lòng nhập tên đăng nhập và mật khẩu');
+    }
+    
+    $conn = getDBConnection();
+    
+    // Find user by username or email
+    $stmt = $conn->prepare("SELECT id, username, email, password, full_name, role, email_verified, email_verified_at, created_at FROM users WHERE username = ? OR email = ?");
+    $stmt->bind_param('ss', $login, $login);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        throw new Exception('Tài khoản không tồn tại');
+    }
+    
+    $user = $result->fetch_assoc();
+    $stmt->close();
+    
+    // Check if email is verified
+    if ($user['email_verified'] == 0) {
+        throw new Exception('Vui lòng xác nhận email trước khi đăng nhập. Kiểm tra hộp thư của bạn.');
     }
     
     // Verify password
     if (!password_verify($password, $user['password'])) {
-        echo json_encode([
-            'status' => false,
-            'message' => 'Tên đăng nhập hoặc mật khẩu không đúng'
-        ]);
-        exit;
+        throw new Exception('Mật khẩu không chính xác');
     }
     
     // Update last login
-    $stmt = $db->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
-    $stmt->execute([$user['id']]);
+    $stmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+    $stmt->bind_param('i', $user['id']);
+    $stmt->execute();
+    $stmt->close();
+    $conn->close();
     
-    // Create session
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['username'] = $user['username'];
-    
-    // Generate token (simple version)
-    $token = base64_encode($user['id'] . ':' . time());
-    
-    // Return user data (without password)
+    // Remove password from response
     unset($user['password']);
     
     echo json_encode([
-        'status' => true,
-        'message' => 'Đăng nhập thành công',
-        'token' => $token,
-        'user' => $user
+        'success' => true,
+        'message' => 'Đăng nhập thành công!',
+        'data' => [
+            'user' => $user,
+            'token' => base64_encode(json_encode(['user_id' => $user['id'], 'exp' => time() + 86400])) // 24h
+        ]
     ]);
-    
+
 } catch (Exception $e) {
+    http_response_code(400);
     echo json_encode([
-        'status' => false,
-        'message' => 'Lỗi: ' . $e->getMessage()
+        'success' => false,
+        'message' => $e->getMessage()
     ]);
 }
+?>
